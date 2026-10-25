@@ -106,17 +106,19 @@
     var lowMap = {}, highMap = {};
     c.dates.forEach(function (dt, i) { lowMap[dt] = c.kline[i][2]; highMap[dt] = c.kline[i][3]; });
 
+    var maxAbs = c.events.reduce(function (m, e) { return Math.max(m, Math.abs(e.amount)); }, 1);
     var marks = c.events.map(function (e) {
       var buy = e.side > 0;
+      var w = Math.abs(e.amount) / maxAbs;
       return {
         coord: [e.date, buy ? lowMap[e.date] : highMap[e.date]],
         value: e.amount,
         symbol: "triangle",
         symbolRotate: buy ? 0 : 180,
-        symbolSize: 12,
-        itemStyle: { color: buy ? UP : DOWN, borderColor: "#0a0e15", borderWidth: 1 },
+        symbolSize: 8 + Math.round(6 * w),
+        itemStyle: { color: buy ? UP : DOWN, borderColor: "#0a0e15", borderWidth: 1, opacity: 0.55 + 0.45 * w },
         label: {
-          show: true,
+          show: w >= 0.35,
           position: buy ? "bottom" : "top",
           distance: 6,
           color: buy ? UP : DOWN,
@@ -130,7 +132,7 @@
       return c.dates.length && a >= c.dates[0] && a <= c.dates[n - 1];
     }).map(function (a) { return { xAxis: a }; });
 
-    var zoomStart = n > 520 ? Math.max(0, 100 - (520 / n) * 100) : 0;
+    var zoomStart = n > 380 ? Math.max(0, 100 - (380 / n) * 100) : 0;
 
     var ch = echarts.init(el, null, { renderer: "canvas" });
     ch.setOption({

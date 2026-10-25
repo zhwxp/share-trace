@@ -1,0 +1,449 @@
+{
+  "_comment": "43 个标的指数 → 57 只国家队 ETF。code 为指数行情代码（market.sqlite bars 内已有），null 表示指数行情不可得，用 proxy ETF 价格替代。",
+  "indices": [
+    {
+      "slug": "sh50",
+      "name": "上证50",
+      "cat": "A股宽基",
+      "code": "sh.000016",
+      "proxy": null,
+      "etfs": [
+        "510050"
+      ]
+    },
+    {
+      "slug": "sh180",
+      "name": "上证180",
+      "cat": "A股宽基",
+      "code": "sh.000010",
+      "proxy": null,
+      "etfs": [
+        "510180"
+      ]
+    },
+    {
+      "slug": "shindex",
+      "name": "上证指数",
+      "cat": "A股宽基",
+      "code": "sh.000001",
+      "proxy": null,
+      "etfs": [
+        "510210"
+      ]
+    },
+    {
+      "slug": "hs300",
+      "name": "沪深300",
+      "cat": "A股宽基",
+      "code": "sh.000300",
+      "proxy": null,
+      "etfs": [
+        "510300",
+        "510310",
+        "510330",
+        "159919"
+      ]
+    },
+    {
+      "slug": "zz500",
+      "name": "中证500",
+      "cat": "A股宽基",
+      "code": "sh.000905",
+      "proxy": null,
+      "etfs": [
+        "510500",
+        "512500",
+        "159922"
+      ]
+    },
+    {
+      "slug": "zz1000",
+      "name": "中证1000",
+      "cat": "A股宽基",
+      "code": "sh.000852",
+      "proxy": null,
+      "etfs": [
+        "512100",
+        "560010",
+        "159845",
+        "159629"
+      ]
+    },
+    {
+      "slug": "zz800",
+      "name": "中证800",
+      "cat": "A股宽基",
+      "code": "sh.000906",
+      "proxy": null,
+      "etfs": [
+        "515800"
+      ]
+    },
+    {
+      "slug": "a500",
+      "name": "中证A500",
+      "cat": "A股宽基",
+      "code": "000510",
+      "proxy": null,
+      "etfs": [
+        "512050",
+        "563800",
+        "563220"
+      ]
+    },
+    {
+      "slug": "cyb",
+      "name": "创业板指",
+      "cat": "A股宽基",
+      "code": "sz.399006",
+      "proxy": null,
+      "etfs": [
+        "159915"
+      ]
+    },
+    {
+      "slug": "cyb50",
+      "name": "创业板50",
+      "cat": "A股宽基",
+      "code": "sz.399673",
+      "proxy": null,
+      "etfs": [
+        "159949"
+      ]
+    },
+    {
+      "slug": "sz100",
+      "name": "深证100",
+      "cat": "A股宽基",
+      "code": "sz.399330",
+      "proxy": null,
+      "etfs": [
+        "159901"
+      ]
+    },
+    {
+      "slug": "kc50",
+      "name": "科创50",
+      "cat": "A股宽基",
+      "code": null,
+      "proxy": "588080",
+      "etfs": [
+        "588000",
+        "588050",
+        "588080"
+      ]
+    },
+    {
+      "slug": "kc100",
+      "name": "科创100",
+      "cat": "A股宽基",
+      "code": null,
+      "proxy": "588800",
+      "etfs": [
+        "588800"
+      ]
+    },
+    {
+      "slug": "chip-gz",
+      "name": "国证芯片",
+      "cat": "A股行业主题",
+      "code": null,
+      "proxy": "159995",
+      "etfs": [
+        "159995"
+      ]
+    },
+    {
+      "slug": "chip-zh",
+      "name": "中华半导体芯片",
+      "cat": "A股行业主题",
+      "code": null,
+      "proxy": "512760",
+      "etfs": [
+        "512760"
+      ]
+    },
+    {
+      "slug": "chip-zz",
+      "name": "中证全指半导体",
+      "cat": "A股行业主题",
+      "code": "H30184",
+      "proxy": null,
+      "etfs": [
+        "512480"
+      ]
+    },
+    {
+      "slug": "pharma",
+      "name": "沪深300医药卫生",
+      "cat": "A股行业主题",
+      "code": "000913",
+      "proxy": null,
+      "etfs": [
+        "512010"
+      ]
+    },
+    {
+      "slug": "medical",
+      "name": "中证医疗",
+      "cat": "A股行业主题",
+      "code": "399989",
+      "proxy": null,
+      "etfs": [
+        "512170"
+      ]
+    },
+    {
+      "slug": "biotech",
+      "name": "中证生物医药",
+      "cat": "A股行业主题",
+      "code": "930726",
+      "proxy": null,
+      "etfs": [
+        "512290"
+      ]
+    },
+    {
+      "slug": "innovdrug",
+      "name": "中证创新药产业",
+      "cat": "A股行业主题",
+      "code": "931152",
+      "proxy": null,
+      "etfs": [
+        "159992"
+      ]
+    },
+    {
+      "slug": "military",
+      "name": "中证军工",
+      "cat": "A股行业主题",
+      "code": "sz.399967",
+      "proxy": null,
+      "etfs": [
+        "512660"
+      ]
+    },
+    {
+      "slug": "military-leader",
+      "name": "军工龙头",
+      "cat": "A股行业主题",
+      "code": "931066",
+      "proxy": null,
+      "etfs": [
+        "512710"
+      ]
+    },
+    {
+      "slug": "comm5g",
+      "name": "5G通信",
+      "cat": "A股行业主题",
+      "code": "931079",
+      "proxy": null,
+      "etfs": [
+        "515050"
+      ]
+    },
+    {
+      "slug": "comm-dev",
+      "name": "通信设备",
+      "cat": "A股行业主题",
+      "code": "931160",
+      "proxy": null,
+      "etfs": [
+        "515880"
+      ]
+    },
+    {
+      "slug": "soe-restruct",
+      "name": "央企结构调整",
+      "cat": "A股行业主题",
+      "code": null,
+      "proxy": "512960",
+      "etfs": [
+        "512960"
+      ]
+    },
+    {
+      "slug": "soe-innov",
+      "name": "央企创新驱动",
+      "cat": "A股行业主题",
+      "code": "000861",
+      "proxy": null,
+      "etfs": [
+        "515900"
+      ]
+    },
+    {
+      "slug": "broker",
+      "name": "证券公司",
+      "cat": "A股行业主题",
+      "code": "399975",
+      "proxy": null,
+      "etfs": [
+        "512000",
+        "512880"
+      ]
+    },
+    {
+      "slug": "nonferrous",
+      "name": "中证申万有色金属",
+      "cat": "A股行业主题",
+      "code": "000819",
+      "proxy": null,
+      "etfs": [
+        "512400"
+      ]
+    },
+    {
+      "slug": "rare-metal",
+      "name": "稀有金属",
+      "cat": "A股行业主题",
+      "code": "930632",
+      "proxy": null,
+      "etfs": [
+        "562800"
+      ]
+    },
+    {
+      "slug": "gold-stock",
+      "name": "黄金产业股票",
+      "cat": "A股行业主题",
+      "code": "931238",
+      "proxy": null,
+      "etfs": [
+        "517520"
+      ]
+    },
+    {
+      "slug": "food",
+      "name": "细分食品饮料",
+      "cat": "A股行业主题",
+      "code": "000815",
+      "proxy": null,
+      "etfs": [
+        "515170"
+      ]
+    },
+    {
+      "slug": "liquor",
+      "name": "中证酒",
+      "cat": "A股行业主题",
+      "code": "399987",
+      "proxy": null,
+      "etfs": [
+        "512690"
+      ]
+    },
+    {
+      "slug": "chem",
+      "name": "细分化工",
+      "cat": "A股行业主题",
+      "code": "000813",
+      "proxy": null,
+      "etfs": [
+        "159870"
+      ]
+    },
+    {
+      "slug": "solar",
+      "name": "光伏产业",
+      "cat": "A股行业主题",
+      "code": "931151",
+      "proxy": null,
+      "etfs": [
+        "515790"
+      ]
+    },
+    {
+      "slug": "newenergy",
+      "name": "中证新能源",
+      "cat": "A股行业主题",
+      "code": "sz.399808",
+      "proxy": null,
+      "etfs": [
+        "516160"
+      ]
+    },
+    {
+      "slug": "robot",
+      "name": "中证机器人",
+      "cat": "A股行业主题",
+      "code": null,
+      "proxy": "562500",
+      "etfs": [
+        "562500"
+      ]
+    },
+    {
+      "slug": "bank",
+      "name": "中证银行",
+      "cat": "A股行业主题",
+      "code": "399986",
+      "proxy": null,
+      "etfs": [
+        "512800"
+      ]
+    },
+    {
+      "slug": "china-internet",
+      "name": "中国互联网50",
+      "cat": "跨境",
+      "code": "H30533",
+      "proxy": null,
+      "etfs": [
+        "513050"
+      ]
+    },
+    {
+      "slug": "hscei",
+      "name": "恒生中国企业",
+      "cat": "跨境",
+      "code": null,
+      "proxy": "510900",
+      "etfs": [
+        "510900"
+      ]
+    },
+    {
+      "slug": "hstech",
+      "name": "恒生科技",
+      "cat": "跨境",
+      "code": null,
+      "proxy": "513180",
+      "etfs": [
+        "513180",
+        "513010"
+      ]
+    },
+    {
+      "slug": "hk-innovdrug",
+      "name": "中证香港创新药",
+      "cat": "跨境",
+      "code": "931787",
+      "proxy": null,
+      "etfs": [
+        "513120"
+      ]
+    },
+    {
+      "slug": "shanghai-gold",
+      "name": "上海金",
+      "cat": "商品",
+      "code": null,
+      "proxy": "518850",
+      "etfs": [
+        "518850"
+      ]
+    },
+    {
+      "slug": "gold9999",
+      "name": "黄金9999",
+      "cat": "商品",
+      "code": null,
+      "proxy": "518880",
+      "etfs": [
+        "518880"
+      ]
+    }
+  ]
+}

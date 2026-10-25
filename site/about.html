@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>口径说明 · 国家队 ETF 动态</title>
+<meta name="description" content="国家队 ETF 动向：份额申赎、指数 K 线与买卖点">
+<link rel="stylesheet" href="assets/style.css">
+</head>
+<body>
+<header class="top">
+  <div class="wrap">
+    <div class="brand">
+      <span class="logo">NT</span>
+      <div>
+        <h1>国家队 ETF 动态</h1>
+        <p class="sub">份额申赎 · 指数 K 线 · 买卖点</p>
+      </div>
+    </div>
+    
+    <nav class="nav">
+      <a href="index.html" class="">今日动态</a>
+      <a href="indices.html" class="">分指数</a>
+      <a href="about.html" class="active">口径说明</a>
+    </nav>
+  </div>
+</header>
+<main class="wrap">
+
+<section class="card">
+  <h2>这个站看什么</h2>
+  <p>国家队（中央汇金投资 / 汇金资管、证金、国新、诚通）买 ETF 走一级市场申购，<b>份额增加与二级市场成交无关</b>。唯一直接指标是基金总份额，不是成交额、不是规模、不是盘口异动。本站把 57 只「国家队曾出现在前十大持有人」的 ETF 的日度份额变化，折算成金额，画到 43 个标的指数的 K 线上。</p>
+  <p class="note">成交额法已被实测证伪：510300 在 2012-05~2026-10 的 3500 个交易日里，成交额 &gt;2×20 日均触发 129 天，落在国家队公告 ±2 日内的只有 5 天，精确率 4%。</p>
+</section>
+<section class="card">
+  <h2>信号规则</h2>
+  <ol>
+    <li>日净申赎 F = Σ(Δ份额 × 当日收盘价)，按标的指数加总。</li>
+    <li>触发：|F| ≥ max(2 亿, 5% × 该指数 ETF 合计规模)，封顶 100 亿；成分 ETF ≥2 只时要求同向只数 ≥ max(2, 60%)。</li>
+    <li>5 个交易日内同向连续触发合并，标在 |F| 最大那天。</li>
+    <li>每个事件统计「后 20 个交易日」指数涨跌：买点看涨、卖点看跌，正数=信号有效。</li>
+  </ol>
+  <p class="note">为什么用「规模的 5%」而不是固定金额：沪深300 四只 ETF 合计规模近万亿，行业指数只有几十亿，同一个金额门槛在两类指数上完全不是一回事。封顶 100 亿是为了让万亿级指数也保留灵敏度。</p>
+  <p class="note">信号方向对、强度不够当择时用。27 个季度样本里份额变化与下一季收益的相关性只有 +0.21，独立事件仅 3~4 个。</p>
+</section>
+<section class="card">
+  <h2>已知口径限制</h2>
+  <ul>
+    <li>份额折算（2 份合 1 份）会造出假申赎，已剔除 510310 / 512100 / 560010 三个折算日。</li>
+    <li>深市 10 只 ETF（159919、159845、159629、159915、159901、159922、159995、159870、159992、159949）没有免费的日度份额历史，2026-10-21 起才有；它们不进历史序列，只出现在当日数据里。</li>
+    <li>沪市份额来自上交所归档接口（最早 2012-01-04），覆盖度逐年爬升：2012 年 5 只、2020 年 34 只、2024 年起 47 只。跨年比较要按当年在册只数归一。</li>
+    <li>「份额大增」不等于「国家队买入」：2022-12 510300 份额 +82%，汇金持仓纹丝未动，那波是保险理财在买。</li>
+    <li>「大额净赎回」也不等于清仓：2026-01 的 13 个交易日合计 -7722 亿，同期沪深300 走平，更像换仓／转托管。</li>
+  </ul>
+</section>
+<section class="card">
+  <h2>更新方式</h2>
+  <p>数据由本地脚本从 <code>market.sqlite</code> 生成静态页面：<code>python3 build.py</code>，产物在 <code>site/</code>，可直接部署到任何静态服务器。</p>
+</section>
+
+</main>
+<footer class="foot">
+  <div class="wrap">
+    <p>数据源：上交所 ETF 归档 / 深交所 / 同花顺 · 行情 baostock · 份额为基金总份额，非成交额</p>
+    <p>本站只做数据呈现，不构成投资建议。生成时间 2026-10-26 02:51</p>
+  </div>
+</footer>
+
+<script src="assets/echarts.min.js"></script>
+<script src="assets/app.js"></script>
+</body>
+</html>

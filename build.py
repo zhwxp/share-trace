@@ -736,7 +736,7 @@ def render_indices(idx_pages):
 def render_detail(p):
     s = p["stats"]
     rows = []
-    for e in p["events"][::-1]:
+    for e in p["events"]:
         top = "、".join(f"{by_name(c)} {v:+.1f}" for c, v in e["top"])
         rows.append(
             (

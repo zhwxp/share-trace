@@ -169,7 +169,7 @@
       axisPointer: { link: [{ xAxisIndex: "all" }], label: { backgroundColor: "#243146" } },
       grid: [
         { left: 54, right: 16, top: 22, height: "50%" },
-        { left: 54, right: 16, top: "66%", height: "17%" }
+        { left: 54, right: 46, top: "66%", height: "17%" }
       ],
       xAxis: [
         Object.assign({ type: "category", data: c.dates, gridIndex: 0, boundaryGap: true, axisLabel: { show: false } }, axisCommon()),
@@ -178,7 +178,8 @@
       ],
       yAxis: [
         Object.assign({ scale: true, gridIndex: 0 }, axisCommon()),
-        Object.assign({ scale: true, gridIndex: 1, splitNumber: 2, name: "亿", nameTextStyle: { color: DIM, fontSize: 10 } }, axisCommon())
+        Object.assign({ scale: true, gridIndex: 1, splitNumber: 2, name: "亿", nameTextStyle: { color: DIM, fontSize: 10 } }, axisCommon()),
+        Object.assign({ scale: true, gridIndex: 1, splitNumber: 2, position: "right", name: "累计", nameTextStyle: { color: DIM, fontSize: 10 }, splitLine: { show: false }, axisLabel: { color: "#38bdf8", fontSize: 9 } }, axisCommon())
       ],
       dataZoom: [
         { type: "inside", xAxisIndex: [0, 1], start: zoomStart, end: 100 },
@@ -192,7 +193,7 @@
         {
           name: "K线", type: "candlestick", data: c.kline,
           itemStyle: { color: UP, color0: DOWN, borderColor: UP, borderColor0: DOWN },
-          markPoint: { data: marks, silent: true },
+          markPoint: { data: marks, silent: true, labelLayout: { hideOverlap: true } },
           markLine: {
             silent: true, symbol: "none",
             lineStyle: { color: "#94a3b8", type: "dashed", width: 1, opacity: 0.45 },
@@ -210,7 +211,7 @@
           })
         },
         {
-          name: "20日累计", type: "line", xAxisIndex: 1, yAxisIndex: 1, data: c.cum,
+          name: "20日累计", type: "line", xAxisIndex: 1, yAxisIndex: 2, data: c.cum,
           symbol: "none", lineStyle: { width: 1.4, color: "#38bdf8" }, connectNulls: true
         }
       ]

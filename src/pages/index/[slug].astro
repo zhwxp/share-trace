@@ -120,13 +120,17 @@ const generated = meta.generated_at.slice(0, 16).replace('T', ' ');
         </div>
         <div class="slist">
           {s.events.map((e) => (
-            <div class="srow" style="grid-template-columns:96px 56px minmax(0,1fr) 132px 96px 80px">
+            <div class="srow sigrow">
               <span class="sd">{e.date}</span>
               <span class={`pill ${e.side > 0 ? 'buy' : 'sell'}`}>{side(e.side)}</span>
-              <span class="sv2">{signed(e.amount)}</span>
-              <span class="sv2 m">{e.days} 天 / {signed(e.total, 0)}</span>
-              <span class="sv2 m">第 {e.rank} / {e.n_events}</span>
-              <span class={`sv2 ${e.post20 > 0 ? 'pos' : 'm'}`}>{e.post20 === null ? '—' : pct(e.post20, 1)}</span>
+              <span class="sv2 samt">{signed(e.amount)}</span>
+              <span class="smeta">
+                <span class="sv2 m">{e.days} 天 / {signed(e.total, 0)}</span>
+                <span class="sv2 m">第 {e.rank} / {e.n_events}</span>
+                <span class={`sv2 ${e.post20 > 0 ? 'pos' : 'm'}`}>
+                  {e.post20 === null ? '后 20 日 —' : `后 20 日 ${pct(e.post20, 1)}`}
+                </span>
+              </span>
             </div>
           ))}
         </div>
@@ -192,6 +196,51 @@ const generated = meta.generated_at.slice(0, 16).replace('T', ' ');
       grid-column: 2;
       grid-row: 2;
       text-align: right;
+    }
+  }
+
+  /* 信号明细：桌面六列，手机折成两行 */
+  .shead,
+  .srow.sigrow {
+    grid-template-columns: 96px 56px 112px 132px 96px minmax(0, 1fr);
+  }
+  .smeta {
+    display: contents;
+  }
+  @media (max-width: 640px) {
+    .shead {
+      display: none;
+    }
+    .srow.sigrow {
+      grid-template-columns: auto auto minmax(0, 1fr);
+      grid-template-areas: 'd p v' 'meta meta meta';
+      gap: 5px 10px;
+      padding: 10px 0;
+      min-height: 0;
+    }
+    .srow.sigrow > .sd {
+      grid-area: d;
+      font-size: 13px;
+    }
+    .srow.sigrow > .pill {
+      grid-area: p;
+      justify-self: start;
+    }
+    .srow.sigrow > .samt {
+      grid-area: v;
+      text-align: right;
+      font-size: 14px;
+    }
+    .srow.sigrow > .smeta {
+      grid-area: meta;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 4px 12px;
+    }
+    .srow.sigrow > .smeta .sv2 {
+      display: block;
+      text-align: left;
+      font-size: 12px;
     }
   }
 </style>

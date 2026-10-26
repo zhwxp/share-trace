@@ -40,8 +40,8 @@ const ann = meta.announcements.slice().sort((a, b) => (a.date < b.date ? 1 : -1)
       <p>日净申赎 F = Σ(Δ份额 × 当日收盘价)，按标的指数加总。</p>
       <p>
         触发条件：|F| ≥ max({p.floor_yi} 亿, {p.ratio * 100}% × 该指数 ETF 合计规模)，封顶 {p.cap_yi} 亿；
-        成分 ETF ≥2 只时要求同向只数 ≥ max(2, 60%)；{p.merge_days} 个交易日内同向连续触发合并成一个事件，
-        标在 |F| 最大的那天。
+        成分 ETF ≥2 只时要求同向只数 ≥ max(2, 60%)。每个触发日单独记一条，不合并——连续几天都过门槛，
+        就是连续几条信号。
       </p>
       <p>
         为什么用「规模的 {Math.round(p.ratio * 100)}%」而不是固定金额：沪深 300 四只 ETF 合计规模近万亿，

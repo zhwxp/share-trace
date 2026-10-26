@@ -115,8 +115,7 @@ const generated = meta.generated_at.slice(0, 16).replace('T', ' ');
     ) : (
       <>
         <div class="shead" aria-hidden="true">
-          <span>日期</span><span>方向</span><span class="num">当日</span>
-          <span class="num">连续 / 合计</span><span class="num">历史排名</span>
+          <span>日期</span><span>方向</span><span class="num">当日</span><span class="num">历史排名</span>
         </div>
         <div class="slist">
           {s.events.map((e) => (
@@ -124,10 +123,7 @@ const generated = meta.generated_at.slice(0, 16).replace('T', ' ');
               <span class="sd">{e.date}</span>
               <span class={`pill ${e.side > 0 ? 'buy' : 'sell'}`}>{side(e.side)}</span>
               <span class="sv2 samt">{signed(e.amount)}</span>
-              <span class="smeta">
-                <span class="sv2 m">{e.days} 天 / {signed(e.total, 0)}</span>
-                <span class="sv2 m">第 {e.rank} / {e.n_events}</span>
-              </span>
+              <span class="sv2 m srank">第 {e.rank} / {e.n_events}</span>
             </div>
           ))}
         </div>
@@ -163,9 +159,9 @@ const generated = meta.generated_at.slice(0, 16).replace('T', ' ');
   </section>
 
   <p class="tail">
-    触发门槛 = max({params.floor_yi} 亿, {params.ratio * 100}% × 该指数 ETF 合计规模)，封顶 {params.cap_yi} 亿；
-    成分 ETF 两只以上时要求同向只数 ≥ max(2, 60%)；{params.merge_days} 个交易日内同向连续触发合并为一个事件，
-    标在当日金额最大的那天。<a href="/about.html">口径说明 →</a>
+    触发门槛 = max({params.floor_yi} 亿, {params.ratio * 100}% × 该指数 ETF 合计规模)，封顶
+    {params.cap_yi} 亿；成分 ETF 两只以上时要求同向只数 ≥ max(2, 60%)。每个触发日单独一条，不合并。
+    <a href="/about.html">口径说明 →</a>
   </p>
 
   <script is:inline src={`/assets/kline.js?v=${V}`} defer></script>
@@ -196,47 +192,40 @@ const generated = meta.generated_at.slice(0, 16).replace('T', ' ');
     }
   }
 
-  /* 信号明细：桌面五列，手机折成两行 */
+  /* 信号明细：桌面四列，手机也四列一行 */
   .shead,
   .srow.sigrow {
-    grid-template-columns: 96px 56px 112px 132px minmax(0, 1fr);
-  }
-  .smeta {
-    display: contents;
+    grid-template-columns: 96px 56px 112px minmax(0, 1fr);
   }
   @media (max-width: 640px) {
     .shead {
       display: none;
     }
     .srow.sigrow {
-      grid-template-columns: auto auto minmax(0, 1fr);
-      grid-template-areas: 'd p v' 'meta meta meta';
-      gap: 5px 10px;
-      padding: 10px 0;
+      grid-template-columns: auto auto minmax(0, 1fr) auto;
+      grid-template-areas: none;
+      gap: 4px 8px;
+      padding: 9px 0;
       min-height: 0;
     }
+    .srow.sigrow > .sd,
+    .srow.sigrow > .pill,
+    .srow.sigrow > .samt,
+    .srow.sigrow > .srank {
+      grid-area: auto;
+    }
     .srow.sigrow > .sd {
-      grid-area: d;
       font-size: 13px;
     }
     .srow.sigrow > .pill {
-      grid-area: p;
       justify-self: start;
     }
     .srow.sigrow > .samt {
-      grid-area: v;
       text-align: right;
       font-size: 14px;
     }
-    .srow.sigrow > .smeta {
-      grid-area: meta;
-      display: flex;
-      flex-wrap: wrap;
-      gap: 4px 12px;
-    }
-    .srow.sigrow > .smeta .sv2 {
-      display: block;
-      text-align: left;
+    .srow.sigrow > .srank {
+      text-align: right;
       font-size: 12px;
     }
   }

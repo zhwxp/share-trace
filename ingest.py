@@ -38,7 +38,6 @@ FLOOR_YI = 2.0        # 单日净申赎绝对下限（亿元）
 RATIO = 0.08          # 相对该指数 ETF 合计规模的占比
 CAP_YI = 100.0        # 占比门槛的绝对上限（亿元）
 MIN_OBS = 60          # 至少积累这么多交易日才允许出信号
-MERGE_DAYS = 5        # 同向连续触发合并窗口（交易日）
 MIN_HIST_OBS = 60     # ETF 至少有这么多天份额历史才进历史序列
 
 # 份额折算日（2 份合 1 份会造出假申赎），这些日期的 Δ份额 置零
@@ -160,7 +159,8 @@ def aggregate(codes, series, min_hist=0):
 def detect_events(dates, agg):
     """单指数信号：单日净申赎 ≥ max(2 亿, 8% × 该指数 ETF 合计规模)，且封顶 100 亿。
 
-    多 ETF 指数还要求同向只数 ≥ max(2, 60%)。5 个交易日内同向连续触发合并。
+    多 ETF 指数还要求同向只数 ≥ max(2, 60%)。每个触发日单独一个事件，不合并——
+    连续几天都过门槛，就是连续几条，信号触发当天就能看到。
     """
     events = []
     for i, d in enumerate(dates):
@@ -177,11 +177,11 @@ def detect_events(dates, agg):
             if same < max(2, math.ceil(0.6 * a["n"])):
                 continue
         top = sorted(a["per"].items(), key=lambda kv: -abs(kv[1]))[:3]
-        item = {
+        events.append({
             "date": d,
             "side": side,
             "amount": round(f, 2),
-            "total": f,
+            "total": round(f, 2),
             "days": 1,
             "reson": a["nin"] if side > 0 else a["nout"],
             "n": a["n"],
@@ -190,22 +190,7 @@ def detect_events(dates, agg):
             "top": [[c, round(v, 2)] for c, v in top],
             "idx": i,
             "span": [d, d],
-        }
-        if events and events[-1]["side"] == side and i - events[-1]["idx"] <= MERGE_DAYS:
-            e = events[-1]
-            e["days"] += 1
-            e["total"] += f
-            e["idx"] = i
-            e["span"][1] = d
-            if abs(f) > abs(e["amount"]):
-                e.update(
-                    date=d, amount=round(f, 2), top=item["top"], reson=item["reson"],
-                    n=item["n"], thr=item["thr"], scale=item["scale"],
-                )
-        else:
-            events.append(item)
-    for e in events:
-        e["total"] = round(e["total"], 2)
+        })
     return events
 
 
@@ -384,7 +369,6 @@ def run(stats_only=False):
             "ratio": RATIO,
             "cap_yi": CAP_YI,
             "min_obs": MIN_OBS,
-            "merge_days": MERGE_DAYS,
             "min_hist_obs": MIN_HIST_OBS,
         },
         "split_dates": {k: sorted(v) for k, v in SPLIT_DATES.items()},

@@ -1,4 +1,4 @@
-/* 国家队 ETF 动态站 —— 前端渲染 */
+/* ShareTrace —— 前端渲染 */
 (function () {
   "use strict";
 

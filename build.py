@@ -255,17 +255,17 @@ def page_shell(title, page, body, data=None, nav_active="home"):
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>{title}</title>
-<meta name="description" content="国家队 ETF 动向：份额申赎、指数 K 线与买卖点">
+<meta name="description" content="ShareTrace：国家队 ETF 份额申赎、指数 K 线与买卖点">
 <link rel="stylesheet" href="{page}assets/style.css">
 </head>
 <body>
 <header class="top">
   <div class="wrap">
     <div class="brand">
-      <span class="logo">NT</span>
+      <span class="logo">ST</span>
       <div>
-        <h1>国家队 ETF 动态</h1>
-        <p class="sub">份额申赎 · 指数 K 线 · 买卖点</p>
+        <h1>ShareTrace</h1>
+        <p class="sub">国家队 ETF 份额足迹 · 指数 K 线 · 买卖点</p>
       </div>
     </div>
     {nav}
@@ -276,7 +276,7 @@ def page_shell(title, page, body, data=None, nav_active="home"):
 </main>
 <footer class="foot">
   <div class="wrap">
-    <p>数据源：上交所 ETF 归档 / 深交所 / 同花顺 · 行情 baostock · 份额为基金总份额，非成交额</p>
+    <p>ShareTrace · 数据源：上交所 ETF 归档 / 深交所 / 同花顺 · 行情 baostock · 份额为基金总份额，非成交额</p>
     <p>本站只做数据呈现，不构成投资建议。生成时间 {datetime.now().strftime('%Y-%m-%d %H:%M')}</p>
   </div>
 </footer>
@@ -510,18 +510,18 @@ def build(stats_only=False):
         shutil.copy(ROOT / "assets" / f, OUT / "assets" / f)
 
     home_html, home_data = render_home(idx_pages, etfs, by_code, series, latest)
-    (OUT / "index.html").write_text(page_shell("国家队 ETF 动态", "", home_html, home_data, "home"))
+    (OUT / "index.html").write_text(page_shell("ShareTrace · 国家队 ETF 份额足迹", "", home_html, home_data, "home"))
 
     idx_html = render_indices(idx_pages)
-    (OUT / "indices.html").write_text(page_shell("分指数 · 国家队 ETF 动态", "", idx_html, None, "idx"))
+    (OUT / "indices.html").write_text(page_shell("分指数 · ShareTrace", "", idx_html, None, "idx"))
 
     about_html = render_about()
-    (OUT / "about.html").write_text(page_shell("口径说明 · 国家队 ETF 动态", "", about_html, None, "about"))
+    (OUT / "about.html").write_text(page_shell("口径说明 · ShareTrace", "", about_html, None, "about"))
 
     for p in idx_pages:
         body, data = render_detail(p)
         (OUT / "index" / f"{p['slug']}.html").write_text(
-            page_shell(f"{p['name']} · 国家队 ETF 动态", "../", body, data, "idx")
+            page_shell(f"{p['name']} · ShareTrace", "../", body, data, "idx")
         )
 
     n_ev = sum(len(p["events"]) for p in idx_pages)
@@ -866,6 +866,7 @@ def render_about():
     return f"""
 <section class="card">
   <h2>这个站看什么</h2>
+  <p class="note">ShareTrace 指「份额的足迹」——国家队买 ETF 走一级市场申购，唯一直接指标是基金总份额；把份额变化画到指数 K 线上，就是它的足迹。</p>
   <p>国家队（中央汇金投资 / 汇金资管、证金、国新、诚通）买 ETF 走一级市场申购，<b>份额增加与二级市场成交无关</b>。唯一直接指标是基金总份额，不是成交额、不是规模、不是盘口异动。本站把 57 只「国家队曾出现在前十大持有人」的 ETF 的日度份额变化，折算成金额，画到 43 个标的指数的 K 线上。</p>
   <p class="note">成交额法已被实测证伪：510300 在 2012-05~2026-10 的 3500 个交易日里，成交额 &gt;2×20 日均触发 129 天，落在国家队公告 ±2 日内的只有 5 天，精确率 4%。</p>
 </section>

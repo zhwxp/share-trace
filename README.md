@@ -1,6 +1,6 @@
-# 国家队 ETF 动态站
+# ShareTrace — 国家队 ETF 份额足迹
 
-静态站点：把 57 只「国家队曾出现在前十大持有人」的 ETF 的日度份额变化折算成金额，画到 43 个标的指数的 K 线上，标出买卖点。
+名字取自「份额的足迹」：把 57 只「国家队曾出现在前十大持有人」的 ETF 的日度份额变化折算成金额，画到 43 个标的指数的 K 线上，标出买卖点。
 
 - 首页：最新交易日的合计净申赎、异动榜、分指数排行、历史信号、逐日历史（客户端分页）
 - 分指数：43 个指数，点开是「K 线 + 买卖点 + 日净申赎柱 + 20 日累计线」+ 信号明细表
@@ -48,8 +48,8 @@ python3 build.py --stats   # 只打印每个指数的信号数量，不写文件
 ```nginx
 server {
     listen 80;
-    server_name nt.example.com;
-    root /var/www/national-team-site/site;
+    server_name sharetrace.example.com;
+    root /var/www/sharetrace/site;
     index index.html;
     location / { try_files $uri $uri/ =404; }
 }

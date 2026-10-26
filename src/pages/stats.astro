@@ -175,12 +175,15 @@ const cards = [
   </div>
   <div class="mlist">
     {byYear.map((y) => (
-      <div class="mrow">
+      <div class="mrow yrow">
         <span class="mm">{y.year}</span>
         <span class="mv">{signed(y.flow)}</span>
         <span class="mv m">{y.rows.length}</span>
         <span class="mv m">{y.rows.filter((x) => x.flow > 0).length}</span>
         <span class="mv m">{y.rows.filter((x) => x.flow <= 0).length}</span>
+        <span class="ymini">
+          {y.rows.filter((x) => x.flow > 0).length} 个月申购 / {y.rows.filter((x) => x.flow <= 0).length} 个月赎回
+        </span>
       </div>
     ))}
   </div>
@@ -224,9 +227,50 @@ const cards = [
       grid-template-columns: 132px minmax(0, 1fr) 84px 84px 84px;
     }
   }
+  .ymini {
+    display: none;
+  }
   @media (max-width: 640px) {
+    .yrow {
+      grid-template-columns: auto minmax(0, 1fr) auto;
+      grid-template-areas: none;
+      gap: 4px 10px;
+    }
+    .yrow > span {
+      grid-area: auto;
+    }
+    .yrow > span:nth-child(3),
+    .yrow > span:nth-child(4),
+    .yrow > span:nth-child(5) {
+      display: none;
+    }
+    .yrow .ymini {
+      display: block;
+      font-size: 12px;
+      color: var(--muted);
+      white-space: nowrap;
+    }
+  }
+  @media (max-width: 640px) {
+    /* 三张卡：前两张并排，第三张跨满，避免右侧留半格 */
+    .statrow {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+    .statrow > div:last-child {
+      grid-column: 1 / -1;
+    }
+    .statrow > div {
+      min-height: 96px;
+    }
+  }
+  @media (max-width: 640px) {
+    /* 手机上保留表头，每个表只留三列：名称 / 样本 / 命中率 */
+    .shead {
+      display: grid;
+      margin-top: 18px;
+      padding-bottom: 6px;
+    }
     .srow {
-      grid-template-columns: minmax(0, 1fr) auto auto;
       grid-template-areas: none;
     }
     .srow > span {
@@ -235,10 +279,28 @@ const cards = [
     .srow > span.sv2:nth-child(2) {
       display: block;
     }
+    .t-dir .shead,
+    .t-dir .srow {
+      grid-template-columns: minmax(0, 1fr) 88px 88px;
+    }
+    .t-str .shead,
+    .t-str .srow,
+    .t-idx .shead,
+    .t-idx .srow {
+      grid-template-columns: minmax(0, 1fr) 84px 64px;
+    }
     .t-dir .srow > span:nth-child(3),
     .t-dir .srow > span:nth-child(5),
+    .t-str .srow > span:nth-child(4),
     .t-str .srow > span:nth-child(5),
-    .t-idx .srow > span:nth-child(5) {
+    .t-idx .srow > span:nth-child(4),
+    .t-idx .srow > span:nth-child(5),
+    .t-dir .shead > span:nth-child(3),
+    .t-dir .shead > span:nth-child(5),
+    .t-str .shead > span:nth-child(4),
+    .t-str .shead > span:nth-child(5),
+    .t-idx .shead > span:nth-child(4),
+    .t-idx .shead > span:nth-child(5) {
       display: none;
     }
   }

@@ -73,7 +73,7 @@ const streakText = st.days > 1
             <span class="sn">{bySlug.get(e.slug)?.name ?? e.slug}</span>
             <span class={`pill ${e.side > 0 ? 'buy' : 'sell'}`}>{side(e.side)}</span>
             <span class="sv fig">{signed(e.amount)}</span>
-            <span class="sm">历史第 {e.rank} 强 / 共 {e.n_events} 次 · 门槛 {e.thr} 亿</span>
+            <span class="sm">历史第 {e.rank} 强 / {e.n_events} 次</span>
           </a>
         ))}
       </div>
@@ -99,7 +99,7 @@ const streakText = st.days > 1
           <span class="sn">{bySlug.get(e.slug)?.name ?? e.slug}</span>
           <span class={`pill ${e.side > 0 ? 'buy' : 'sell'}`}>{side(e.side)}</span>
           <span class="sv fig">{signed(e.amount)}</span>
-          <span class="sm">{e.date} · 历史第 {e.rank} 强 / 共 {e.n_events} 次</span>
+          <span class="sm">{e.date} · 第 {e.rank} 强 / {e.n_events} 次</span>
         </a>
       ))}
     </div>

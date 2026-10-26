@@ -127,9 +127,9 @@
         { left: padL, right: small ? 40 : 48, top: small ? '56%' : '70%', height: small ? '16%' : '15%' }
       ],
       xAxis: [
-        Object.assign({ type: 'category', data: c.dates, gridIndex: 0, boundaryGap: true, axisLabel: { show: false } }, axis),
+        Object.assign({}, axis, { type: 'category', data: c.dates, gridIndex: 0, boundaryGap: true, axisLabel: { show: false } }),
         Object.assign({ type: 'category', data: c.dates, gridIndex: 1, boundaryGap: true }, axis,
-          { axisLabel: { color: MUTED, fontSize: 11, hideOverlap: true, interval: Math.max(1, Math.ceil(n / (small ? 4 : 7))) } })
+          { axisLabel: { color: MUTED, fontSize: 11, hideOverlap: true, showMaxLabel: true, interval: 'auto' } })
       ],
       yAxis: [
         Object.assign({ scale: true, gridIndex: 0 }, axis),

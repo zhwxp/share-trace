@@ -1,6 +1,6 @@
 {
  "schema_version": 1,
- "generated_at": "2026-10-26T23:05:47+08:00",
+ "generated_at": "2026-10-26T23:18:56+08:00",
  "latest_trade_date": "2026-10-26",
  "first_trade_date": "2012-01-04",
  "params": {
@@ -67,20 +67,7 @@
  },
  "stale": {
   "note": "K 线比最新份额日期短的指数，上游行情还没有这几天的数据",
-  "by_index": {
-   "gold-stock": {
-    "last_date": "2026-10-23",
-    "lag_days": 1
-   },
-   "chip-zz": {
-    "last_date": "2026-10-23",
-    "lag_days": 1
-   },
-   "hk-innovdrug": {
-    "last_date": "2026-10-23",
-    "lag_days": 1
-   }
-  }
+  "by_index": {}
  },
  "indices": {
   "sh50": {
@@ -558,8 +545,8 @@
    "kline_code": "931238",
    "kline_source": "index",
    "first_date": "2023-11-01",
-   "last_date": "2026-10-23",
-   "rows": 754,
+   "last_date": "2026-10-26",
+   "rows": 755,
    "flow_days": 722,
    "events": 2,
    "etfs_used": [
@@ -571,8 +558,8 @@
    "kline_code": "H30184",
    "kline_source": "index",
    "first_date": "2019-06-12",
-   "last_date": "2026-10-23",
-   "rows": 1787,
+   "last_date": "2026-10-26",
+   "rows": 1788,
    "flow_days": 1788,
    "events": 5,
    "etfs_used": [
@@ -611,8 +598,8 @@
    "kline_code": "931787",
    "kline_source": "index",
    "first_date": "2022-07-12",
-   "last_date": "2026-10-23",
-   "rows": 1054,
+   "last_date": "2026-10-26",
+   "rows": 1055,
    "flow_days": 1039,
    "events": 2,
    "etfs_used": [

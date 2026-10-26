@@ -901,7 +901,7 @@ html.no-js .reveal { opacity: 1; transform: none; }
   main.wrap { padding-top: 22px; padding-bottom: 56px; }
   .foot { padding-bottom: calc(100px + env(safe-area-inset-bottom)); }
   .head { align-items: flex-start; gap: 10px; }
-  .head .right { text-align: left; }
+  .head .right { display: none; }
   .panel { padding: 16px 14px; }
   .figrow { grid-template-columns: repeat(2, minmax(0, 1fr)); }
   .figrow > div + div { padding-left: 16px; }

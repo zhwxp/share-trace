@@ -1,0 +1,27 @@
+---
+/**
+ * 份额足迹条：2012 年至今每个交易日的合计净申赎，一条一格。
+ * 构建期画成 SVG 路径（无脚本也能看），悬停/触摸/键盘读数由 strip.js 加。
+ */
+const { fp, caption = '' } = Astro.props;
+const label = `2012 年 ${fp.start} 至 ${fp.end} 共 ${fp.n} 个交易日的合计净申赎，单日最大 ${fp.max} 亿元`;
+---
+<figure class="footstrip reveal" data-strip={fp.bars} data-w={fp.w} tabindex="0" role="group"
+  aria-label={`${label}。方向键逐日读数。`}>
+  <div class="cursor" aria-hidden="true"></div>
+  <svg viewBox={`0 0 ${fp.w} ${fp.h}`} preserveAspectRatio="none" aria-hidden="true">
+    <path d={fp.pos} fill="var(--chart-1)" opacity="0.9"></path>
+    <path d={fp.neg} fill="var(--chart-2)" opacity="0.95"></path>
+    <line x1="0" x2={fp.w} y1={fp.mid} y2={fp.mid} stroke="var(--axis-ink)" stroke-width="1"
+      vector-effect="non-scaling-stroke" opacity="0.4"></line>
+    <line x1={fp.w - 0.5} x2={fp.w - 0.5} y1="0" y2={fp.h} stroke="var(--accent)" stroke-width="1"
+      vector-effect="non-scaling-stroke" opacity="0.9"></line>
+  </svg>
+  <div class="years" aria-hidden="true">
+    {fp.years.map((y) => (
+      <span style={`left:${(y.i / fp.w) * 100}%`}>{y.y}</span>
+    ))}
+    <span class="now" style="left:100%">今日</span>
+  </div>
+  {caption && <figcaption class="stripcap" data-idle={caption}>{caption}</figcaption>}
+</figure>

@@ -16,15 +16,22 @@
 ```
 ingest.py             数据导出：sqlite → data/（所有换算都在这里做完）
 data/                 站点数据，进 git
-src/lib/data.mjs      构建期读 data/、校验、派生
+src/lib/data.mjs      构建期读 data/、校验、派生（含足迹条、迷你净申赎）
 src/lib/format.mjs    数字与日期显示规则
-src/layouts/          页面骨架
+src/layouts/          页面骨架（左栏 / 平板顶栏 / 手机底部标签）
+src/components/       Footprint.astro：2012 年至今的逐日足迹条
 src/pages/            首页 / 分指数 / 详情 / 信号 / 历史 / 口径
 src/pages/data/       静态 JSON 与 CSV 端点（图表序列、历史明细）
 src/styles/global.css 设计 token 与全站样式
-public/assets/        echarts.min.js、detail.js
+public/assets/        charts.js（SVG 图表）、detail.js（ECharts）、strip.js（足迹条读数）、reveal.js、echarts.min.js
 dist/                 构建产物（.gitignore，由平台构建）
 ```
+
+## 视觉
+
+taste-skill app 路线 **data-terminal**（2026-10-26 抽签，seed 511257246）：深色研究终端，卡片比页面底色更深、层级靠明度；数字全部 IBM Plex Mono 等宽、符号写在数字里；选中态统一是 1px 的朱红细线；朱红同时是今日与「国家队在场」的唯一数据色相，涨红跌绿只留给 K 线。
+
+标志性元素是「份额足迹」：2012 年以来 3,593 个交易日的合计净申赎，一天一格，悬停 / 触摸 / 方向键逐日读数。构建期画成 SVG 路径（无脚本也看得到），`strip.js` 只在有脚本时加读数。
 
 ## 数据流
 

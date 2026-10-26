@@ -1,9 +1,9 @@
 ---
-import '@fontsource/geist/latin-400.css';
-import '@fontsource/geist/latin-500.css';
-import '@fontsource/geist/latin-700.css';
-import '@fontsource/geist-mono/latin-400.css';
-import '@fontsource/geist-mono/latin-500.css';
+import '@fontsource/public-sans/latin-400.css';
+import '@fontsource/public-sans/latin-500.css';
+import '@fontsource/public-sans/latin-600.css';
+import '@fontsource/ibm-plex-mono/latin-400.css';
+import '@fontsource/ibm-plex-mono/latin-500.css';
 import '../styles/global.css';
 
 const {
@@ -11,6 +11,7 @@ const {
   desc = 'ShareTrace：国家队 ETF 份额申赎、指数 K 线与买卖点',
   current = '',
   echarts = false,
+  stamp = null,
 } = Astro.props;
 
 const nav = [
@@ -20,43 +21,100 @@ const nav = [
   ['history', '历史', '/history.html'],
   ['about', '口径说明', '/about.html'],
 ];
+const here = nav.find(([k]) => k === current)?.[1] ?? 'ShareTrace';
 ---
+
 <!DOCTYPE html>
-<html lang="zh-CN">
+<html lang="zh-CN" class="no-js">
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
     <title>{title}</title>
     <meta name="description" content={desc} />
+    <meta name="theme-color" content="#171719" />
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content={title} />
+    <meta property="og:description" content={desc} />
+    <meta name="color-scheme" content="dark" />
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+    <script is:inline>document.documentElement.classList.remove('no-js');</script>
   </head>
   <body>
-    <header class="shell">
-      <div class="wrap">
-        <a class="mark" href="/index.html">
-          <svg width="20" height="20" viewBox="0 0 20 20" aria-hidden="true">
-            <rect x="1" y="11" width="4" height="8" rx="1" fill="#0a0a0a" opacity=".22"></rect>
-            <rect x="7" y="7" width="4" height="12" rx="1" fill="#0a0a0a" opacity=".5"></rect>
-            <rect x="13" y="2" width="4" height="17" rx="1" fill="#1d5fbf"></rect>
-          </svg>
+    <a class="skip" href="#main">跳到正文</a>
+
+    <header class="rail">
+      <a class="mark" href="/index.html" aria-label="ShareTrace 首页">
+        <svg width="22" height="22" viewBox="0 0 22 22" aria-hidden="true">
+          <rect x="2" y="13" width="2" height="4" fill="#3c3c41"></rect>
+          <rect x="5.4" y="10" width="2" height="7" fill="#57575d"></rect>
+          <rect x="8.8" y="6" width="2" height="11" fill="#7c7c83"></rect>
+          <rect x="12.2" y="11" width="2" height="6" fill="#57575d"></rect>
+          <rect x="15.6" y="8" width="2" height="9" fill="#9a9aa1"></rect>
+          <rect x="19" y="3" width="2" height="14" fill="#d0503f"></rect>
+        </svg>
+        <span>
           <span class="name">ShareTrace</span>
-          <span class="scope">43 个指数 · 57 只 ETF · 份额口径</span>
+          <span class="sub">份额足迹</span>
+        </span>
+      </a>
+      <nav class="nav" aria-label="主导航">
+        {nav.map(([key, label, href]) => (
+          <a href={href} aria-current={key === current ? 'page' : undefined}>{label}</a>
+        ))}
+      </nav>
+      {stamp && (
+        <div class="stamp">
+          <b>最新交易日</b>
+          {stamp.date}
+          <b style="margin-top:10px">数据生成</b>
+          {stamp.generated}
+        </div>
+      )}
+    </header>
+
+    <div class="app">
+      <div class="topbar">
+        <a class="mark" href="/index.html" aria-label="ShareTrace 首页">
+          <svg width="20" height="20" viewBox="0 0 22 22" aria-hidden="true">
+            <rect x="2" y="13" width="2" height="4" fill="#3c3c41"></rect>
+            <rect x="5.4" y="10" width="2" height="7" fill="#57575d"></rect>
+            <rect x="8.8" y="6" width="2" height="11" fill="#7c7c83"></rect>
+            <rect x="12.2" y="11" width="2" height="6" fill="#57575d"></rect>
+            <rect x="15.6" y="8" width="2" height="9" fill="#9a9aa1"></rect>
+            <rect x="19" y="3" width="2" height="14" fill="#d0503f"></rect>
+          </svg>
+          <span><span class="name">ShareTrace</span><span class="sub">份额足迹</span></span>
         </a>
-        <nav class="main">
+        <span class="small" style="color:var(--faint)">{here}</span>
+        <nav class="nav" aria-label="主导航">
           {nav.map(([key, label, href]) => (
             <a href={href} aria-current={key === current ? 'page' : undefined}>{label}</a>
           ))}
         </nav>
       </div>
-    </header>
-    <main class="wrap">
-      <slot />
-    </main>
-    <footer class="foot">
-      <div class="wrap">
-        <p>数据源：上交所 ETF 归档 / 深交所 / 同花顺 · 行情 baostock · 份额为基金总份额，不是成交额。</p>
-        <p>本站只做数据呈现，不构成投资建议。份额变化能说明资金进出，不能证明是国家队在买。</p>
-      </div>
-    </footer>
+
+      <main class="wrap" id="main">
+        <slot />
+      </main>
+
+      <footer class="foot">
+        <div class="wrap">
+          <p>
+            份额为基金总份额（一级市场申赎），不是成交额。数据源：上交所 ETF 归档、深交所、腾讯日线、中证指数官网。
+            本站只做数据呈现，不构成投资建议；份额变化能说明资金进出，不能证明是国家队在买。
+          </p>
+          <p><a href="/about.html">口径说明与已知限制</a> · 纯静态构建，数据随仓库提交</p>
+        </div>
+      </footer>
+    </div>
+
+    <nav class="tabs" aria-label="主导航（手机）">
+      {nav.map(([key, label, href]) => (
+        <a href={href} aria-current={key === current ? 'page' : undefined}>{label}</a>
+      ))}
+    </nav>
+
     {echarts && <script is:inline src="/assets/echarts.min.js"></script>}
+    <script is:inline src="/assets/reveal.js"></script>
   </body>
 </html>

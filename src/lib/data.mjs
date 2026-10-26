@@ -192,6 +192,103 @@ export function eventsOn(date) {
   return load().events.filter((e) => e.date === date);
 }
 
+/** 份额足迹：2012 年起的逐日合计净申赎，给首页与历史页的足迹条用。
+ *  plot 是构建期画好的 SVG 路径（无脚本也能看），bars 是悬停读数用的紧凑串。 */
+export function footprint() {
+  const { shDaily, latest } = load();
+  const days = shDaily.filter((d) => d.date <= latest && d.flow !== null);
+  const max = Math.max(...days.map((d) => Math.abs(d.flow)), 1);
+
+  const H = 104, MID = 58, TOP = 6, BOT = 100;
+  // 平方根刻度：单日最大 1126 亿，线性刻度下 99% 的交易日只有几像素高，条带会糊成噪声
+  const s = Math.min(MID - TOP, BOT - MID) / Math.sqrt(max);
+  let pos = '';
+  let neg = '';
+  for (let i = 0; i < days.length; i++) {
+    const f = days[i].flow;
+    if (Math.abs(f) < 0.05) continue;
+    const h = Math.sqrt(Math.abs(f)) * s;
+    const y = f > 0 ? MID - h : MID;
+    const d = `M${i} ${y.toFixed(1)}h1v${h.toFixed(1)}h-1z`;
+    if (f > 0) pos += d;
+    else neg += d;
+  }
+
+  const t0 = Date.UTC(2012, 0, 1);
+  const ord = (d) => Math.round((Date.parse(d + 'T00:00:00Z') - t0) / 86400000).toString(36);
+  const fl = (f) => {
+    const v = Math.round(f * 10);
+    return v < 0 ? `-${(-v).toString(36)}` : v.toString(36);
+  };
+  const bars = `${days.map((d) => ord(d.date)).join(',')}|${days.map((d) => fl(d.flow)).join(',')}`;
+
+  const years = [];
+  for (let y = 2012; y <= Number(latest.slice(0, 4)); y++) {
+    const i = days.findIndex((d) => d.date >= `${y}-01-01`);
+    if (i >= 0) years.push({ y: String(y), i });
+  }
+
+  return {
+    n: days.length,
+    start: days[0]?.date ?? null,
+    end: days[days.length - 1]?.date ?? null,
+    max: round(max, 2),
+    w: days.length,
+    h: H,
+    mid: MID,
+    pos,
+    neg,
+    bars,
+    years,
+  };
+}
+
+/** 连续同向天数（截至最新交易日），用于首页的一句话结论 */
+export function streak() {
+  const { shDaily, latest } = load();
+  const upto = shDaily.filter((d) => d.date <= latest);
+  if (!upto.length) return { days: 0, sign: 0 };
+  const sign = Math.sign(upto[upto.length - 1].flow);
+  let n = 0;
+  for (let i = upto.length - 1; i >= 0 && Math.sign(upto[i].flow) === sign; i--) n++;
+  return { days: n, sign };
+}
+
+/** 单指数最近 N 日净申赎的迷你足迹（分指数页的每一行用） */
+export function miniFlow(slug, days = 20, w = 100, h = 22) {
+  const { indexSeries } = load();
+  const rows = (indexSeries.get(slug) ?? []).filter((r) => r.flow !== null).slice(-days);
+  const max = Math.max(...rows.map((r) => Math.abs(r.flow)), 1);
+  const mid = h * 0.5;
+  const bw = w / days;
+  let pos = '';
+  let neg = '';
+  rows.forEach((r, i) => {
+    const x = i * bw;
+    const height = Math.max(0.8, (Math.sqrt(Math.abs(r.flow)) / Math.sqrt(max)) * (mid - 1.5));
+    if (r.flow >= 0) pos += `M${x.toFixed(2)} ${(mid - height).toFixed(2)}h${(bw * 0.72).toFixed(2)}v${height.toFixed(2)}h-${(bw * 0.72).toFixed(2)}z`;
+    else neg += `M${x.toFixed(2)} ${mid}h${(bw * 0.72).toFixed(2)}v${height.toFixed(2)}h-${(bw * 0.72).toFixed(2)}z`;
+  });
+  return { w, h, mid, pos, neg, n: rows.length, last: rows[rows.length - 1]?.flow ?? null };
+}
+
+/** 信号的有效率：后 20 日方向对的事件占比 */
+export function signalStats() {
+  const { events } = load();
+  const buys = events.filter((e) => e.side > 0).length;
+  const matured = events.filter((e) => e.post20 !== null && e.post20 !== undefined);
+  const hit = matured.filter((e) => e.post20 > 0).length;
+  return {
+    total: events.length,
+    buys,
+    sells: events.length - buys,
+    matured: matured.length,
+    hit,
+    rate: matured.length ? hit / matured.length : null,
+    first: events[0]?.date ?? null,
+  };
+}
+
 /** 详情页图表的原始序列：K 线、申赎、事件、公告锚点。
  *  均线与 20 日累计在浏览器里算——派生序列不进 payload，能省三成体积。 */
 export function chartPayload(slug) {

@@ -4,8 +4,9 @@
   'use strict';
 
   // 红涨绿跌只出现在 K 线里；其余一律 ink / 灰，资金流那条线用 --chart-1
-  var UP = '#c4242a', DOWN = '#2e7d32', GRID = '#ececec', AXIS = '#e6e6e6', MUTED = '#8a8f97';
-  var TX = '#0a0a0a', FLOW = '#1d5fbf';
+  var UP = '#c9473d', DOWN = '#3f9c6d', GRID = '#26262a', AXIS = '#2c2c31', MUTED = '#9a9ca2';
+  var TX = '#ffffff', FLOW = '#f2f2f3', FLOW_NEG = '#6e7076', CUM = '#cf3f4e';
+  var PANEL = '#1b1b1f', EDGE = '#2e2e34';
 
   var el = document.getElementById('detailChart');
   if (!el || !window.echarts) return;
@@ -63,7 +64,7 @@
     var axis = {
       axisLine: { lineStyle: { color: AXIS } },
       axisTick: { show: false },
-      axisLabel: { color: MUTED, fontSize: 10 },
+      axisLabel: { color: MUTED, fontSize: 11 },
       splitLine: { lineStyle: { color: GRID } }
     };
 
@@ -77,13 +78,13 @@
         symbol: 'triangle',
         symbolRotate: buy ? 0 : 180,
         symbolSize: 8 + Math.round(6 * w),
-        itemStyle: { color: buy ? FLOW : '#8a8f97', borderColor: '#fff', borderWidth: 1, opacity: 0.6 + 0.4 * w },
+        itemStyle: { color: buy ? UP : DOWN, borderColor: '#171719', borderWidth: 1, opacity: 0.65 + 0.35 * w },
         label: {
           show: w >= 0.35,
           position: buy ? 'bottom' : 'top',
           distance: 6,
-          color: buy ? FLOW : MUTED,
-          fontSize: 10,
+          color: buy ? '#e8897b' : '#6fc99b',
+          fontSize: 11,
           formatter: function (p) { return (p.value > 0 ? '+' : '') + Math.round(p.value); }
         }
       };
@@ -95,6 +96,11 @@
 
     var zoomStart = n > 380 ? Math.max(0, 100 - (380 / n) * 100) : 0;
 
+    // 小屏（<420px 高）把两块网格压紧，给底部缩放条和 x 轴留位置
+    var H = el.clientHeight || 520;
+    var small = H < 420;
+    var padL = small ? 34 : 56;
+
     var ch = echarts.init(el, null, { renderer: 'canvas' });
     ch.setOption({
       animation: false,
@@ -103,8 +109,9 @@
       tooltip: {
         trigger: 'axis',
         axisPointer: { type: 'cross', link: [{ xAxisIndex: 'all' }] },
-        backgroundColor: '#ffffff',
-        borderColor: GRID,
+        backgroundColor: PANEL,
+        borderColor: EDGE,
+        padding: [8, 10],
         textStyle: { color: TX, fontSize: 12 },
         formatter: function (ps) {
           var i = ps[0].dataIndex;
@@ -130,30 +137,31 @@
           return out;
         }
       },
-      axisPointer: { link: [{ xAxisIndex: 'all' }], label: { backgroundColor: '#f2f1ec', color: TX } },
+      axisPointer: { link: [{ xAxisIndex: 'all' }], label: { backgroundColor: '#2c2c31', color: TX } },
       grid: [
-        { left: 56, right: 16, top: 16, height: '52%' },
-        { left: 56, right: 48, top: '70%', height: '15%' }
+        { left: padL, right: small ? 10 : 16, top: small ? 8 : 16, height: small ? '44%' : '52%' },
+        { left: padL, right: small ? 40 : 48, top: small ? '56%' : '70%', height: small ? '16%' : '15%' }
       ],
       xAxis: [
         Object.assign({ type: 'category', data: c.dates, gridIndex: 0, boundaryGap: true, axisLabel: { show: false } }, axis),
         Object.assign({ type: 'category', data: c.dates, gridIndex: 1, boundaryGap: true }, axis,
-          { axisLabel: { color: MUTED, fontSize: 10, interval: Math.ceil(n / 7) } })
+          { axisLabel: { color: MUTED, fontSize: 11, hideOverlap: true, interval: Math.max(1, Math.ceil(n / (small ? 4 : 7))) } })
       ],
       yAxis: [
         Object.assign({ scale: true, gridIndex: 0 }, axis),
         Object.assign({ scale: true, gridIndex: 1, splitNumber: 2 }, axis),
         Object.assign({
           scale: true, gridIndex: 1, splitNumber: 2, position: 'right',
-          splitLine: { show: false }, axisLabel: { color: MUTED, fontSize: 9 }
+          splitLine: { show: false }, axisLabel: { color: MUTED, fontSize: 11 }
         }, axis)
       ],
       dataZoom: [
         { type: 'inside', xAxisIndex: [0, 1], start: zoomStart, end: 100 },
         {
-          type: 'slider', xAxisIndex: [0, 1], start: zoomStart, end: 100, bottom: 8, height: 16,
-          borderColor: GRID, fillerColor: 'rgba(29,95,191,.08)',
-          handleStyle: { color: FLOW }, textStyle: { color: MUTED, fontSize: 10 }
+          type: 'slider', xAxisIndex: [0, 1], start: zoomStart, end: 100, bottom: small ? 2 : 8, height: small ? 12 : 16,
+          borderColor: GRID, fillerColor: 'rgba(242,242,243,.06)',
+          dataBackground: { lineStyle: { color: '#55555c' }, areaStyle: { color: '#2c2c31' } },
+          handleStyle: { color: MUTED }, textStyle: { color: MUTED, fontSize: 11 }
         }
       ],
       series: [
@@ -163,23 +171,23 @@
           markPoint: { data: marks, silent: true, labelLayout: { hideOverlap: true } },
           markLine: {
             silent: true, symbol: 'none',
-            lineStyle: { color: MUTED, type: 'dashed', width: 1, opacity: 0.4 },
+            lineStyle: { color: '#6e7076', type: 'dashed', width: 1, opacity: 0.5 },
             label: { show: false },
             data: annLines
           }
         },
-        { name: 'MA20', type: 'line', data: c.ma20, symbol: 'none', lineStyle: { width: 1, color: '#6b6b6b', opacity: 0.9 }, connectNulls: true },
-        { name: 'MA60', type: 'line', data: c.ma60, symbol: 'none', lineStyle: { width: 1, color: '#b9bcc2', opacity: 0.95 }, connectNulls: true },
+        { name: 'MA20', type: 'line', data: c.ma20, symbol: 'none', lineStyle: { width: 1, color: '#c9cbd0', opacity: 0.8 }, connectNulls: true },
+        { name: 'MA60', type: 'line', data: c.ma60, symbol: 'none', lineStyle: { width: 1, color: '#6e7076', opacity: 0.9 }, connectNulls: true },
         {
           name: '日净申赎', type: 'bar', xAxisIndex: 1, yAxisIndex: 1, barMaxWidth: 7,
           data: c.flows.map(function (v) {
             if (v === null || v === undefined) return { value: null };
-            return { value: v, itemStyle: { color: v >= 0 ? FLOW : '#cfd3d8' } };
+            return { value: v, itemStyle: { color: v >= 0 ? FLOW : FLOW_NEG } };
           })
         },
         {
           name: '20日累计', type: 'line', xAxisIndex: 1, yAxisIndex: 2, data: c.cum,
-          symbol: 'none', lineStyle: { width: 1.4, color: FLOW }, connectNulls: true
+          symbol: 'none', lineStyle: { width: 1.4, color: CUM }, connectNulls: true
         }
       ]
     });

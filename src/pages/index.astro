@@ -1,103 +1,176 @@
 ---
 import Base from '../layouts/Base.astro';
-import { load, marketToday, movers, eventsOn } from '../lib/data.mjs';
+import Footprint from '../components/Footprint.astro';
+import { load, marketToday, movers, eventsOn, footprint, streak, signalStats, indexStats } from '../lib/data.mjs';
 import { num, signed, side } from '../lib/format.mjs';
 
 const { meta, latest, indices, bySlug, events } = load();
 const t = marketToday();
+const fp = footprint();
+const st = streak();
+const ss = signalStats();
 const signals = eventsOn(latest).slice(0, 3);
+const recentEv = events.filter((e) => e.date < latest).slice(-3).reverse();
 const mv = movers(5);
 const recent = t.history.slice(-20);
+const biggest = recent.reduce((a, b) => (Math.abs(b.flow) > Math.abs(a.flow) ? b : a), recent[0]);
 
 const generated = meta.generated_at.slice(0, 16).replace('T', ' ');
-
-// 今天是空的就说上一次是什么，不留空框
-const lastAny = events
-  .filter((e) => e.date <= latest)
-  .slice()
-  .sort((a, b) => (a.date < b.date ? 1 : -1))[0];
-
 const labels = recent.map((d) => d.date.slice(5));
 const values = recent.map((d) => d.flow);
 const chartPayload = { labels, values, today: labels.length - 1 };
----
-<Base title="ShareTrace · 今日动态" current="home">
-  <h1>今日动态</h1>
-  <p class="lede">
-    最新交易日 {latest} · 数据生成 {generated} · 沪市 {t.n} 只国家队 ETF
-  </p>
 
-  <div class="kpis">
-    <div class="kpi">
-      <div class="label">当日合计净申赎</div>
-      <div class="value fig">{signed(t.flow)}<span class="unit">亿元</span></div>
-      <div class="sub">{t.nIn} 只净申购 · {t.nOut} 只净赎回</div>
+// 每个大类的当日合计：给「分指数」一个入口，也让首页看见 43 个指数不是平均的
+const cats = meta.categories.map((cat) => {
+  const rows = indices.filter((it) => it.cat === cat);
+  const sum = rows.reduce((s, it) => s + (indexStats(it.slug).today ?? 0), 0);
+  return { cat, n: rows.length, flow: Math.round(sum * 100) / 100 };
+});
+const catMax = Math.max(...cats.map((c) => Math.abs(c.flow)), 1);
+const codeToSlug = new Map();
+for (const it of indices) for (const c of it.etfs) codeToSlug.set(c, it.slug);
+
+// 今日最大的一只；没有信号时也说一句真话
+const top = mv[0];
+const streakText = st.days > 1
+  ? `连续 ${st.days} 个交易日${st.sign > 0 ? '净申购' : '净赎回'}`
+  : '今日转为' + (st.sign > 0 ? '净申购' : '净赎回');
+---
+<Base title="ShareTrace · 今日动态" current="home" stamp={{ date: latest, generated }}>
+  <div class="head reveal">
+    <div>
+      <h1>今日动态</h1>
+      <p class="meta">
+        <span class="fig">{latest}</span> 收盘 · 沪市 <span class="fig">{t.n}</span> 只国家队 ETF 合计
+        · 数据生成 <span class="fig">{generated}</span>
+      </p>
     </div>
-    <div class="kpi">
-      <div class="label">近 5 日</div>
-      <div class="value fig">{signed(t.d5)}<span class="unit">亿元</span></div>
-      <div class="sub">截至 {latest}</div>
-    </div>
-    <div class="kpi">
-      <div class="label">近 20 日</div>
-      <div class="value fig">{signed(t.d20)}<span class="unit">亿元</span></div>
-      <div class="sub">沪市 {t.n} 只合计</div>
+    <div class="right">
+      覆盖 <b>{indices.length}</b> 个标的指数<br />
+      <b>{meta.counts.etfs}</b> 只 ETF 的份额变化
     </div>
   </div>
 
-  <section class="chartcard" style="margin-top: 20px;">
-    <div class="head">
-      <h2>近 20 个交易日净申赎</h2>
-      <span class="lede">上为净申购，下为净赎回 · 单位亿元</span>
+  <section class="panel reveal" style="margin-top:22px">
+    <div class="herotop">
+      <div class="lead">
+        <span class="value {t.flow >= 0 ? 'up' : ''}">{signed(t.flow)}</span>
+        <span class="unit">亿元 · 当日合计净申赎</span>
+      </div>
+      <p class="finding">
+        {streakText}，20 日累计 <span class="fig">{signed(t.d20)}</span> 亿。
+        <span class="fig">{t.nIn}</span> 只净申购、<span class="fig">{t.nOut}</span> 只净赎回，最大的是{top.etf.name}
+        <span class="fig">{signed(top.flow)}</span> 亿。
+      </p>
     </div>
-    <div id="flowChart" class="chart"></div>
+
+    <div class="figrow">
+      <div>
+        <div class="label">近 5 日 · 亿元</div>
+        <div class="v">{signed(t.d5)}</div>
+        <div class="s">截至 {latest}</div>
+      </div>
+      <div>
+        <div class="label">近 20 日 · 亿元</div>
+        <div class="v">{signed(t.d20)}</div>
+        <div class="s">同期合计</div>
+      </div>
+      <div>
+        <div class="label">越过门槛的指数</div>
+        <div class="v">{signals.length} <span style="font-size:12px;color:var(--muted)">个指数</span></div>
+        <div class="s">{signals.length ? signals.map((e) => bySlug.get(e.slug)?.name ?? e.slug).join('、') : `最近一次 ${ss.first ?? '—'}`}</div>
+      </div>
+    </div>
+
+    <Footprint
+      fp={fp}
+      caption={`每个交易日一格：2012 年以来 ${fp.n} 个交易日，竖条高度为当日合计净申赎（平方根刻度，单日最大 ${num(fp.max, 0)} 亿元）。在册 ETF 数逐年增加，早年只含当时已有的份额数据。`}
+    />
   </section>
 
-  <h2>今日信号 <span class="count">{signals.length ? `${signals.length} 个指数越过门槛` : '无'}</span></h2>
-  {signals.length === 0 ? (
-    <p class="empty">
-      {latest} 没有指数达到触发门槛。
-      {lastAny && `最近一次是 ${lastAny.date} 的${bySlug.get(lastAny.slug)?.name ?? lastAny.slug}，${side(lastAny.side)} ${signed(lastAny.amount, 0)} 亿元。`}
-    </p>
-  ) : (
-    <div class="panel tight">
-      <table class="tbl">
-        <thead>
-          <tr>
-            <th>指数</th><th>方向</th><th class="num">当日(亿)</th>
-            <th class="num hide-sm">门槛(亿)</th><th class="num hide-sm">成分 ETF</th><th class="num">共振</th>
-          </tr>
-        </thead>
-        <tbody>
-          {signals.map((e) => (
-            <tr>
-              <td><a href={`/index/${e.slug}.html`}>{bySlug.get(e.slug)?.name ?? e.slug}</a></td>
-              <td><span class={`tag ${e.side > 0 ? 'buy' : 'sell'}`}>{side(e.side)}</span></td>
-              <td class="num fig">{signed(e.amount)}</td>
-              <td class="num fig hide-sm">{num(e.thr, 1)}</td>
-              <td class="num fig hide-sm">{e.n}</td>
-              <td class="num fig">{e.reson}/{e.n}</td>
-            </tr>
-          ))}
-        </tbody>
-      </table>
-    </div>
-  )}
+  <div class="duo" style="margin-top:24px">
+    <section class="panel reveal card-chart">
+      <div class="panel-head">
+        <h2>近 20 个交易日</h2>
+        <span class="note">上为净申购，下为净赎回 · 亿元</span>
+      </div>
+      <div id="flowChart" class="chart"></div>
+      <p class="chartnote">
+        20 个交易日里 <span class="fig">{recent.filter((d) => d.flow > 0).length}</span> 天净申购、
+        <span class="fig">{recent.filter((d) => d.flow < 0).length}</span> 天净赎回，合计
+        <span class="fig">{signed(t.d20)}</span> 亿元，日均 <span class="fig">{signed(t.d20 / 20)}</span> 亿；单日最大
+        <span class="fig">{signed(biggest.flow)}</span> 亿元（{biggest.date}）。
+      </p>
+    </section>
 
-  <h2>ETF 异动前五 <span class="count">按当日净申赎绝对值</span></h2>
-  <div class="panel tight">
+    <section class="panel reveal" style="display:flex;flex-direction:column">
+      <div class="panel-head">
+        <h2>今日信号</h2>
+        <span class="note">{signals.length ? `${signals.length} / ${ss.total}` : '无'}</span>
+      </div>
+      {signals.length === 0 ? (
+        <p class="lede" style="margin:0">
+          {latest} 没有指数达到触发门槛。最近一次是
+          {events.filter((e) => e.date <= latest).slice(-1)[0]?.date ?? '—'}。
+        </p>
+      ) : (
+        <div class="sigs">
+          {signals.map((e) => (
+            <a class="sig" href={`/index/${e.slug}.html`}>
+              <span class="sn">{bySlug.get(e.slug)?.name ?? e.slug}</span>
+              <span class={`pill ${e.side > 0 ? 'buy' : 'sell'}`}>{side(e.side)}</span>
+              <span class="sv fig">{signed(e.amount)}</span>
+              <span class="sm" title="共振：同向成分 ETF 只数 / 总数；门槛：触发所需的最小净申赎">共振 {e.reson}/{e.n} · 门槛 {num(e.thr, 1)} 亿</span>
+            </a>
+          ))}
+        </div>
+      )}
+
+      <div class="subhead">最近信号</div>
+      <div class="sigs">
+        {recentEv.map((e) => (
+          <a class="sig quiet" href={`/index/${e.slug}.html`}>
+            <span class="sn">{bySlug.get(e.slug)?.name ?? e.slug}</span>
+            <span class={`pill ${e.side > 0 ? 'buy' : 'sell'}`}>{side(e.side)}</span>
+            <span class="sv fig">{signed(e.amount)}</span>
+            <span class="sm">{e.date} · {e.days} 天合计 {signed(e.total, 0)} 亿{e.post20 === null ? '' : ` · 后 20 日 ${pct(e.post20, 1)}`}</span>
+          </a>
+        ))}
+      </div>
+
+      <a class="more" href="/signals.html">
+        全部 {ss.total} 个信号，后 20 日有效率 {Math.round(ss.rate * 100)}% →
+      </a>
+    </section>
+  </div>
+
+  <section class="band reveal">
+    <div class="band-head">
+      <h2>ETF 异动前五</h2>
+      <span class="side">按当日净申赎绝对值 · 深市部分 ETF 只有最近几日的份额</span>
+    </div>
     <table class="tbl">
       <thead>
         <tr>
-          <th>ETF</th><th>市场</th><th class="num">当日净申赎(亿)</th>
-          <th class="num">Δ份额(亿份)</th><th class="num">份额(亿份)</th>
+          <th>ETF</th>
+          <th>市场</th>
+          <th>档</th>
+          <th class="num">当日净申赎 (亿)</th>
+          <th class="num">Δ 份额 (亿份)</th>
+          <th class="num">份额 (亿份)</th>
         </tr>
       </thead>
       <tbody>
         {mv.map((m) => (
           <tr>
-            <td>{m.etf.name} <span class="lede fig">{m.etf.code}</span></td>
-            <td class="lede">{m.etf.market}</td>
+            <td>
+              {codeToSlug.has(m.etf.code)
+                ? <a href={`/index/${codeToSlug.get(m.etf.code)}.html`}>{m.etf.name}</a>
+                : m.etf.name}
+              {' '}<span class="sub">{m.etf.code}</span>
+            </td>
+            <td class="small">{m.etf.market}</td>
+            <td class="small">{m.etf.tier}</td>
             <td class="num fig">{signed(m.flow)}</td>
             <td class="num fig">{signed(m.d_share)}</td>
             <td class="num fig">{num(m.share, 2)}</td>
@@ -105,34 +178,44 @@ const chartPayload = { labels, values, today: labels.length - 1 };
         ))}
       </tbody>
     </table>
-  </div>
-  <p class="note">
-    深市几只 ETF 的份额历史只有最近几个交易日，Δ份额 只对比相邻两天；完整名单见分指数页。
-  </p>
+  </section>
 
-  <div class="actions">
-    <a class="btn" href="/indices.html">看全部 {indices.length} 个指数</a>
-    <a class="btn ghost" href="/signals.html">全部 {events.length} 个历史信号</a>
-  </div>
+  <p class="tail">
+    按大类看今日：
+    {cats.map((c, i) => (
+      <span>{i > 0 ? ' · ' : ''}{c.cat} <span class="fig">{signed(c.flow)}</span></span>
+    ))}
+    <a href="/indices.html">全部 {indices.length} 个指数 →</a>
+  </p>
 
   <script is:inline type="application/json" id="flow-data" set:html={JSON.stringify(chartPayload)} />
   <script is:inline src="/assets/charts.js"></script>
+  <script is:inline src="/assets/strip.js"></script>
   <script is:inline>
     (function () {
       var el = document.getElementById('flowChart');
       var raw = document.getElementById('flow-data');
       if (!el || !raw || !window.Charts) return;
       var d = JSON.parse(raw.textContent);
-      Charts.diverging(el, {
-        labels: d.labels,
-        values: d.values,
-        above: '净申购',
-        below: '净赎回',
-        format: function (v) { return v >= 100 ? Math.round(v) : v.toFixed(0); },
-        height: 190,
-        mark: [d.today],
-        markLabel: '今日',
-        markSide: 'both'
+      function draw() {
+        Charts.diverging(el, {
+          labels: d.labels,
+          values: d.values,
+          above: '净申购',
+          below: '净赎回',
+          format: function (v) { return v >= 100 ? Math.round(v) : v.toFixed(0); },
+          height: Math.max(180, Math.round(el.clientHeight)),
+          mark: [d.today],
+          markLabel: '今日',
+          markSide: 'both',
+          xAt: [0, 5, 10, 15, 19]
+        });
+      }
+      draw();
+      var t;
+      window.addEventListener('resize', function () {
+        clearTimeout(t);
+        t = setTimeout(draw, 160);
       });
     })();
   </script>

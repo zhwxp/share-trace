@@ -1,63 +1,86 @@
 ---
 import Base from '../layouts/Base.astro';
-import { load, indexStats } from '../lib/data.mjs';
-import { num, signed } from '../lib/format.mjs';
+import { load, indexStats, miniFlow } from '../lib/data.mjs';
+import { num, signed, side } from '../lib/format.mjs';
 
-const { meta, indices, bySlug } = load();
+const { meta, latest, indices } = load();
 const rows = indices.map((it) => ({ it, s: indexStats(it.slug) }));
-const groups = meta.categories.map((cat) => ({
-  cat,
-  rows: rows.filter((r) => r.it.cat === cat).sort((a, b) => Math.abs(b.s.today ?? 0) - Math.abs(a.s.today ?? 0)),
-}));
-const totalEvents = meta.counts.events;
+const maxAbs = Math.max(...rows.map((r) => Math.abs(r.s.today ?? 0)), 1);
+
+const groups = meta.categories.map((cat) => {
+  const list = rows
+    .filter((r) => r.it.cat === cat)
+    .sort((a, b) => Math.abs(b.s.today ?? 0) - Math.abs(a.s.today ?? 0));
+  const flow = Math.round(list.reduce((s, r) => s + (r.s.today ?? 0), 0) * 100) / 100;
+  const ev = list.reduce((s, r) => s + r.s.events.length, 0);
+  return { cat, list, flow, ev };
+});
+const totalEv = meta.counts.events;
+const generated = meta.generated_at.slice(0, 16).replace('T', ' ');
 ---
-<Base title="ShareTrace · 分指数" current="indices">
-  <h1>分指数</h1>
-  <p class="lede">
-    {indices.length} 个标的指数，按大类分组，组内按当日净申赎绝对值排序。当日口径为 {meta.latest_trade_date}。
-  </p>
+<Base title="ShareTrace · 分指数" current="indices" stamp={{ date: latest, generated }}>
+  <div class="head reveal">
+    <div>
+      <h1>分指数</h1>
+      <p class="meta">
+        {indices.length} 个标的指数，按大类分组，组内按当日净申赎绝对值排序。当日口径
+        <span class="fig">{latest}</span>，单位亿元。
+      </p>
+    </div>
+    <div class="right">
+      <b>{groups.length}</b> 个大类<br />
+      <b>{totalEv}</b> 个历史信号
+    </div>
+  </div>
+
+  <div class="ihead" aria-hidden="true">
+    <span>指数</span>
+    <span>近 20 日逐日</span>
+    <span class="num">当日</span>
+    <span class="num">20 日合计</span>
+    <span class="num">最近信号</span>
+  </div>
 
   {groups.map((g) => (
-    <section>
-      <h2>{g.cat}</h2>
-      <div class="panel">
-        <table class="tbl">
-          <thead>
-            <tr>
-              <th>指数</th>
-              <th class="num">当日(亿)</th>
-              <th class="num">近 5 日(亿)</th>
-              <th class="num">近 20 日(亿)</th>
-              <th class="num">ETF 只数</th>
-              <th class="num">事件</th>
-              <th>最近信号</th>
-            </tr>
-          </thead>
-          <tbody>
-            {g.rows.map(({ it, s }) => (
-              <tr>
-                <td>
-                  <a href={`/index/${it.slug}.html`}>{it.name}</a>
-                  {s.shortHistory && <span class="lede"> · 份额历史不足</span>}
-                </td>
-                <td class="num fig">{signed(s.today)}</td>
-                <td class="num fig">{signed(s.d5)}</td>
-                <td class="num fig">{signed(s.d20)}</td>
-                <td class="num fig">{s.nEtf ?? '—'}</td>
-                <td class="num fig">{s.events.length}</td>
-                <td>
-                  {s.lastEvent
-                    ? `${s.lastEvent.date} ${s.lastEvent.side > 0 ? '买' : '卖'} ${signed(s.lastEvent.amount, 0)}`
-                    : '—'}
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
+    <section class="band reveal" id={g.cat}>
+      <div class="band-head">
+        <h2>{g.cat} <span class="cnt">{g.list.length}</span></h2>
+        <span class="side">
+          当日合计 <span class="fig">{signed(g.flow)}</span> 亿 · {g.ev} 个事件
+        </span>
+      </div>
+      <div class="ilist">
+        {g.list.map(({ it, s }) => {
+          const mf = miniFlow(it.slug);
+          return (
+          <a class="irow" href={`/index/${it.slug}.html`}>
+            <span class="inm">
+              {it.name}
+              {s.shortHistory && <span class="flag">历史不足</span>}
+            </span>
+            <span class="ispark" aria-hidden="true">
+              <svg viewBox={`0 0 ${mf.w} ${mf.h}`} preserveAspectRatio="none">
+                <line x1="0" x2={mf.w} y1={mf.mid} y2={mf.mid} stroke="var(--axis-ink)" stroke-width="0.5" opacity="0.35"></line>
+                <path d={mf.pos} fill="var(--chart-1)" opacity="0.85"></path>
+                <path d={mf.neg} fill="var(--chart-2)"></path>
+              </svg>
+            </span>
+            <span class="iv">{signed(s.today)}</span>
+            <span class="iv m">{signed(s.d20)}</span>
+            <span class="ie">
+              {s.lastEvent
+                ? <>{s.lastEvent.date.slice(2)} <span class={`pill ${s.lastEvent.side > 0 ? 'buy' : 'sell'}`}>{side(s.lastEvent.side)}</span> <span class="fig">{signed(s.lastEvent.amount, 0)}</span></>
+                : <span class="faint">—</span>}
+            </span>
+          </a>
+          );
+        })}
       </div>
     </section>
   ))}
-  <p class="note">
-    共 {totalEvents} 个信号事件。「份额历史不足」的指数只有最近几个交易日的份额数据，不参与历史序列。
+
+  <p class="tail">
+    事件口径：5 个交易日内同向连续触发合并为一个，标在金额最大那天。「历史不足」的指数只有最近几个交易日的份额数据，
+    不参与历史序列，也不出信号。<a href="/about.html">口径说明 →</a>
   </p>
 </Base>

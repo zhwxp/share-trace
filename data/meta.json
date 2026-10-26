@@ -1,6 +1,6 @@
 {
  "schema_version": 1,
- "generated_at": "2026-10-26T22:56:38+08:00",
+ "generated_at": "2026-10-26T23:05:47+08:00",
  "latest_trade_date": "2026-10-26",
  "first_trade_date": "2012-01-04",
  "params": {
@@ -66,37 +66,13 @@
   }
  },
  "stale": {
-  "note": "K 线比最新份额日期短的指数，通常是上游当天行情还没补",
+  "note": "K 线比最新份额日期短的指数，上游行情还没有这几天的数据",
   "by_index": {
-   "rare-metal": {
-    "last_date": "2026-10-23",
-    "lag_days": 1
-   },
-   "biotech": {
-    "last_date": "2026-10-23",
-    "lag_days": 1
-   },
-   "military-leader": {
-    "last_date": "2026-10-23",
-    "lag_days": 1
-   },
-   "comm5g": {
-    "last_date": "2026-10-23",
-    "lag_days": 1
-   },
-   "solar": {
-    "last_date": "2026-10-23",
-    "lag_days": 1
-   },
-   "innovdrug": {
-    "last_date": "2026-10-23",
-    "lag_days": 1
-   },
-   "comm-dev": {
-    "last_date": "2026-10-23",
-    "lag_days": 1
-   },
    "gold-stock": {
+    "last_date": "2026-10-23",
+    "lag_days": 1
+   },
+   "chip-zz": {
     "last_date": "2026-10-23",
     "lag_days": 1
    },
@@ -217,7 +193,7 @@
    "first_date": "2012-01-04",
    "last_date": "2026-10-26",
    "rows": 3594,
-   "flow_days": 3,
+   "flow_days": 4,
    "events": 0,
    "etfs_used": [
     "159915"
@@ -230,7 +206,7 @@
    "first_date": "2014-06-18",
    "last_date": "2026-10-26",
    "rows": 3003,
-   "flow_days": 3,
+   "flow_days": 4,
    "events": 0,
    "etfs_used": [
     "159949"
@@ -243,7 +219,7 @@
    "first_date": "2012-01-04",
    "last_date": "2026-10-26",
    "rows": 3594,
-   "flow_days": 3,
+   "flow_days": 4,
    "events": 0,
    "etfs_used": [
     "159901"
@@ -297,7 +273,7 @@
    "first_date": "2012-01-04",
    "last_date": "2026-10-26",
    "rows": 3594,
-   "flow_days": 3,
+   "flow_days": 4,
    "events": 0,
    "etfs_used": [
     "159870"
@@ -362,7 +338,7 @@
    "first_date": "2020-02-10",
    "last_date": "2026-10-26",
    "rows": 1628,
-   "flow_days": 3,
+   "flow_days": 4,
    "events": 0,
    "etfs_used": [
     "159995"
@@ -491,9 +467,9 @@
    "kline_code": "930632",
    "kline_source": "index",
    "first_date": "2021-09-27",
-   "last_date": "2026-10-23",
-   "rows": 1227,
-   "flow_days": 1227,
+   "last_date": "2026-10-26",
+   "rows": 1228,
+   "flow_days": 1228,
    "events": 3,
    "etfs_used": [
     "562800"
@@ -504,9 +480,9 @@
    "kline_code": "930726",
    "kline_source": "index",
    "first_date": "2019-05-20",
-   "last_date": "2026-10-23",
-   "rows": 1803,
-   "flow_days": 1803,
+   "last_date": "2026-10-26",
+   "rows": 1804,
+   "flow_days": 1804,
    "events": 3,
    "etfs_used": [
     "512290"
@@ -517,9 +493,9 @@
    "kline_code": "931066",
    "kline_source": "index",
    "first_date": "2019-08-26",
-   "last_date": "2026-10-23",
-   "rows": 1734,
-   "flow_days": 1734,
+   "last_date": "2026-10-26",
+   "rows": 1735,
+   "flow_days": 1735,
    "events": 3,
    "etfs_used": [
     "512710"
@@ -530,9 +506,9 @@
    "kline_code": "931079",
    "kline_source": "index",
    "first_date": "2019-10-16",
-   "last_date": "2026-10-23",
-   "rows": 1703,
-   "flow_days": 1703,
+   "last_date": "2026-10-26",
+   "rows": 1704,
+   "flow_days": 1704,
    "events": 4,
    "etfs_used": [
     "515050"
@@ -543,9 +519,9 @@
    "kline_code": "931151",
    "kline_source": "index",
    "first_date": "2020-12-18",
-   "last_date": "2026-10-23",
-   "rows": 1415,
-   "flow_days": 1415,
+   "last_date": "2026-10-26",
+   "rows": 1416,
+   "flow_days": 1416,
    "events": 1,
    "etfs_used": [
     "515790"
@@ -556,9 +532,9 @@
    "kline_code": "931152",
    "kline_source": "index",
    "first_date": "2019-09-24",
-   "last_date": "2026-10-23",
-   "rows": 1714,
-   "flow_days": 3,
+   "last_date": "2026-10-26",
+   "rows": 1715,
+   "flow_days": 4,
    "events": 0,
    "etfs_used": [
     "159992"
@@ -569,9 +545,9 @@
    "kline_code": "931160",
    "kline_source": "index",
    "first_date": "2019-09-06",
-   "last_date": "2026-10-23",
-   "rows": 1725,
-   "flow_days": 1725,
+   "last_date": "2026-10-26",
+   "rows": 1726,
+   "flow_days": 1726,
    "events": 14,
    "etfs_used": [
     "515880"
@@ -584,7 +560,7 @@
    "first_date": "2023-11-01",
    "last_date": "2026-10-23",
    "rows": 754,
-   "flow_days": 721,
+   "flow_days": 722,
    "events": 2,
    "etfs_used": [
     "517520"
@@ -595,8 +571,8 @@
    "kline_code": "H30184",
    "kline_source": "index",
    "first_date": "2019-06-12",
-   "last_date": "2026-10-26",
-   "rows": 1788,
+   "last_date": "2026-10-23",
+   "rows": 1787,
    "flow_days": 1788,
    "events": 5,
    "etfs_used": [
@@ -637,7 +613,7 @@
    "first_date": "2022-07-12",
    "last_date": "2026-10-23",
    "rows": 1054,
-   "flow_days": 1007,
+   "flow_days": 1039,
    "events": 2,
    "etfs_used": [
     "513120"
@@ -687,7 +663,7 @@
  "counts": {
   "indices": 43,
   "etfs": 57,
-  "etf_rows": 92777,
+  "etf_rows": 92834,
   "events": 240
  }
 }

@@ -514,14 +514,27 @@ def main(argv):
         rows = read_csv(DATA / "index" / f"{slug}.csv")
         dts = [r["date"] for r in rows if r["flow"] != ""]
         flow_days[slug] = len(dts)
-        agg = {r["date"]: {"flow": float(r["flow"]), "nin": int(r["n_in"]), "nout": int(r["n_out"]),
-                           "n": int(r["n_etf"]), "scale": float(r["scale"]), "per": {}}
-               for r in rows if r["flow"] != ""}
+        # 每只成分 ETF 的当日申赎，detect_events 靠它算「前 3 大贡献」
+        per_out = {}
+        for c in it["etfs"]:
+            p = DATA / "etf" / f"{c}.csv"
+            if p.exists():
+                per_out[c] = {r["date"]: float(r["flow"]) for r in read_csv(p) if r["flow"]}
+        agg = {
+            r["date"]: {
+                "flow": float(r["flow"]),
+                "nin": int(r["n_in"]),
+                "nout": int(r["n_out"]),
+                "n": int(r["n_etf"]),
+                "scale": float(r["scale"]),
+                "per": {c: v[r["date"]] for c, v in per_out.items() if r["date"] in v},
+            }
+            for r in rows
+            if r["flow"] != ""
+        }
         if len(dts) < ingest.MIN_OBS:
             continue
         evs = ingest.detect_events(dts, agg)
-        kdates = [r["date"] for r in rows]
-        kclose = [float(r["c"]) for r in rows]
         ingest.annotate_events(evs)
         for e in evs:
             events_all.append({"slug": slug, **e})

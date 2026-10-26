@@ -5,10 +5,8 @@ name: daily-data
 
 on:
   schedule:
-    # GitHub 默认按 UTC 解释 cron，可以用 timezone 字段指定 IANA 时区。
-    # 这里直接写北京时间，不再手工换算。
-    - cron: '10 1 * * *'
-      timezone: "Asia/Shanghai"
+    # 测试：UTC 17:35 = 北京 01:35，先去掉 timezone 字段，验证 schedule 本身能不能触发。
+    - cron: '35 17 * * *'
   workflow_dispatch:
     inputs:
       date:

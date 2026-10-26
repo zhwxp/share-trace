@@ -10,12 +10,25 @@ export function getStaticPaths() {
 }
 
 const { it } = Astro.props;
-const { meta, byCode } = load();
+const { meta, byCode, etfSeries } = load();
 const s = indexStats(it.slug);
 const m = meta.indices[it.slug];
 const params = meta.params;
 const stale = meta.stale?.by_index?.[it.slug];
-const detail = it.etfs.map((c) => byCode.get(c)).filter(Boolean);
+const detail = it.etfs
+  .map((c) => {
+    const info = byCode.get(c);
+    if (!info) return null;
+    const rows = etfSeries.get(c) ?? [];
+    const last = rows[rows.length - 1];
+    return {
+      ...info,
+      share: last?.share ?? null,
+      dShare: last?.d_share ?? null,
+      flow: last?.flow ?? null,
+    };
+  })
+  .filter(Boolean);
 const generated = meta.generated_at.slice(0, 16).replace('T', ' ');
 ---
 <Base title={`${it.name} · ShareTrace`} current="indices" echarts stamp={{ date: meta.latest_trade_date, generated }}>
@@ -54,7 +67,11 @@ const generated = meta.generated_at.slice(0, 16).replace('T', ' ');
       <div class="v hl" style="font-size:18px">
         {s.lastEvent ? `${s.lastEvent.date.slice(2)} ${side(s.lastEvent.side)}` : '—'}
       </div>
-      <div class="s">{s.lastEvent ? `${signed(s.lastEvent.amount, 0)} 亿元` : '还没有触发过'}</div>
+      <div class="s">
+        {s.lastEvent
+          ? `${signed(s.lastEvent.amount, 0)} 亿元 · 历史第 ${s.lastEvent.rank} 强 / 共 ${s.lastEvent.n_events} 次`
+          : '还没有触发过'}
+      </div>
     </div>
   </div>
 
@@ -99,7 +116,7 @@ const generated = meta.generated_at.slice(0, 16).replace('T', ' ');
       <>
         <div class="shead" aria-hidden="true">
           <span>日期</span><span>方向</span><span class="num">当日</span>
-          <span class="num">连续 / 合计</span><span class="num">门槛</span><span class="num">后 20 日</span>
+          <span class="num">连续 / 合计</span><span class="num">历史排名</span><span class="num">后 20 日</span>
         </div>
         <div class="slist">
           {s.events.map((e) => (
@@ -108,7 +125,7 @@ const generated = meta.generated_at.slice(0, 16).replace('T', ' ');
               <span class={`pill ${e.side > 0 ? 'buy' : 'sell'}`}>{side(e.side)}</span>
               <span class="sv2">{signed(e.amount)}</span>
               <span class="sv2 m">{e.days} 天 / {signed(e.total, 0)}</span>
-              <span class="sv2 m">{num(e.thr, 1)}</span>
+              <span class="sv2 m">第 {e.rank} / {e.n_events}</span>
               <span class={`sv2 ${e.post20 > 0 ? 'pos' : 'm'}`}>{e.post20 === null ? '—' : pct(e.post20, 1)}</span>
             </div>
           ))}
@@ -123,13 +140,17 @@ const generated = meta.generated_at.slice(0, 16).replace('T', ' ');
       <span class="side">份额为最新交易日的基金总份额</span>
     </div>
     <div class="chead" aria-hidden="true">
-      <span>代码</span><span>名称</span><span>档</span><span>市场</span><span class="num">份额（亿份）</span>
+      <span>代码</span><span>名称</span><span>档</span><span>市场</span>
+      <span class="num">份额（亿份）</span><span class="num">当日 Δ 份额</span>
     </div>
     <div class="clist">
       {detail.map((e) => (
         <div class="crow">
           <span class="cn">{e.name}</span>
           <span class="cs">{num(e.share, 2)}</span>
+          <span class={`cd ${e.dShare > 0 ? 'up' : e.dShare < 0 ? 'down' : ''}`}>
+            {e.dShare === null ? '—' : signed(e.dShare, 2)}
+          </span>
           <span class="cmeta">
             <span class="cc">{e.code}</span>
             <span class="ct">{e.tier}</span>
@@ -149,3 +170,28 @@ const generated = meta.generated_at.slice(0, 16).replace('T', ' ');
   <script is:inline src={`/assets/kline.js?v=${V}`} defer></script>
   <script is:inline src={`/assets/detail.js?v=${V}`} defer></script>
 </Base>
+
+<style>
+  .crow .cd {
+    font-family: var(--mono);
+    font-variant-numeric: tabular-nums;
+    font-size: 13px;
+  }
+  @media (min-width: 641px) {
+    .chead, .crow {
+      grid-template-columns: 84px minmax(0, 1fr) 72px 52px 104px 96px;
+    }
+    .crow .cd,
+    .chead > span:nth-child(6) {
+      grid-column: 6;
+      text-align: right;
+    }
+  }
+  @media (max-width: 640px) {
+    .crow .cd {
+      grid-column: 2;
+      grid-row: 2;
+      text-align: right;
+    }
+  }
+</style>

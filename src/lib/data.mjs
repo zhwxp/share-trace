@@ -8,6 +8,9 @@ import path from 'node:path';
 const ROOT = process.cwd();
 const DATA = path.resolve(ROOT, 'data');
 
+/** 后验收益窗口（交易日）。与 ingest.py 的 POST_WINDOWS 必须一致。 */
+export const WINDOWS = [20, 60, 120, 240, 360, 480, 600];
+
 function readJson(p) {
   return JSON.parse(fs.readFileSync(path.join(DATA, p), 'utf8'));
 }
@@ -89,10 +92,10 @@ export function load() {
     throw new Error(`数据校验失败（先跑 python3 ingest.py）：\n  - ${problems.join('\n  - ')}`);
   }
 
-  // ---- 沪市合计（异动／历史页用）
-  const shEtfs = etfs.filter((e) => e.market === 'SH');
+  // ---- 全市场合计：57 只一起算，深市 10 只 2026-10-21 起才有份额
   const byDate = new Map();
-  for (const e of shEtfs) {
+  const shOnly = new Map();
+  for (const e of etfs) {
     for (const r of etfSeries.get(e.code) ?? []) {
       let a = byDate.get(r.date);
       if (!a) byDate.set(r.date, (a = { date: r.date, flow: 0, nIn: 0, nOut: 0, n: 0 }));
@@ -100,10 +103,18 @@ export function load() {
       a.n += 1;
       if ((r.flow ?? 0) > 0) a.nIn += 1;
       else if ((r.flow ?? 0) < 0) a.nOut += 1;
+
+      if (e.market === 'SH') {
+        let b = shOnly.get(r.date);
+        if (!b) shOnly.set(r.date, (b = { date: r.date, flow: 0, n: 0 }));
+        b.flow += r.flow ?? 0;
+        b.n += 1;
+      }
     }
   }
-  const shDaily = [...byDate.values()].sort((a, b) => (a.date < b.date ? -1 : 1));
-  for (const d of shDaily) d.flow = round(d.flow, 2);
+  const daily = [...byDate.values()].sort((a, b) => (a.date < b.date ? -1 : 1));
+  for (const d of daily) d.flow = round(d.flow, 2);
+  const shDaily = [...shOnly.values()].sort((a, b) => (a.date < b.date ? -1 : 1));
 
   const eventsBySlug = new Map();
   for (const ev of events) {
@@ -119,6 +130,7 @@ export function load() {
     eventsBySlug,
     indexSeries,
     etfSeries,
+    daily,
     shDaily,
     latest,
     byCode: new Map(etfs.map((e) => [e.code, e])),
@@ -130,6 +142,13 @@ export function load() {
 export function round(x, n = 2) {
   const f = 10 ** n;
   return Math.round(x * f) / f;
+}
+
+export function median(arr) {
+  if (!arr.length) return null;
+  const s = arr.slice().sort((a, b) => a - b);
+  const m = Math.floor(s.length / 2);
+  return s.length % 2 ? s[m] : (s[m - 1] + s[m]) / 2;
 }
 
 /** 单指数的当期口径：当日／近 5 日／近 20 日净申赎 */
@@ -155,12 +174,14 @@ export function indexStats(slug) {
   };
 }
 
-/** 最新交易日的沪市合计与近 5／20 日 */
+/** 最新交易日的全市场合计与近 5／20 日 */
 export function marketToday() {
-  const { shDaily, latest } = load();
-  const upto = shDaily.filter((d) => d.date <= latest);
+  const { daily, latest } = load();
+  const upto = daily.filter((d) => d.date <= latest);
   const last = upto[upto.length - 1] ?? null;
   const sum = (arr) => (arr.length ? round(arr.reduce((s, d) => s + d.flow, 0), 2) : null);
+  // 沪市 47 只在册时 n=47；深市 10 只进合计的第一天 n 会跳到 57
+  const szFirst = daily.find((d) => d.n > 47)?.date ?? null;
   return {
     date: last?.date ?? latest,
     flow: last?.flow ?? null,
@@ -170,6 +191,7 @@ export function marketToday() {
     d5: sum(upto.slice(-5)),
     d20: sum(upto.slice(-20)),
     history: upto,
+    szFirst,
   };
 }
 
@@ -178,61 +200,10 @@ export function eventsOn(date) {
   return load().events.filter((e) => e.date === date);
 }
 
-/** 份额足迹：2012 年起的逐日合计净申赎，给首页与历史页的足迹条用。
- *  plot 是构建期画好的 SVG 路径（无脚本也能看），bars 是悬停读数用的紧凑串。 */
-export function footprint() {
-  const { shDaily, latest } = load();
-  const days = shDaily.filter((d) => d.date <= latest && d.flow !== null);
-  const max = Math.max(...days.map((d) => Math.abs(d.flow)), 1);
-
-  const H = 104, MID = 58, TOP = 6, BOT = 100;
-  // 平方根刻度：单日最大 1126 亿，线性刻度下 99% 的交易日只有几像素高，条带会糊成噪声
-  const s = Math.min(MID - TOP, BOT - MID) / Math.sqrt(max);
-  let pos = '';
-  let neg = '';
-  for (let i = 0; i < days.length; i++) {
-    const f = days[i].flow;
-    if (Math.abs(f) < 0.05) continue;
-    const h = Math.sqrt(Math.abs(f)) * s;
-    const y = f > 0 ? MID - h : MID;
-    const d = `M${i} ${y.toFixed(1)}h1v${h.toFixed(1)}h-1z`;
-    if (f > 0) pos += d;
-    else neg += d;
-  }
-
-  const t0 = Date.UTC(2012, 0, 1);
-  const ord = (d) => Math.round((Date.parse(d + 'T00:00:00Z') - t0) / 86400000).toString(36);
-  const fl = (f) => {
-    const v = Math.round(f * 10);
-    return v < 0 ? `-${(-v).toString(36)}` : v.toString(36);
-  };
-  const bars = `${days.map((d) => ord(d.date)).join(',')}|${days.map((d) => fl(d.flow)).join(',')}`;
-
-  const years = [];
-  for (let y = 2012; y <= Number(latest.slice(0, 4)); y++) {
-    const i = days.findIndex((d) => d.date >= `${y}-01-01`);
-    if (i >= 0) years.push({ y: String(y), i });
-  }
-
-  return {
-    n: days.length,
-    start: days[0]?.date ?? null,
-    end: days[days.length - 1]?.date ?? null,
-    max: round(max, 2),
-    w: days.length,
-    h: H,
-    mid: MID,
-    pos,
-    neg,
-    bars,
-    years,
-  };
-}
-
 /** 连续同向天数（截至最新交易日），用于首页的一句话结论 */
 export function streak() {
-  const { shDaily, latest } = load();
-  const upto = shDaily.filter((d) => d.date <= latest);
+  const { daily, latest } = load();
+  const upto = daily.filter((d) => d.date <= latest);
   if (!upto.length) return { days: 0, sign: 0 };
   const sign = Math.sign(upto[upto.length - 1].flow);
   let n = 0;
@@ -240,20 +211,97 @@ export function streak() {
   return { days: n, sign };
 }
 
-/** 信号的有效率：后 20 日方向对的事件占比 */
+/**
+ * 一组事件的窗口统计：命中率、中位收益、相对该指数「任意一天买入」基准的超额。
+ * 卖点的 post 已经取过负号（看跌为正），基准也要按方向取号，否则超额会算反。
+ */
+function windowStats(list, meta) {
+  return WINDOWS.map((w) => {
+    const vals = [];
+    const excess = [];
+    for (const e of list) {
+      const v = e.post?.[String(w)];
+      if (v === null || v === undefined) continue;
+      vals.push(v);
+      const b = meta.indices?.[e.slug]?.bench?.[String(w)];
+      if (b !== null && b !== undefined) excess.push(v - e.side * b);
+    }
+    const hit = vals.filter((v) => v > 0).length;
+    return {
+      w,
+      n: vals.length,
+      hit,
+      rate: vals.length ? hit / vals.length : null,
+      med: vals.length ? round(median(vals), 2) : null,
+      excess: excess.length ? round(median(excess), 2) : null,
+    };
+  });
+}
+
+/** 信号有效性：全样本、买点、卖点，各自按窗口拆 */
 export function signalStats() {
-  const { events } = load();
-  const buys = events.filter((e) => e.side > 0).length;
-  const matured = events.filter((e) => e.post20 !== null && e.post20 !== undefined);
-  const hit = matured.filter((e) => e.post20 > 0).length;
+  const { events, meta } = load();
+  const buys = events.filter((e) => e.side > 0);
+  const sells = events.filter((e) => e.side < 0);
   return {
     total: events.length,
-    buys,
-    sells: events.length - buys,
-    matured: matured.length,
-    hit,
-    rate: matured.length ? hit / matured.length : null,
+    buys: buys.length,
+    sells: sells.length,
     first: events[0]?.date ?? null,
+    all: windowStats(events, meta),
+    buy: windowStats(buys, meta),
+    sell: windowStats(sells, meta),
+  };
+}
+
+/** 按指数看命中率（样本太少的不上，免得一个事件就 100%） */
+export function byIndexStats(minN = 5) {
+  const { events, meta, bySlug } = load();
+  const groups = new Map();
+  for (const e of events) {
+    if (!groups.has(e.slug)) groups.set(e.slug, []);
+    groups.get(e.slug).push(e);
+  }
+  const rows = [];
+  for (const [slug, list] of groups) {
+    if (list.length < minN) continue;
+    const w = windowStats(list, meta).find((x) => x.w === 360);
+    rows.push({
+      slug,
+      name: bySlug.get(slug)?.name ?? slug,
+      cat: bySlug.get(slug)?.cat ?? '',
+      n: list.length,
+      buys: list.filter((e) => e.side > 0).length,
+      rate: w.rate,
+      med: w.med,
+      excess: w.excess,
+      matured: w.n,
+    });
+  }
+  return rows.sort((a, b) => (b.rate ?? 0) - (a.rate ?? 0));
+}
+
+/** 按历史强度分三档：同一指数内部 |当日金额| 排名前 1/3、中 1/3、后 1/3。
+ *  买卖点分开算——两个方向的信号基数差一倍，混在一起分层会被构成带偏。
+ *  n_events < 3 的指数分不出三档，直接排除。 */
+export function strengthStats() {
+  const { events, meta } = load();
+  const split = (list) => {
+    const bands = { strong: [], mid: [], weak: [] };
+    for (const e of list) {
+      if (!e.rank || !e.n_events || e.n_events < 3) continue;
+      const p = e.rank / e.n_events;
+      bands[p <= 1 / 3 ? 'strong' : p <= 2 / 3 ? 'mid' : 'weak'].push(e);
+    }
+    return ['strong', 'mid', 'weak'].map((k) => ({
+      key: k,
+      n: bands[k].length,
+      windows: windowStats(bands[k], meta),
+    }));
+  };
+  return {
+    buy: split(events.filter((e) => e.side > 0)),
+    sell: split(events.filter((e) => e.side < 0)),
   };
 }
 
@@ -279,6 +327,8 @@ export function chartPayload(slug) {
       days: e.days,
       reson: e.reson,
       n: e.n,
+      rank: e.rank,
+      nEvents: e.n_events,
       post20: e.post20 ?? null,
     })),
   };

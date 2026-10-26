@@ -522,8 +522,8 @@ def main(argv):
         evs = ingest.detect_events(dts, agg)
         kdates = [r["date"] for r in rows]
         kclose = [float(r["c"]) for r in rows]
+        ingest.annotate_events(evs, kdates, kclose)
         for e in evs:
-            e["post20"] = ingest.post_return(kdates, kclose, e["date"], e["side"])
             events_all.append({"slug": slug, **e})
 
     events_all.sort(key=lambda e: (e["date"], e["slug"]))

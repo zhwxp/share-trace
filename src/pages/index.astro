@@ -1,17 +1,14 @@
 ---
 import Base from '../layouts/Base.astro';
-import Footprint from '../components/Footprint.astro';
-import { load, marketToday, eventsOn, footprint, streak, signalStats } from '../lib/data.mjs';
+import { load, marketToday, eventsOn, streak } from '../lib/data.mjs';
 import { signed, side } from '../lib/format.mjs';
 import { V } from '../lib/asset.mjs';
 
 const { meta, latest, bySlug, events } = load();
 const t = marketToday();
-const fp = footprint();
 const st = streak();
-const ss = signalStats();
-const signals = eventsOn(latest).slice(0, 4);
-const recentEv = events.filter((e) => e.date < latest).slice(-4).reverse();
+const signals = eventsOn(latest);
+const recentEv = events.filter((e) => e.date < latest).slice(-10).reverse();
 const recent = t.history.slice(-20);
 
 const generated = meta.generated_at.slice(0, 16).replace('T', ' ');
@@ -23,6 +20,7 @@ const streakText = st.days > 1
   ? `连续 ${st.days} 个交易日${st.sign > 0 ? '净申购' : '净赎回'}`
   : '今日转为' + (st.sign > 0 ? '净申购' : '净赎回');
 ---
+
 <Base title="ShareTrace · 今日动态" current="home" stamp={{ date: latest, generated }}>
   <div class="head reveal">
     <div>
@@ -35,7 +33,7 @@ const streakText = st.days > 1
     <div class="herotop">
       <div class="lead">
         <span class="value {t.flow >= 0 ? 'up' : ''}">{signed(t.flow)}</span>
-        <span class="unit">亿元 · 沪市 {t.n} 只合计净申赎</span>
+        <span class="unit">亿元 · {t.n} 只合计净申赎</span>
       </div>
       <p class="finding">
         {streakText}，20 日累计 <span class="fig">{signed(t.d20)}</span> 亿。
@@ -54,55 +52,58 @@ const streakText = st.days > 1
       </div>
     </div>
 
-    <Footprint fp={fp} caption={`2012 年以来 ${fp.n} 个交易日，一格一天。`} />
+    {t.szFirst && (
+      <p class="note" style="margin:16px 0 0;color:var(--faint);font-size:12px">
+        深市 10 只自 <span class="fig">{t.szFirst}</span> 起才计入合计，之前只有沪市 47 只；两段柱高不完全可比，深市历史份额补上后就一致了。
+      </p>
+    )}
   </section>
 
   <section class="band reveal">
     <div class="band-head">
       <h2>今日信号 <span class="cnt">{signals.length}</span></h2>
-      <span class="side"><a href="/signals.html">全部 {ss.total} 个 →</a></span>
+      <span class="side">历史第 N 强 = 该指数所有信号里按当日金额排名</span>
     </div>
     {signals.length === 0 ? (
       <p class="empty">今天没有指数达到触发门槛。</p>
     ) : (
       <div class="sigs">
         {signals.map((e) => (
-          <a class="sig" href={`/indices.html#${e.slug}`}>
+          <a class="sig" href={`/index/${e.slug}.html`}>
             <span class="sn">{bySlug.get(e.slug)?.name ?? e.slug}</span>
             <span class={`pill ${e.side > 0 ? 'buy' : 'sell'}`}>{side(e.side)}</span>
             <span class="sv fig">{signed(e.amount)}</span>
+            <span class="sm">历史第 {e.rank} 强 / 共 {e.n_events} 次 · 门槛 {e.thr} 亿</span>
           </a>
         ))}
       </div>
     )}
   </section>
 
-  <div class="duo" style="margin-top:34px">
-    <section class="panel reveal card-chart">
-      <div class="panel-head">
-        <h2>近 20 个交易日</h2>
-        <span class="note">净申赎 · 亿元</span>
-      </div>
-      <div id="flowChart" class="chart"></div>
-    </section>
+  <section class="panel reveal" style="margin-top:34px">
+    <div class="panel-head">
+      <h2>近 20 个交易日</h2>
+      <span class="note">净申赎 · 亿元</span>
+    </div>
+    <div id="flowChart" class="chart"></div>
+  </section>
 
-    <section class="panel reveal">
-      <div class="panel-head">
-        <h2>最近信号</h2>
-        <span class="note"><a href="/signals.html">全部 →</a></span>
-      </div>
-      <div class="sigs">
-        {recentEv.map((e) => (
-          <a class="sig quiet" href={`/indices.html#${e.slug}`}>
-            <span class="sn">{bySlug.get(e.slug)?.name ?? e.slug}</span>
-            <span class={`pill ${e.side > 0 ? 'buy' : 'sell'}`}>{side(e.side)}</span>
-            <span class="sv fig">{signed(e.amount)}</span>
-            <span class="sm">{e.date}</span>
-          </a>
-        ))}
-      </div>
-    </section>
-  </div>
+  <section class="band reveal" style="margin-top:34px">
+    <div class="band-head">
+      <h2>最近 10 个信号</h2>
+      <span class="side"><a href="/stats.html">统计 →</a></span>
+    </div>
+    <div class="sigs">
+      {recentEv.map((e) => (
+        <a class="sig quiet" href={`/index/${e.slug}.html`}>
+          <span class="sn">{bySlug.get(e.slug)?.name ?? e.slug}</span>
+          <span class={`pill ${e.side > 0 ? 'buy' : 'sell'}`}>{side(e.side)}</span>
+          <span class="sv fig">{signed(e.amount)}</span>
+          <span class="sm">{e.date} · 历史第 {e.rank} 强 / 共 {e.n_events} 次</span>
+        </a>
+      ))}
+    </div>
+  </section>
 
   <p class="tail">
     每个指数都能看 K 线与买卖点。<a href="/indices.html">分指数 →</a>
@@ -110,7 +111,6 @@ const streakText = st.days > 1
 
   <script is:inline type="application/json" id="flow-data" set:html={JSON.stringify(chartPayload)} />
   <script is:inline src={`/assets/charts.js?v=${V}`}></script>
-  <script is:inline src={`/assets/strip.js?v=${V}`}></script>
   <script is:inline>
     (function () {
       var el = document.getElementById('flowChart');

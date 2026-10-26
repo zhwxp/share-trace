@@ -16,11 +16,10 @@ const {
 } = Astro.props;
 
 const nav = [
-  ['home', '今日动态', '/index.html'],
-  ['indices', '分指数', '/indices.html'],
-  ['signals', '信号', '/signals.html'],
-  ['history', '历史', '/history.html'],
-  ['about', '口径说明', '/about.html'],
+  ['home', '今日', '/index.html'],
+  ['indices', '指数', '/indices.html'],
+  ['stats', '统计', '/stats.html'],
+  ['about', '口径', '/about.html'],
 ];
 const here = nav.find(([k]) => k === current)?.[1] ?? 'ShareTrace';
 ---

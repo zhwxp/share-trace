@@ -1,6 +1,6 @@
 {
  "schema_version": 1,
- "generated_at": "2026-10-26T17:17:36+08:00",
+ "generated_at": "2026-10-26T21:21:22+08:00",
  "latest_trade_date": "2026-10-23",
  "first_trade_date": "2012-01-04",
  "params": {
@@ -81,33 +81,16 @@
    "etfs_used": [
     "510050"
    ],
-   "etfs_short": []
-  },
-  "sh180": {
-   "kline_code": "sh.000010",
-   "kline_source": "index",
-   "first_date": "2012-01-04",
-   "last_date": "2026-10-23",
-   "rows": 3593,
-   "flow_days": 3593,
-   "events": 16,
-   "etfs_used": [
-    "510180"
-   ],
-   "etfs_short": []
-  },
-  "shindex": {
-   "kline_code": "sh.000001",
-   "kline_source": "index",
-   "first_date": "2012-01-04",
-   "last_date": "2026-10-23",
-   "rows": 3593,
-   "flow_days": 3593,
-   "events": 16,
-   "etfs_used": [
-    "510210"
-   ],
-   "etfs_short": []
+   "etfs_short": [],
+   "bench": {
+    "20": 0.1,
+    "60": 0.55,
+    "120": 0.69,
+    "240": 2.9,
+    "360": 5.67,
+    "480": 8.5,
+    "600": 13.96
+   }
   },
   "hs300": {
    "kline_code": "sh.000300",
@@ -124,7 +107,84 @@
    ],
    "etfs_short": [
     "159919"
-   ]
+   ],
+   "bench": {
+    "20": 0.49,
+    "60": 0.65,
+    "120": 1.97,
+    "240": 3.7,
+    "360": 1.58,
+    "480": 2.81,
+    "600": 7.97
+   }
+  },
+  "sh180": {
+   "kline_code": "sh.000010",
+   "kline_source": "index",
+   "first_date": "2012-01-04",
+   "last_date": "2026-10-23",
+   "rows": 3593,
+   "flow_days": 3593,
+   "events": 16,
+   "etfs_used": [
+    "510180"
+   ],
+   "etfs_short": [],
+   "bench": {
+    "20": 0.13,
+    "60": 0.28,
+    "120": 0.73,
+    "240": 4.07,
+    "360": 3.76,
+    "480": 7.85,
+    "600": 10.48
+   }
+  },
+  "zz800": {
+   "kline_code": "sh.000906",
+   "kline_source": "index",
+   "first_date": "2019-12-16",
+   "last_date": "2026-10-23",
+   "rows": 1660,
+   "flow_days": 1660,
+   "events": 5,
+   "etfs_used": [
+    "515800"
+   ],
+   "etfs_short": [],
+   "bench": {
+    "20": 0.32,
+    "60": 0.33,
+    "120": 1.51,
+    "240": 5.46,
+    "360": 3.16,
+    "480": 4.46,
+    "600": 6.64
+   }
+  },
+  "a500": {
+   "kline_code": "000510",
+   "kline_source": "index",
+   "first_date": "2024-10-15",
+   "last_date": "2026-10-23",
+   "rows": 492,
+   "flow_days": 492,
+   "events": 0,
+   "etfs_used": [
+    "512050",
+    "563800",
+    "563220"
+   ],
+   "etfs_short": [],
+   "bench": {
+    "20": 0.41,
+    "60": 0.72,
+    "120": 2.17,
+    "240": 6.63,
+    "360": 4.7,
+    "480": 7.1,
+    "600": 10.92
+   }
   },
   "zz500": {
    "kline_code": "sh.000905",
@@ -140,7 +200,16 @@
    ],
    "etfs_short": [
     "159922"
-   ]
+   ],
+   "bench": {
+    "20": 0.83,
+    "60": 1.1,
+    "120": 3.27,
+    "240": 6.61,
+    "360": 6.49,
+    "480": 6.48,
+    "600": 11.89
+   }
   },
   "zz1000": {
    "kline_code": "sh.000852",
@@ -157,35 +226,16 @@
    "etfs_short": [
     "159845",
     "159629"
-   ]
-  },
-  "zz800": {
-   "kline_code": "sh.000906",
-   "kline_source": "index",
-   "first_date": "2019-12-16",
-   "last_date": "2026-10-23",
-   "rows": 1660,
-   "flow_days": 1660,
-   "events": 5,
-   "etfs_used": [
-    "515800"
    ],
-   "etfs_short": []
-  },
-  "a500": {
-   "kline_code": "000510",
-   "kline_source": "index",
-   "first_date": "2024-10-15",
-   "last_date": "2026-10-23",
-   "rows": 492,
-   "flow_days": 492,
-   "events": 0,
-   "etfs_used": [
-    "512050",
-    "563800",
-    "563220"
-   ],
-   "etfs_short": []
+   "bench": {
+    "20": 0.33,
+    "60": 0.45,
+    "120": 2.02,
+    "240": 5.66,
+    "360": 7.97,
+    "480": 7.63,
+    "600": 8.7
+   }
   },
   "cyb": {
    "kline_code": "sz.399006",
@@ -198,7 +248,16 @@
    "etfs_used": [
     "159915"
    ],
-   "etfs_short": []
+   "etfs_short": [],
+   "bench": {
+    "20": 0.48,
+    "60": 0.9,
+    "120": 3.04,
+    "240": 12.41,
+    "360": 9.54,
+    "480": 12.48,
+    "600": 24.74
+   }
   },
   "cyb50": {
    "kline_code": "sz.399673",
@@ -211,7 +270,16 @@
    "etfs_used": [
     "159949"
    ],
-   "etfs_short": []
+   "etfs_short": [],
+   "bench": {
+    "20": 0.01,
+    "60": -0.2,
+    "120": -0.3,
+    "240": -4.74,
+    "360": -5.86,
+    "480": -6.51,
+    "600": -2.2
+   }
   },
   "sz100": {
    "kline_code": "sz.399330",
@@ -224,7 +292,16 @@
    "etfs_used": [
     "159901"
    ],
-   "etfs_short": []
+   "etfs_short": [],
+   "bench": {
+    "20": 0.41,
+    "60": 0.42,
+    "120": 1.2,
+    "240": 4.81,
+    "360": 1.29,
+    "480": 6.63,
+    "600": 13.69
+   }
   },
   "kc50": {
    "kline_code": "sh.588080",
@@ -239,7 +316,16 @@
     "588050",
     "588080"
    ],
-   "etfs_short": []
+   "etfs_short": [],
+   "bench": {
+    "20": -1.34,
+    "60": -2.63,
+    "120": -0.1,
+    "240": -5.65,
+    "360": -15.24,
+    "480": -8.26,
+    "600": -3.67
+   }
   },
   "kc100": {
    "kline_code": "sh.588800",
@@ -252,163 +338,104 @@
    "etfs_used": [
     "588800"
    ],
-   "etfs_short": []
+   "etfs_short": [],
+   "bench": {
+    "20": 0.12,
+    "60": 4.63,
+    "120": 19.6,
+    "240": 43.47,
+    "360": 76.25,
+    "480": 106.19,
+    "600": 119.93
+   }
   },
-  "chip-gz": {
-   "kline_code": "sz.159995",
+  "shindex": {
+   "kline_code": "sh.000001",
    "kline_source": "index",
-   "first_date": "2020-02-10",
+   "first_date": "2012-01-04",
    "last_date": "2026-10-23",
-   "rows": 1627,
+   "rows": 3593,
+   "flow_days": 3593,
+   "events": 16,
+   "etfs_used": [
+    "510210"
+   ],
+   "etfs_short": [],
+   "bench": {
+    "20": 0.28,
+    "60": 0.15,
+    "120": 1.45,
+    "240": 3.32,
+    "360": 1.85,
+    "480": 5.08,
+    "600": 6.27
+   }
+  },
+  "chem": {
+   "kline_code": "000813",
+   "kline_source": "index",
+   "first_date": "2012-01-04",
+   "last_date": "2026-10-23",
+   "rows": 3593,
    "flow_days": 3,
    "events": 0,
    "etfs_used": [
-    "159995"
+    "159870"
    ],
-   "etfs_short": []
+   "etfs_short": [],
+   "bench": {
+    "20": 0.33,
+    "60": -0.85,
+    "120": -0.76,
+    "240": 0.1,
+    "360": -0.97,
+    "480": 2.97,
+    "600": 6.91
+   }
   },
-  "chip-zh": {
-   "kline_code": "sh.512760",
+  "food": {
+   "kline_code": "000815",
    "kline_source": "index",
-   "first_date": "2019-06-12",
+   "first_date": "2021-01-13",
    "last_date": "2026-10-23",
-   "rows": 1787,
-   "flow_days": 1787,
-   "events": 6,
-   "etfs_used": [
-    "512760"
-   ],
-   "etfs_short": []
-  },
-  "chip-zz": {
-   "kline_code": "H30184",
-   "kline_source": "index",
-   "first_date": "2019-06-12",
-   "last_date": "2026-10-23",
-   "rows": 1787,
-   "flow_days": 1787,
-   "events": 5,
-   "etfs_used": [
-    "512480"
-   ],
-   "etfs_short": []
-  },
-  "pharma": {
-   "kline_code": "000913",
-   "kline_source": "index",
-   "first_date": "2013-10-28",
-   "last_date": "2026-10-23",
-   "rows": 3159,
-   "flow_days": 3159,
-   "events": 3,
-   "etfs_used": [
-    "512010"
-   ],
-   "etfs_short": []
-  },
-  "medical": {
-   "kline_code": "399989",
-   "kline_source": "index",
-   "first_date": "2019-06-17",
-   "last_date": "2026-10-23",
-   "rows": 1784,
-   "flow_days": 1784,
-   "events": 5,
-   "etfs_used": [
-    "512170"
-   ],
-   "etfs_short": []
-  },
-  "biotech": {
-   "kline_code": "930726",
-   "kline_source": "index",
-   "first_date": "2019-05-20",
-   "last_date": "2026-10-23",
-   "rows": 1803,
-   "flow_days": 1803,
-   "events": 3,
-   "etfs_used": [
-    "512290"
-   ],
-   "etfs_short": []
-  },
-  "innovdrug": {
-   "kline_code": "931152",
-   "kline_source": "index",
-   "first_date": "2019-09-24",
-   "last_date": "2026-10-23",
-   "rows": 1714,
-   "flow_days": 3,
-   "events": 0,
-   "etfs_used": [
-    "159992"
-   ],
-   "etfs_short": []
-  },
-  "military": {
-   "kline_code": "sz.399967",
-   "kline_source": "index",
-   "first_date": "2016-08-08",
-   "last_date": "2026-10-23",
-   "rows": 2477,
-   "flow_days": 2477,
+   "rows": 1398,
+   "flow_days": 1398,
    "events": 2,
    "etfs_used": [
-    "512660"
+    "515170"
    ],
-   "etfs_short": []
+   "etfs_short": [],
+   "bench": {
+    "20": 0.33,
+    "60": 0.66,
+    "120": -1.01,
+    "240": 0.98,
+    "360": 8.44,
+    "480": 25.62,
+    "600": 38.52
+   }
   },
-  "military-leader": {
-   "kline_code": "931066",
+  "nonferrous": {
+   "kline_code": "000819",
    "kline_source": "index",
-   "first_date": "2019-08-26",
+   "first_date": "2017-09-01",
    "last_date": "2026-10-23",
-   "rows": 1734,
-   "flow_days": 1734,
-   "events": 3,
+   "rows": 2216,
+   "flow_days": 2216,
+   "events": 5,
    "etfs_used": [
-    "512710"
+    "512400"
    ],
-   "etfs_short": []
-  },
-  "comm5g": {
-   "kline_code": "931079",
-   "kline_source": "index",
-   "first_date": "2019-10-16",
-   "last_date": "2026-10-23",
-   "rows": 1703,
-   "flow_days": 1703,
-   "events": 4,
-   "etfs_used": [
-    "515050"
-   ],
-   "etfs_short": []
-  },
-  "comm-dev": {
-   "kline_code": "931160",
-   "kline_source": "index",
-   "first_date": "2019-09-06",
-   "last_date": "2026-10-23",
-   "rows": 1725,
-   "flow_days": 1725,
-   "events": 14,
-   "etfs_used": [
-    "515880"
-   ],
-   "etfs_short": []
-  },
-  "soe-restruct": {
-   "kline_code": "sh.512960",
-   "kline_source": "index",
-   "first_date": "2019-01-18",
-   "last_date": "2026-10-23",
-   "rows": 1880,
-   "flow_days": 1880,
-   "events": 3,
-   "etfs_used": [
-    "512960"
-   ],
-   "etfs_short": []
+   "etfs_short": [],
+   "bench": {
+    "20": 0.17,
+    "60": -0.95,
+    "120": -0.15,
+    "240": 2.18,
+    "360": 2.34,
+    "480": 5.38,
+    "600": 4.3
+   }
   },
   "soe-innov": {
    "kline_code": "000861",
@@ -421,7 +448,104 @@
    "etfs_used": [
     "515900"
    ],
-   "etfs_short": []
+   "etfs_short": [],
+   "bench": {
+    "20": 0.0,
+    "60": 1.28,
+    "120": 4.55,
+    "240": 7.94,
+    "360": 9.15,
+    "480": 15.5,
+    "600": 17.23
+   }
+  },
+  "pharma": {
+   "kline_code": "000913",
+   "kline_source": "index",
+   "first_date": "2013-10-28",
+   "last_date": "2026-10-23",
+   "rows": 3159,
+   "flow_days": 3159,
+   "events": 3,
+   "etfs_used": [
+    "512010"
+   ],
+   "etfs_short": [],
+   "bench": {
+    "20": 0.7,
+    "60": 1.16,
+    "120": 3.7,
+    "240": 3.58,
+    "360": 8.85,
+    "480": 12.97,
+    "600": 20.76
+   }
+  },
+  "chip-gz": {
+   "kline_code": "sz.159995",
+   "kline_source": "index",
+   "first_date": "2020-02-10",
+   "last_date": "2026-10-23",
+   "rows": 1627,
+   "flow_days": 3,
+   "events": 0,
+   "etfs_used": [
+    "159995"
+   ],
+   "etfs_short": [],
+   "bench": {
+    "20": -0.36,
+    "60": -0.39,
+    "120": -0.09,
+    "240": 7.09,
+    "360": -0.52,
+    "480": 0.6,
+    "600": 2.05
+   }
+  },
+  "newenergy": {
+   "kline_code": "sz.399808",
+   "kline_source": "index",
+   "first_date": "2021-02-04",
+   "last_date": "2026-10-23",
+   "rows": 1382,
+   "flow_days": 1382,
+   "events": 4,
+   "etfs_used": [
+    "516160"
+   ],
+   "etfs_short": [],
+   "bench": {
+    "20": -0.2,
+    "60": -3.32,
+    "120": 2.8,
+    "240": 1.52,
+    "360": 5.0,
+    "480": 0.19,
+    "600": -13.65
+   }
+  },
+  "military": {
+   "kline_code": "sz.399967",
+   "kline_source": "index",
+   "first_date": "2016-08-08",
+   "last_date": "2026-10-23",
+   "rows": 2477,
+   "flow_days": 2477,
+   "events": 2,
+   "etfs_used": [
+    "512660"
+   ],
+   "etfs_short": [],
+   "bench": {
+    "20": 0.26,
+    "60": 0.14,
+    "120": 0.02,
+    "240": 2.0,
+    "360": 1.28,
+    "480": 1.01,
+    "600": 0.16
+   }
   },
   "broker": {
    "kline_code": "399975",
@@ -435,124 +559,16 @@
     "512000",
     "512880"
    ],
-   "etfs_short": []
-  },
-  "nonferrous": {
-   "kline_code": "000819",
-   "kline_source": "index",
-   "first_date": "2017-09-01",
-   "last_date": "2026-10-23",
-   "rows": 2216,
-   "flow_days": 2216,
-   "events": 5,
-   "etfs_used": [
-    "512400"
-   ],
-   "etfs_short": []
-  },
-  "rare-metal": {
-   "kline_code": "930632",
-   "kline_source": "index",
-   "first_date": "2021-09-27",
-   "last_date": "2026-10-23",
-   "rows": 1227,
-   "flow_days": 1227,
-   "events": 3,
-   "etfs_used": [
-    "562800"
-   ],
-   "etfs_short": []
-  },
-  "gold-stock": {
-   "kline_code": "931238",
-   "kline_source": "index",
-   "first_date": "2023-11-01",
-   "last_date": "2026-10-23",
-   "rows": 754,
-   "flow_days": 721,
-   "events": 2,
-   "etfs_used": [
-    "517520"
-   ],
-   "etfs_short": []
-  },
-  "food": {
-   "kline_code": "000815",
-   "kline_source": "index",
-   "first_date": "2021-01-13",
-   "last_date": "2026-10-23",
-   "rows": 1398,
-   "flow_days": 1398,
-   "events": 2,
-   "etfs_used": [
-    "515170"
-   ],
-   "etfs_short": []
-  },
-  "liquor": {
-   "kline_code": "399987",
-   "kline_source": "index",
-   "first_date": "2019-05-06",
-   "last_date": "2026-10-23",
-   "rows": 1813,
-   "flow_days": 1813,
-   "events": 9,
-   "etfs_used": [
-    "512690"
-   ],
-   "etfs_short": []
-  },
-  "chem": {
-   "kline_code": "000813",
-   "kline_source": "index",
-   "first_date": "2012-01-04",
-   "last_date": "2026-10-23",
-   "rows": 3593,
-   "flow_days": 3,
-   "events": 0,
-   "etfs_used": [
-    "159870"
-   ],
-   "etfs_short": []
-  },
-  "solar": {
-   "kline_code": "931151",
-   "kline_source": "index",
-   "first_date": "2020-12-18",
-   "last_date": "2026-10-23",
-   "rows": 1415,
-   "flow_days": 1415,
-   "events": 1,
-   "etfs_used": [
-    "515790"
-   ],
-   "etfs_short": []
-  },
-  "newenergy": {
-   "kline_code": "sz.399808",
-   "kline_source": "index",
-   "first_date": "2021-02-04",
-   "last_date": "2026-10-23",
-   "rows": 1382,
-   "flow_days": 1382,
-   "events": 4,
-   "etfs_used": [
-    "516160"
-   ],
-   "etfs_short": []
-  },
-  "robot": {
-   "kline_code": "sh.562500",
-   "kline_source": "index",
-   "first_date": "2021-12-29",
-   "last_date": "2026-10-23",
-   "rows": 1165,
-   "flow_days": 1165,
-   "events": 2,
-   "etfs_used": [
-    "562500"
-   ],
-   "etfs_short": []
+   "etfs_short": [],
+   "bench": {
+    "20": -0.46,
+    "60": -1.46,
+    "120": -2.53,
+    "240": -1.06,
+    "360": -0.52,
+    "480": 3.46,
+    "600": 6.72
+   }
   },
   "bank": {
    "kline_code": "399986",
@@ -565,20 +581,324 @@
    "etfs_used": [
     "512800"
    ],
-   "etfs_short": []
+   "etfs_short": [],
+   "bench": {
+    "20": 0.38,
+    "60": 1.07,
+    "120": 2.32,
+    "240": 4.08,
+    "360": 6.14,
+    "480": 7.83,
+    "600": 8.94
+   }
   },
-  "china-internet": {
-   "kline_code": "sh.513050",
-   "kline_source": "etf",
-   "first_date": "2017-01-18",
+  "liquor": {
+   "kline_code": "399987",
+   "kline_source": "index",
+   "first_date": "2019-05-06",
    "last_date": "2026-10-23",
-   "rows": 2368,
-   "flow_days": 2368,
+   "rows": 1813,
+   "flow_days": 1813,
+   "events": 9,
+   "etfs_used": [
+    "512690"
+   ],
+   "etfs_short": [],
+   "bench": {
+    "20": 0.03,
+    "60": 0.4,
+    "120": -2.0,
+    "240": 1.12,
+    "360": 7.56,
+    "480": 21.55,
+    "600": 33.42
+   }
+  },
+  "medical": {
+   "kline_code": "399989",
+   "kline_source": "index",
+   "first_date": "2019-06-17",
+   "last_date": "2026-10-23",
+   "rows": 1784,
+   "flow_days": 1784,
+   "events": 5,
+   "etfs_used": [
+    "512170"
+   ],
+   "etfs_short": [],
+   "bench": {
+    "20": 0.29,
+    "60": 0.03,
+    "120": 1.96,
+    "240": 0.3,
+    "360": 4.22,
+    "480": 3.7,
+    "600": 0.29
+   }
+  },
+  "chip-zh": {
+   "kline_code": "sh.512760",
+   "kline_source": "index",
+   "first_date": "2019-06-12",
+   "last_date": "2026-10-23",
+   "rows": 1787,
+   "flow_days": 1787,
+   "events": 6,
+   "etfs_used": [
+    "512760"
+   ],
+   "etfs_short": [],
+   "bench": {
+    "20": 0.42,
+    "60": 0.84,
+    "120": -1.28,
+    "240": -7.19,
+    "360": -12.92,
+    "480": -4.33,
+    "600": -8.24
+   }
+  },
+  "soe-restruct": {
+   "kline_code": "sh.512960",
+   "kline_source": "index",
+   "first_date": "2019-01-18",
+   "last_date": "2026-10-23",
+   "rows": 1880,
+   "flow_days": 1880,
+   "events": 3,
+   "etfs_used": [
+    "512960"
+   ],
+   "etfs_short": [],
+   "bench": {
+    "20": 0.22,
+    "60": 0.98,
+    "120": 3.48,
+    "240": 5.58,
+    "360": 8.34,
+    "480": 11.97,
+    "600": 14.23
+   }
+  },
+  "robot": {
+   "kline_code": "sh.562500",
+   "kline_source": "index",
+   "first_date": "2021-12-29",
+   "last_date": "2026-10-23",
+   "rows": 1165,
+   "flow_days": 1165,
+   "events": 2,
+   "etfs_used": [
+    "562500"
+   ],
+   "etfs_short": [],
+   "bench": {
+    "20": -1.43,
+    "60": -0.12,
+    "120": 0.77,
+    "240": 5.78,
+    "360": 6.83,
+    "480": 11.66,
+    "600": 19.74
+   }
+  },
+  "rare-metal": {
+   "kline_code": "930632",
+   "kline_source": "index",
+   "first_date": "2021-09-27",
+   "last_date": "2026-10-23",
+   "rows": 1227,
+   "flow_days": 1227,
+   "events": 3,
+   "etfs_used": [
+    "562800"
+   ],
+   "etfs_short": [],
+   "bench": {
+    "20": 0.22,
+    "60": -1.33,
+    "120": -4.29,
+    "240": -0.02,
+    "360": 5.99,
+    "480": 23.13,
+    "600": 29.47
+   }
+  },
+  "biotech": {
+   "kline_code": "930726",
+   "kline_source": "index",
+   "first_date": "2019-05-20",
+   "last_date": "2026-10-23",
+   "rows": 1803,
+   "flow_days": 1803,
+   "events": 3,
+   "etfs_used": [
+    "512290"
+   ],
+   "etfs_short": [],
+   "bench": {
+    "20": 0.62,
+    "60": 0.58,
+    "120": 3.33,
+    "240": 3.57,
+    "360": 9.38,
+    "480": 13.02,
+    "600": 10.36
+   }
+  },
+  "military-leader": {
+   "kline_code": "931066",
+   "kline_source": "index",
+   "first_date": "2019-08-26",
+   "last_date": "2026-10-23",
+   "rows": 1734,
+   "flow_days": 1734,
+   "events": 3,
+   "etfs_used": [
+    "512710"
+   ],
+   "etfs_short": [],
+   "bench": {
+    "20": -0.38,
+    "60": -1.35,
+    "120": 2.53,
+    "240": 4.79,
+    "360": 3.62,
+    "480": 6.83,
+    "600": 12.86
+   }
+  },
+  "comm5g": {
+   "kline_code": "931079",
+   "kline_source": "index",
+   "first_date": "2019-10-16",
+   "last_date": "2026-10-23",
+   "rows": 1703,
+   "flow_days": 1703,
+   "events": 4,
+   "etfs_used": [
+    "515050"
+   ],
+   "etfs_short": [],
+   "bench": {
+    "20": 1.06,
+    "60": 3.11,
+    "120": 6.35,
+    "240": 6.62,
+    "360": 5.73,
+    "480": 6.42,
+    "600": -8.74
+   }
+  },
+  "solar": {
+   "kline_code": "931151",
+   "kline_source": "index",
+   "first_date": "2020-12-18",
+   "last_date": "2026-10-23",
+   "rows": 1415,
+   "flow_days": 1415,
    "events": 1,
    "etfs_used": [
-    "513050"
+    "515790"
    ],
-   "etfs_short": []
+   "etfs_short": [],
+   "bench": {
+    "20": -1.42,
+    "60": -6.7,
+    "120": -8.49,
+    "240": -8.08,
+    "360": -21.79,
+    "480": -33.5,
+    "600": -34.73
+   }
+  },
+  "innovdrug": {
+   "kline_code": "931152",
+   "kline_source": "index",
+   "first_date": "2019-09-24",
+   "last_date": "2026-10-23",
+   "rows": 1714,
+   "flow_days": 3,
+   "events": 0,
+   "etfs_used": [
+    "159992"
+   ],
+   "etfs_short": [],
+   "bench": {
+    "20": -0.55,
+    "60": -1.05,
+    "120": -1.65,
+    "240": -7.38,
+    "360": -16.05,
+    "480": -23.49,
+    "600": -22.13
+   }
+  },
+  "comm-dev": {
+   "kline_code": "931160",
+   "kline_source": "index",
+   "first_date": "2019-09-06",
+   "last_date": "2026-10-23",
+   "rows": 1725,
+   "flow_days": 1725,
+   "events": 14,
+   "etfs_used": [
+    "515880"
+   ],
+   "etfs_short": [],
+   "bench": {
+    "20": 0.44,
+    "60": 2.66,
+    "120": 6.79,
+    "240": 8.97,
+    "360": 10.83,
+    "480": 9.67,
+    "600": 10.92
+   }
+  },
+  "gold-stock": {
+   "kline_code": "931238",
+   "kline_source": "index",
+   "first_date": "2023-11-01",
+   "last_date": "2026-10-23",
+   "rows": 754,
+   "flow_days": 721,
+   "events": 2,
+   "etfs_used": [
+    "517520"
+   ],
+   "etfs_short": [],
+   "bench": {
+    "20": 1.06,
+    "60": 7.4,
+    "120": 17.26,
+    "240": 23.35,
+    "360": 55.44,
+    "480": 83.87,
+    "600": 83.67
+   }
+  },
+  "chip-zz": {
+   "kline_code": "H30184",
+   "kline_source": "index",
+   "first_date": "2019-06-12",
+   "last_date": "2026-10-23",
+   "rows": 1787,
+   "flow_days": 1787,
+   "events": 5,
+   "etfs_used": [
+    "512480"
+   ],
+   "etfs_short": [],
+   "bench": {
+    "20": 0.28,
+    "60": 1.58,
+    "120": 6.47,
+    "240": 22.99,
+    "360": 41.4,
+    "480": 32.99,
+    "600": 39.31
+   }
   },
   "hscei": {
    "kline_code": "sh.510900",
@@ -591,7 +911,16 @@
    "etfs_used": [
     "510900"
    ],
-   "etfs_short": []
+   "etfs_short": [],
+   "bench": {
+    "20": 0.0,
+    "60": 0.32,
+    "120": 0.17,
+    "240": 0.17,
+    "360": 0.0,
+    "480": 1.07,
+    "600": 4.32
+   }
   },
   "hstech": {
    "kline_code": "sh.513180",
@@ -605,7 +934,16 @@
     "513180",
     "513010"
    ],
-   "etfs_short": []
+   "etfs_short": [],
+   "bench": {
+    "20": -1.48,
+    "60": -4.46,
+    "120": -3.33,
+    "240": -6.96,
+    "360": 0.54,
+    "480": 15.81,
+    "600": 18.14
+   }
   },
   "hk-innovdrug": {
    "kline_code": "931787",
@@ -618,7 +956,38 @@
    "etfs_used": [
     "513120"
    ],
-   "etfs_short": []
+   "etfs_short": [],
+   "bench": {
+    "20": -0.14,
+    "60": -1.4,
+    "120": 1.22,
+    "240": -2.86,
+    "360": 16.51,
+    "480": 60.45,
+    "600": 52.26
+   }
+  },
+  "china-internet": {
+   "kline_code": "sh.513050",
+   "kline_source": "etf",
+   "first_date": "2017-01-18",
+   "last_date": "2026-10-23",
+   "rows": 2368,
+   "flow_days": 2368,
+   "events": 1,
+   "etfs_used": [
+    "513050"
+   ],
+   "etfs_short": [],
+   "bench": {
+    "20": -0.27,
+    "60": 0.03,
+    "120": 1.11,
+    "240": 0.54,
+    "360": -1.95,
+    "480": 1.31,
+    "600": 8.65
+   }
   },
   "shanghai-gold": {
    "kline_code": "sh.518850",
@@ -631,7 +1000,16 @@
    "etfs_used": [
     "518850"
    ],
-   "etfs_short": []
+   "etfs_short": [],
+   "bench": {
+    "20": 0.79,
+    "60": 2.91,
+    "120": 7.05,
+    "240": 16.33,
+    "360": 30.73,
+    "480": 44.04,
+    "600": 51.46
+   }
   },
   "gold9999": {
    "kline_code": "sh.518880",
@@ -644,7 +1022,16 @@
    "etfs_used": [
     "518880"
    ],
-   "etfs_short": []
+   "etfs_short": [],
+   "bench": {
+    "20": 0.46,
+    "60": 1.72,
+    "120": 4.34,
+    "240": 9.51,
+    "360": 15.01,
+    "480": 18.76,
+    "600": 21.03
+   }
   }
  },
  "counts": {

@@ -1,0 +1,245 @@
+---
+import Base from '../layouts/Base.astro';
+import { load, marketToday, signalStats, byIndexStats, strengthStats } from '../lib/data.mjs';
+import { num, signed, pct } from '../lib/format.mjs';
+import { V } from '../lib/asset.mjs';
+
+const { meta } = load();
+const t = marketToday();
+const ss = signalStats();
+const bi = byIndexStats();
+const st = strengthStats();
+
+// 买卖点各自回测里最好的窗口都是 360 日（买点 480/600 更差，卖点 240/480/600 都低一档）
+const W = 360;
+const at = (arr) => arr.find((x) => x.w === W);
+const buy = at(ss.buy);
+const sell = at(ss.sell);
+const all = at(ss.all);
+
+const byMonth = new Map();
+for (const d of t.history) {
+  const key = d.date.slice(0, 7);
+  let m = byMonth.get(key);
+  if (!m) byMonth.set(key, (m = { month: key, flow: 0, n: 0 }));
+  m.flow += d.flow;
+  m.n += 1;
+}
+const months = [...byMonth.values()]
+  .map((m) => ({ ...m, flow: Math.round(m.flow * 100) / 100 }))
+  .sort((a, b) => (a.month < b.month ? 1 : -1));
+const years = [...new Set(months.map((m) => m.month.slice(0, 4)))].sort().reverse();
+const byYear = years.map((y) => {
+  const ys = months.filter((m) => m.month.startsWith(y));
+  return { year: y, rows: ys, flow: Math.round(ys.reduce((s, m) => s + m.flow, 0) * 100) / 100 };
+});
+const asc = months.slice().reverse();
+const chart = { labels: asc.map((m) => m.month.slice(2)), values: asc.map((m) => m.flow) };
+const generated = meta.generated_at.slice(0, 16).replace('T', ' ');
+
+const cards = [
+  { k: '买点', n: ss.buys, w: buy, hint: '大额净申购之后' },
+  { k: '卖点', n: ss.sells, w: sell, hint: '大额净赎回之后' },
+  { k: '全样本', n: ss.total, w: all, hint: '两个方向合起来' },
+];
+---
+
+<Base title="ShareTrace · 统计" current="stats" echarts stamp={{ date: meta.latest_trade_date, generated }}>
+  <div class="head reveal">
+    <div>
+      <h1>统计</h1>
+      <p class="meta">
+        {ss.first} 以来 {ss.total} 个事件，看 {W} 个交易日之后的涨跌。超额 = 信号后收益 −
+        该指数任意一天买入的中位收益，卖点已按看跌方向取号。
+      </p>
+    </div>
+    <div class="right">
+      <b>{W}</b> 交易日窗口<br />
+      <b>{bi.length}</b> 个指数样本 ≥5
+    </div>
+  </div>
+
+  <div class="statrow reveal">
+    {cards.map((c) => (
+      <div>
+        <div class="k">{c.k} · {c.n} 个</div>
+        <div class="v">{(c.w.rate * 100).toFixed(0)}<span class="u">% 命中</span></div>
+        <div class="s">
+          中位 {pct(c.w.med, 1)} · 超额 <b class={c.w.excess > 0 ? 'up' : 'down'}>{pct(c.w.excess, 1)}</b>
+        </div>
+      </div>
+    ))}
+  </div>
+
+  <section class="band reveal t-dir">
+    <div class="band-head">
+      <h2>方向决定一切</h2>
+      <span class="side">同样 {W} 日，买点和卖点完全相反</span>
+    </div>
+    <p class="finding" style="padding:0 2px 14px">
+      净赎回之后市场确实跌，时间越长越准；净申购之后一到六个月继续跌，拉长到两年半也跑不赢基准。
+      国家队是逆势接盘的，它买的时候市场还在跌，接完还要跌一段。买点 {W} 日已经是它七个窗口里最好的一档，
+      超额仍是 <span class="fig">{pct(buy.excess, 1)}</span>。
+    </p>
+    <div class="shead" aria-hidden="true">
+      <span>窗口</span><span class="num">买点命中</span><span class="num">买点超额</span>
+      <span class="num">卖点命中</span><span class="num">卖点超额</span>
+    </div>
+    <div class="slist">
+      {[60, 120, 240, 360, 480, 600].map((w) => {
+        const bw = ss.buy.find((x) => x.w === w), sw = ss.sell.find((x) => x.w === w);
+        return (
+          <div class="srow">
+            <span class="sd">{w} 日{w === W ? ' · 最优' : ''}</span>
+            <span class="sv2">{(bw.rate * 100).toFixed(1)}%</span>
+            <span class={`sv2 ${bw.excess > 0 ? 'pos' : 'm'}`}>{pct(bw.excess, 1)}</span>
+            <span class="sv2">{(sw.rate * 100).toFixed(1)}%</span>
+            <span class={`sv2 ${sw.excess > 0 ? 'pos' : 'm'}`}>{pct(sw.excess, 1)}</span>
+          </div>
+        );
+      })}
+    </div>
+  </section>
+
+  <section class="band reveal t-str">
+    <div class="band-head">
+      <h2>强度只对买点有用</h2>
+      <span class="side">同一指数内部按 |当日金额| 分三档，{W} 日</span>
+    </div>
+    <p class="finding" style="padding:0 2px 14px">
+      买点整体跑输基准，但最强的那三分之一超额转正（30 个成熟样本），中、弱两档都是负的——只有大额申购才有点意义，
+      小额触发是噪声。卖点反过来，越弱越准，可强档只剩 6 个成熟样本，不能当真。
+    </p>
+    {['buy', 'sell'].map((dir) => (
+      <>
+        <div class="subhead">{dir === 'buy' ? '买点内部' : '卖点内部'}</div>
+        <div class="shead" aria-hidden="true">
+          <span>档位</span><span class="num">成熟 / 全部</span><span class="num">命中</span>
+          <span class="num">中位</span><span class="num">超额</span>
+        </div>
+        <div class="slist">
+          {st[dir].map((b) => {
+            const w = b.windows.find((x) => x.w === W);
+            const lab = b.key === 'strong' ? '前 1/3（最强）' : b.key === 'mid' ? '中 1/3' : '后 1/3（最弱）';
+            return (
+              <div class="srow">
+                <span class="sd">{lab}</span>
+                <span class="sv2 m">{w.n} / {b.n}</span>
+                <span class="sv2">{(w.rate * 100).toFixed(0)}%</span>
+                <span class="sv2">{pct(w.med, 1)}</span>
+                <span class={`sv2 ${w.excess > 0 ? 'pos' : 'm'}`}>{pct(w.excess, 1)}</span>
+              </div>
+            );
+          })}
+        </div>
+      </>
+    ))}
+  </section>
+
+  <section class="band reveal t-idx">
+    <div class="band-head">
+      <h2>按指数 <span class="cnt">{bi.length}</span></h2>
+      <span class="side">样本 ≥5 的才上榜，{W} 日</span>
+    </div>
+    <div class="shead" aria-hidden="true">
+      <span>指数</span><span class="num">事件</span><span class="num">命中</span>
+      <span class="num">中位</span><span class="num">超额</span>
+    </div>
+    <div class="slist">
+      {bi.map((r) => (
+        <a class="srow" href={`/index/${r.slug}.html`}>
+          <span class="sn2">{r.name}</span>
+          <span class="sv2 m">{r.n}</span>
+          <span class="sv2">{(r.rate * 100).toFixed(0)}%</span>
+          <span class="sv2">{pct(r.med, 1)}</span>
+          <span class={`sv2 ${r.excess > 0 ? 'pos' : ''}`}>{pct(r.excess, 1)}</span>
+        </a>
+      ))}
+    </div>
+    <p class="tail" style="margin-top:14px">
+      宽基普遍好于行业主题。中证全指半导体 5 个事件全中，超额却是负的——样本太小，别当结论看。
+    </p>
+  </section>
+
+  <section class="panel reveal" style="margin-top:34px">
+    <div class="panel-head">
+      <h2>资金时间线</h2>
+      <span class="note">按月合计 · 亿元 · 深市 10 只 2026-10-21 起才计入</span>
+    </div>
+    <div id="monthChart" class="chart"></div>
+  </section>
+
+  <div class="mhead" aria-hidden="true">
+    <span>年份</span><span class="num">合计</span><span class="num">月份</span>
+    <span class="num">净申购月</span><span class="num">净赎回月</span>
+  </div>
+  <div class="mlist">
+    {byYear.map((y) => (
+      <div class="mrow">
+        <span class="mm">{y.year}</span>
+        <span class="mv">{signed(y.flow)}</span>
+        <span class="mv m">{y.rows.length}</span>
+        <span class="mv m">{y.rows.filter((x) => x.flow > 0).length}</span>
+        <span class="mv m">{y.rows.filter((x) => x.flow <= 0).length}</span>
+      </div>
+    ))}
+  </div>
+
+  <p class="tail">
+    原始数据：<a href="/data/history.csv">逐日明细 CSV →</a>
+    · 口径与已知限制见 <a href="/about.html">口径说明</a>。
+  </p>
+
+  <script is:inline type="application/json" id="month-data" set:html={JSON.stringify(chart)} />
+  <script is:inline src={`/assets/charts.js?v=${V}`}></script>
+  <script is:inline>
+    (function () {
+      var el = document.getElementById('monthChart');
+      var raw = document.getElementById('month-data');
+      if (!el || !raw || !window.Charts) return;
+      var d = JSON.parse(raw.textContent);
+      function draw() {
+        Charts.diverging(el, {
+          labels: d.labels,
+          values: d.values,
+          above: '净申购',
+          below: '净赎回',
+          format: function (v) { return Math.abs(v) >= 1000 ? Math.round(v / 100) / 10 + 'k' : Math.round(v); },
+          height: 210,
+          mark: [d.values.length - 1],
+          markLabel: '本月',
+          markSide: 'above'
+        });
+      }
+      draw();
+      var t;
+      window.addEventListener('resize', function () { clearTimeout(t); t = setTimeout(draw, 160); });
+    })();
+  </script>
+</Base>
+
+<style>
+  @media (min-width: 641px) {
+    .shead, .srow {
+      grid-template-columns: 132px minmax(0, 1fr) 84px 84px 84px;
+    }
+  }
+  @media (max-width: 640px) {
+    .srow {
+      grid-template-columns: minmax(0, 1fr) auto auto;
+      grid-template-areas: none;
+    }
+    .srow > span {
+      grid-area: auto;
+    }
+    .srow > span.sv2:nth-child(2) {
+      display: block;
+    }
+    .t-dir .srow > span:nth-child(3),
+    .t-dir .srow > span:nth-child(5),
+    .t-str .srow > span:nth-child(5),
+    .t-idx .srow > span:nth-child(5) {
+      display: none;
+    }
+  }
+</style>

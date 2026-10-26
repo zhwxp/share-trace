@@ -1,110 +1,82 @@
 ---
 import Base from '../layouts/Base.astro';
 import { load, indexStats } from '../lib/data.mjs';
-import { signed, side, pct } from '../lib/format.mjs';
-import { V } from '../lib/asset.mjs';
+import { signed } from '../lib/format.mjs';
 
-const { meta, latest, indices, events } = load();
+const { meta, latest, indices } = load();
 const rows = indices.map((it) => ({ it, s: indexStats(it.slug) }));
-
+// 组内顺序固定：宽基按成分股市值（大盘→小盘），行业按指数代码，跨境、商品各自成组
 const groups = meta.categories.map((cat) => ({
   cat,
-  list: rows
-    .filter((r) => r.it.cat === cat)
-    .sort((a, b) => Math.abs(b.s.today ?? 0) - Math.abs(a.s.today ?? 0)),
+  list: rows.filter((r) => r.it.cat === cat),
 }));
-
-// 默认打开最近出过信号的那个指数
-const lastEv = events.slice().sort((a, b) => (a.date < b.date ? 1 : -1))[0];
-const def = lastEv?.slug && indices.some((i) => i.slug === lastEv.slug) ? lastEv.slug : 'hs300';
-const dIt = indices.find((i) => i.slug === def);
-const dS = indexStats(def);
-const dEv = dS.events.slice(0, 8);
 const generated = meta.generated_at.slice(0, 16).replace('T', ' ');
 ---
-<Base title="ShareTrace · 分指数" current="indices" echarts stamp={{ date: latest, generated }}>
+
+<Base title="ShareTrace · 分指数" current="indices" stamp={{ date: latest, generated }}>
   <div class="head reveal">
     <div>
       <h1>分指数</h1>
-      <p class="meta">{indices.length} 个指数 · <span class="fig">{latest}</span> 收盘</p>
+      <p class="meta">
+        {indices.length} 个标的指数，点进去看 K 线、买卖点和成分 ETF。单位亿元，当日口径
+        <span class="fig">{latest}</span>。
+      </p>
     </div>
   </div>
 
-  <div class="picker">
-    <aside class="plist reveal" aria-label="指数列表">
-      {groups.map((g) => (
-        <div class="pgroup">
-          <h2>{g.cat}</h2>
-          {g.list.map(({ it, s }) => (
-            <a class="pitem" href={`#${it.slug}`} data-slug={it.slug} data-name={it.name}
-              aria-current={it.slug === def ? 'true' : undefined}>
-              <span class="pn">{it.name}</span>
-              <span class="pv">{signed(s.today)}</span>
-            </a>
-          ))}
-        </div>
-      ))}
-    </aside>
-
-    <section class="pmain reveal">
-      <label class="pselect-wrap">
-        <span class="sr">选择指数</span>
-        <select class="pselect" id="pSelect">
-          {groups.map((g) => (
-            <optgroup label={g.cat}>
-              {g.list.map(({ it }) => (
-                <option value={it.slug} selected={it.slug === def}>{it.name}</option>
-              ))}
-            </optgroup>
-          ))}
-        </select>
-      </label>
-
-      <div class="phead">
-        <h2 id="pName">{dIt.name}</h2>
-        <div class="pstats" id="pStats">
-          <span>当日 <b class={dS.today >= 0 ? 'up' : ''}>{signed(dS.today)}</b></span>
-          <span>近 5 日 <b>{signed(dS.d5)}</b></span>
-          <span>近 20 日 <b>{signed(dS.d20)}</b></span>
-        </div>
+  {groups.map((g) => (
+    <section class="band reveal">
+      <div class="band-head">
+        <h2>{g.cat} <span class="cnt">{g.list.length}</span></h2>
       </div>
-
-      <div class="legend" style="margin-bottom:8px">
-        <span class="l"><i class="sw sw-candle"></i>K 线</span>
-        <span class="l"><i class="sw sw-ma20"></i>MA20</span>
-        <span class="l"><i class="sw sw-ma60"></i>MA60</span>
-        <span class="l"><i class="sw sw-flow"></i>日净申赎</span>
-        <span class="l"><i class="sw sw-cum"></i>20 日累计</span>
-        <span class="l">▲ 买点 ▼ 卖点</span>
+      <div class="shead" aria-hidden="true">
+        <span>指数</span><span class="num">当日</span><span class="num">近 5 日</span>
+        <span class="num">近 20 日</span><span class="num">信号</span><span class="num">最近</span>
       </div>
-
-      <div id="pChart" class="chart chart-echarts" role="img"
-        aria-label={`${dIt.name}的 K 线、均线与净申赎，标出 ${dS.events.length} 个买卖点`}
-        data-src={`/data/index/${def}.json`}></div>
-      <noscript>
-        <p class="note">图表需要脚本。单个指数的独立页：<a href={`/index/${def}.html`}>{dIt.name}</a></p>
-      </noscript>
-
-      <div class="psig">
-        <div class="band-head">
-          <h3>历史信号 <span class="cnt">{dS.events.length}</span></h3>
-          <span class="side">后 20 日为信号方向的指数涨跌，正数=有效</span>
-        </div>
-        <div id="pSignals">
-          {dEv.map((e) => (
-            <div class="psrow">
-              <span class="psd">{e.date}</span>
-              <span class={`pill ${e.side > 0 ? 'buy' : 'sell'}`}>{side(e.side)}</span>
-              <span class="psv">{signed(e.amount)}</span>
-              <span class="psp">{e.post20 === null ? '—' : pct(e.post20, 1)}</span>
-            </div>
-          ))}
-          {dEv.length === 0 && <p class="empty">这个指数还没有触发过信号。</p>}
-        </div>
+      <div class="slist">
+        {g.list.map(({ it, s }) => (
+          <a class="srow" href={`/index/${it.slug}.html`}>
+            <span class="sn2">{it.name}</span>
+            <span class={`sv2 ${s.today >= 0 ? 'pos' : 'm'}`}>{signed(s.today)}</span>
+            <span class="sv2 m">{signed(s.d5)}</span>
+            <span class="sv2 m">{signed(s.d20)}</span>
+            <span class="sv2 m">{s.events.length}</span>
+            <span class="sv2 m">{s.lastEvent ? s.lastEvent.date.slice(2) : '—'}</span>
+          </a>
+        ))}
       </div>
     </section>
-  </div>
+  ))}
 
-  <script is:inline defer src={`/assets/kline.js?v=${V}`}></script>
-  <script is:inline defer src={`/assets/picker.js?v=${V}`}></script>
+  <p class="tail">
+    信号门槛 = max({meta.params.floor_yi} 亿, {meta.params.ratio * 100}% × 该指数 ETF 合计规模)，封顶
+    {meta.params.cap_yi} 亿。<a href="/about.html">口径说明 →</a>
+  </p>
 </Base>
+
+<style>
+  @media (min-width: 641px) {
+    .shead, .srow {
+      grid-template-columns: minmax(0, 1fr) 92px 92px 92px 56px 72px;
+    }
+  }
+  @media (max-width: 640px) {
+    .srow {
+      grid-template-columns: minmax(0, 1fr) auto;
+      grid-template-areas: none;
+    }
+    .srow > span {
+      grid-area: auto;
+    }
+    .srow > span:nth-child(3),
+    .srow > span:nth-child(4),
+    .srow > span:nth-child(5),
+    .srow > span:nth-child(6) {
+      display: none;
+    }
+    .srow > span.sv2:nth-child(2) {
+      display: block;
+      text-align: right;
+    }
+  }
+</style>

@@ -77,20 +77,28 @@ def probe_sse():
 
 
 def probe_szse():
-    """深交所 1945 报表：逐只查，深市 10 只用它。"""
+    """深交所 1945 报表：逐只查，深市 10 只用它。
+
+    连试 3 次，用来区分「偶发 reset」和「稳定被拒」。
+    """
     code = "159919"
     url = (
         "http://www.szse.cn/api/report/ShowReport/data?SHOWTYPE=JSON"
         f"&CATALOGID=1945&TABKEY=tab1&PAGENO=1&txtQueryKeyAndJC={code}"
     )
-    try:
-        raw, status = get(url, {"Referer": "http://www.szse.cn/"}, timeout=30)
-        d = json.loads(raw.decode("utf-8"))
-        rows = d[0].get("data") or []
-        got = [r.get("dqgm") for r in rows if code in str(r.get("sys_key", ""))]
-        record("szse:1945", bool(got), f"HTTP {status} rows={len(rows)} dqgm={got[:1]}")
-    except Exception as e:
-        record("szse:1945", False, f"{type(e).__name__}: {e}")
+    errs = []
+    for attempt in range(1, 4):
+        try:
+            raw, status = get(url, {"Referer": "http://www.szse.cn/"}, timeout=40)
+            d = json.loads(raw.decode("utf-8"))
+            rows = d[0].get("data") or []
+            got = [r.get("dqgm") for r in rows if code in str(r.get("sys_key", ""))]
+            record("szse:1945", bool(got), f"第 {attempt} 次 HTTP {status} rows={len(rows)} dqgm={got[:1]}")
+            return
+        except Exception as e:
+            errs.append(f"{type(e).__name__}")
+            time.sleep(2)
+    record("szse:1945", False, f"3 次都失败：{', '.join(errs)}")
 
 
 def probe_tencent():
@@ -118,6 +126,33 @@ def probe_csindex():
         record("csindex:perf", False, f"{type(e).__name__}: {e}")
 
 
+def probe_tencent_kline():
+    """腾讯日线：baostock 的备胎（指数/ETF 前复权日线）。"""
+    url = ("https://web.ifzq.gtimg.cn/appstock/app/fqkline/get"
+           "?param=sh000300,day,2026-09-01,2026-10-26,320,qfq")
+    try:
+        raw, status = get(url, {"Referer": "https://gu.qq.com/"}, timeout=25)
+        d = json.loads(raw.decode("utf-8"))
+        node = (d.get("data") or {}).get("sh000300") or {}
+        rows = node.get("qfqday") or node.get("day") or []
+        record("tencent:kline", bool(rows), f"HTTP {status} rows={len(rows)} last={rows[-1][0] if rows else None}")
+    except Exception as e:
+        record("tencent:kline", False, f"{type(e).__name__}: {e}")
+
+
+def probe_sina_kline():
+    """新浪日线：腾讯之外的第二个备胎。"""
+    url = ("https://money.finance.sina.com.cn/quotes_service/api/json_v2.php/"
+           "CN_MarketData.getKLineData?symbol=sh000300&scale=240&ma=no&datalen=20")
+    try:
+        raw, status = get(url, {"Referer": "https://finance.sina.com.cn/"}, timeout=25)
+        rows = json.loads(raw.decode("utf-8", "replace"))
+        last = rows[-1].get("day") if isinstance(rows, list) and rows else None
+        record("sina:kline", bool(rows), f"HTTP {status} rows={len(rows) if isinstance(rows, list) else 0} last={last}")
+    except Exception as e:
+        record("sina:kline", False, f"{type(e).__name__}: {e}")
+
+
 def probe_baostock():
     """baostock：43 个指数 + 57 只 ETF 的日线来源。"""
     try:
@@ -130,8 +165,13 @@ def probe_baostock():
 
     buf = io.StringIO()
     try:
-        with contextlib.redirect_stdout(buf):
-            lg = bs.login()
+        lg = None
+        for attempt in range(2):
+            with contextlib.redirect_stdout(buf):
+                lg = bs.login()
+            if lg.error_code == "0":
+                break
+            time.sleep(3)
         if lg.error_code != "0":
             record("baostock", False, f"login {lg.error_code} {lg.error_msg}")
             return
@@ -177,6 +217,8 @@ def main():
     probe_szse()
     probe_tencent()
     probe_csindex()
+    probe_tencent_kline()
+    probe_sina_kline()
     probe_ths()
     probe_baostock()
 

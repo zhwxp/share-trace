@@ -35,9 +35,29 @@ market.sqlite ──ingest.py──> data/ (git) ──astro build──> dist/ 
 份额与行情先由 `etf_flow_monitor.py`、`astock sync` 更新进库，然后：
 
 ```bash
-python3 ingest.py          # 导出 data/，一天一次
+python3 ingest.py          # 从 sqlite 全量导出 data/（初始化或重建历史时用）
 npm run build              # 只读 data/，不碰数据库
 ```
+
+日常更新不用这台机器：`.github/workflows/daily-data.yml` 周一至五 21:40（CST）跑 `daily.py`，抓当天份额与行情、追加到 `data/`、校验构建、提交，EdgeOne 随后自动重建。
+
+```bash
+python3 daily.py                     # 抓今天
+python3 daily.py --date 2026-10-23   # 补指定日期
+python3 daily.py --backfill          # 把每个序列缺的交易日都补上
+python3 daily.py --dry-run           # 只看要追加什么
+```
+
+`daily.py` 不连数据库：`data/` 自己就是状态，算 Δ份额只需上一交易日的份额，就在 CSV 最后一行。
+
+| 用途 | 源 |
+|---|---|
+| 沪市份额 | 上交所 commonQuery，一次拿全市场（21:18 后发布） |
+| 深市份额 | 深交所 1945 报表，逐只，偶发连接重置，带重试 |
+| 当日行情 | 腾讯 `qt.gtimg.cn` 批量快照，一次几十只 |
+| 历史补缺 | 腾讯日线 → 新浪日线 → 中证 index-perf（H/930/931 只能走官网） |
+
+不用 baostock：它从境外经常登录失败（`10002007`），而腾讯不复权日线与库内 baostock `none` 实测同值（ETF 33/33 根完全一致，指数最大差 0.005 点）。
 
 构建端不连数据库：换机器、上 CI 都能复现，`data/` 的 diff 就是当天数据变化的审计记录。`python3 ingest.py --stats` 只打印每个指数的信号数量，不写文件。
 

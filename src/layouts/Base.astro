@@ -1,0 +1,52 @@
+---
+import '../styles/global.css';
+
+const {
+  title,
+  desc = 'ShareTrace：国家队 ETF 份额申赎、指数 K 线与买卖点',
+  current = '',
+  echarts = false,
+} = Astro.props;
+
+const nav = [
+  ['home', '今日动态', '/index.html'],
+  ['indices', '分指数', '/indices.html'],
+  ['signals', '信号', '/signals.html'],
+  ['history', '历史', '/history.html'],
+  ['about', '口径说明', '/about.html'],
+];
+---
+<!DOCTYPE html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <title>{title}</title>
+    <meta name="description" content={desc} />
+  </head>
+  <body>
+    <header class="top">
+      <div class="wrap">
+        <div class="brand">
+          <strong>ShareTrace</strong>
+          <span>国家队 ETF 份额足迹</span>
+        </div>
+        <nav class="main">
+          {nav.map(([key, label, href]) => (
+            <a href={href} aria-current={key === current ? 'page' : undefined}>{label}</a>
+          ))}
+        </nav>
+      </div>
+    </header>
+    <main class="wrap">
+      <slot />
+    </main>
+    <footer class="foot">
+      <div class="wrap">
+        <p>数据源：上交所 ETF 归档 / 深交所 / 同花顺 · 行情 baostock · 份额为基金总份额，不是成交额</p>
+        <p>本站只做数据呈现，不构成投资建议。</p>
+      </div>
+    </footer>
+    {echarts && <script is:inline src="/assets/echarts.min.js"></script>}
+  </body>
+</html>

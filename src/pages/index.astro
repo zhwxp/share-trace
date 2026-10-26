@@ -1,0 +1,74 @@
+---
+import Base from '../layouts/Base.astro';
+import { load, marketToday, movers, eventsOn } from '../lib/data.mjs';
+import { num, signed, tone, side } from '../lib/format.mjs';
+
+const { meta, latest, indices, bySlug } = load();
+const t = marketToday();
+const signals = eventsOn(latest);
+const mv = movers(5);
+const generated = meta.generated_at.slice(0, 16).replace('T', ' ');
+---
+<Base title="ShareTrace · 今日动态" current="home">
+  <p class="lede">最新交易日 {latest} · 数据生成 {generated}</p>
+
+  <div class={`big ${tone(t.flow)}`}>
+    {signed(t.flow)}<span class="unit">亿元</span>
+  </div>
+  <p class="lede">
+    沪市 {t.n} 只国家队 ETF 当日合计净申赎：{t.nIn} 只净申购、{t.nOut} 只净赎回。
+    近 5 日 {signed(t.d5)} 亿元，近 20 日 {signed(t.d20)} 亿元。
+  </p>
+
+  <h2>今日信号</h2>
+  {signals.length === 0 ? (
+    <p class="empty">{latest} 没有指数达到触发门槛。</p>
+  ) : (
+    <div class="panel">
+      <table class="tbl">
+        <thead>
+          <tr>
+            <th>指数</th><th>方向</th><th class="num">当日净申赎(亿)</th>
+            <th class="num">门槛(亿)</th><th class="num">共振</th>
+          </tr>
+        </thead>
+        <tbody>
+          {signals.slice(0, 3).map((e) => (
+            <tr>
+              <td><a href={`/index/${e.slug}.html`}>{bySlug.get(e.slug)?.name ?? e.slug}</a></td>
+              <td><span class={`tag ${e.side > 0 ? 'up' : 'down'}`}>{side(e.side)}</span></td>
+              <td class="num">{signed(e.amount)}</td>
+              <td class="num">{num(e.thr, 1)}</td>
+              <td class="num">{e.reson}/{e.n}</td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </div>
+  )}
+
+  <h2>ETF 异动前五</h2>
+  <div class="panel">
+    <table class="tbl">
+      <thead>
+        <tr>
+          <th>ETF</th><th class="num">当日净申赎(亿)</th>
+          <th class="num">Δ份额(亿份)</th><th class="num">份额(亿份)</th>
+        </tr>
+      </thead>
+      <tbody>
+        {mv.map((m) => (
+          <tr>
+            <td>{m.etf.name} <span class="lede">{m.etf.code}</span></td>
+            <td class={`num ${tone(m.flow)}`}>{signed(m.flow)}</td>
+            <td class={`num ${tone(m.d_share)}`}>{signed(m.d_share, 2)}</td>
+            <td class="num">{num(m.share, 2)}</td>
+          </tr>
+        ))}
+      </tbody>
+    </table>
+  </div>
+  <p class="note">按当日净申赎绝对值排序，只取前 5 只；全部 43 个指数见分指数页。深市几只 ETF 的份额历史只有最近几个交易日，它们的 Δ份额 只对比相邻两天。</p>
+
+  <a class="cta" href="/indices.html">看全部 {indices.length} 个指数 →</a>
+</Base>

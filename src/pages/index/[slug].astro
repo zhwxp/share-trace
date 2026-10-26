@@ -1,0 +1,103 @@
+---
+import Base from '../../layouts/Base.astro';
+import { load, indexStats } from '../../lib/data.mjs';
+import { num, signed, tone, side, pct } from '../../lib/format.mjs';
+
+export function getStaticPaths() {
+  const { indices } = load();
+  return indices.map((it) => ({ params: { slug: it.slug }, props: { it } }));
+}
+
+const { it } = Astro.props;
+const { meta, byCode, bySlug } = load();
+const s = indexStats(it.slug);
+const m = meta.indices[it.slug];
+const params = meta.params;
+const stale = meta.stale?.by_index?.[it.slug];
+const detail = it.etfs.map((c) => byCode.get(c)).filter(Boolean);
+---
+<Base title={`${it.name} · ShareTrace`} current="indices" echarts>
+  <p class="lede">
+    <a href="/indices.html">分指数</a> / {it.cat}
+  </p>
+  <h1>{it.name}</h1>
+  <p class="lede">
+    当日净申赎 {signed(s.today)} 亿元（{s.lastDate}）· 近 5 日 {signed(s.d5)} · 近 20 日 {signed(s.d20)}
+    · 事件 {s.events.length} 个
+  </p>
+
+  {stale && (
+    <p class="note">
+      这张图止于 {stale.last_date}，比最新份额日期少 {stale.lag_days} 个交易日——上游行情还没补上，不是份额没有变化。
+    </p>
+  )}
+  {s.shortHistory && (
+    <p class="note">
+      成分 ETF 的份额历史只有 {m.flow_days} 个交易日，图上只画得出最近几天；历史序列不足，不出信号。
+    </p>
+  )}
+
+  <div id="detailChart" class="chart" data-src={`/data/index/${it.slug}.json`}></div>
+  <p class="note" id="chart-status">图表载入中…</p>
+  <p class="note">
+    上：K 线（{m.kline_source === 'index' ? '指数行情' : '代理 ETF 行情'} {m.kline_code}）+ MA20 / MA60，虚线为国家队公告时点。
+    下：日净申赎（亿元）与 20 日累计。三角为信号点，面积越大金额越大。
+  </p>
+
+  <h2>信号明细</h2>
+  {s.events.length === 0 ? (
+    <p class="empty">这个指数还没有触发过信号。</p>
+  ) : (
+    <div class="panel">
+      <table class="tbl">
+        <thead>
+          <tr>
+            <th>日期</th><th>方向</th><th class="num">当日(亿)</th><th class="num">连续/合计(亿)</th>
+            <th class="num">门槛(亿)</th><th class="num">共振</th><th class="num">后 20 日</th>
+          </tr>
+        </thead>
+        <tbody>
+          {s.events.map((e) => (
+            <tr>
+              <td>{e.date}</td>
+              <td><span class={`tag ${e.side > 0 ? 'up' : 'down'}`}>{side(e.side)}</span></td>
+              <td class={`num ${tone(e.amount)}`}>{signed(e.amount)}</td>
+              <td class="num">{e.days} 天 / {signed(e.total)}</td>
+              <td class="num">{num(e.thr, 1)}</td>
+              <td class="num">{e.reson}/{e.n}</td>
+              <td class={`num ${tone(e.post20)}`}>{e.post20 === null ? '—' : pct(e.post20, 1)}</td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </div>
+  )}
+
+  <h2>成分 ETF</h2>
+  <div class="panel">
+    <table class="tbl">
+      <thead>
+        <tr><th>代码</th><th>名称</th><th>档</th><th>市场</th><th class="num">份额(亿份)</th></tr>
+      </thead>
+      <tbody>
+        {detail.map((e) => (
+          <tr>
+            <td>{e.code}</td>
+            <td>{e.name}</td>
+            <td>{e.tier}</td>
+            <td>{e.market}</td>
+            <td class="num">{num(e.share, 2)}</td>
+          </tr>
+        ))}
+      </tbody>
+    </table>
+  </div>
+
+  <p class="note">
+    触发门槛 = max({params.floor_yi} 亿, {params.ratio * 100}% × 该指数 ETF 合计规模)，封顶 {params.cap_yi} 亿；
+    成分 ETF 两只以上时要求同向只数 ≥ max(2, 60%)；{params.merge_days} 个交易日内同向连续触发合并为一个事件，
+    标在当日金额最大的那天。后 20 日为信号方向对应的指数涨跌，正数=信号有效。
+  </p>
+
+  <script is:inline src="/assets/detail.js" defer></script>
+</Base>

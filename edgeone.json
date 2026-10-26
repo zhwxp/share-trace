@@ -1,11 +1,17 @@
 {
   "name": "sharetrace",
-  "installCommand": "echo 'no dependencies -- pure static'",
-  "buildCommand": "echo 'using prebuilt site/'",
-  "outputDirectory": "./site",
+  "installCommand": "npm ci",
+  "buildCommand": "npm run build",
+  "outputDirectory": "./dist",
   "headers": [
     {
       "source": "/assets/*",
+      "headers": [
+        { "key": "Cache-Control", "value": "public, max-age=604800" }
+      ]
+    },
+    {
+      "source": "/data/*",
       "headers": [
         { "key": "Cache-Control", "value": "public, max-age=604800" }
       ]

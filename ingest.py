@@ -254,7 +254,7 @@ def run(stats_only=False):
                 ["date", "close", "share", "flow", "d_share"],
                 [
                     (r["date"], num(r["close"], 4), num(r["share"], 4),
-                     num(r["flow"], 2), num(r["d_share"], 4))
+                     num(r["flow"], 4), num(r["d_share"], 4))
                     for r in rows
                 ],
             )
@@ -315,7 +315,7 @@ def run(stats_only=False):
             rows.append(
                 (
                     d, num(b["o"], 4), num(b["h"], 4), num(b["l"], 4), num(b["c"], 4),
-                    num(a["flow"], 2) if a else None,
+                    num(a["flow"], 4) if a else None,
                     a["nin"] if a else None,
                     a["nout"] if a else None,
                     a["n"] if a else None,

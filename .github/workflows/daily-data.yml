@@ -5,8 +5,10 @@ name: daily-data
 
 on:
   schedule:
-    # 测试用：字面写 0:40，不做时区折算，观察 GitHub 到底按哪个时区解释。
-    - cron: '40 0 * * *'
+    # GitHub 默认按 UTC 解释 cron，可以用 timezone 字段指定 IANA 时区。
+    # 这里直接写北京时间，不再手工换算。
+    - cron: '10 1 * * *'
+      timezone: "Asia/Shanghai"
   workflow_dispatch:
     inputs:
       date:

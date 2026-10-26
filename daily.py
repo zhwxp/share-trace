@@ -522,7 +522,7 @@ def main(argv):
         evs = ingest.detect_events(dts, agg)
         kdates = [r["date"] for r in rows]
         kclose = [float(r["c"]) for r in rows]
-        ingest.annotate_events(evs, kdates, kclose)
+        ingest.annotate_events(evs)
         for e in evs:
             events_all.append({"slug": slug, **e})
 

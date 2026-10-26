@@ -1,17 +1,8 @@
 ---
 import Base from '../layouts/Base.astro';
-import { load, signalStats } from '../lib/data.mjs';
-import { num, pct } from '../lib/format.mjs';
+import { load } from '../lib/data.mjs';
 
 const { meta } = load();
-const ss = signalStats();
-const at = (arr, w) => arr.find((x) => x.w === w);
-const buy360 = at(ss.buy, 360);
-const sell360 = at(ss.sell, 360);
-const all20 = at(ss.all, 20);
-const buy60 = at(ss.buy, 60);
-const buy120 = at(ss.buy, 120);
-const buy600 = at(ss.buy, 600);
 const p = meta.params;
 const split = Object.entries(meta.split_dates)
   .map(([code, dates]) => `${code} ${dates.join('、')}`)
@@ -50,40 +41,11 @@ const ann = meta.announcements.slice().sort((a, b) => (a.date < b.date ? 1 : -1)
       <p>
         触发条件：|F| ≥ max({p.floor_yi} 亿, {p.ratio * 100}% × 该指数 ETF 合计规模)，封顶 {p.cap_yi} 亿；
         成分 ETF ≥2 只时要求同向只数 ≥ max(2, 60%)；{p.merge_days} 个交易日内同向连续触发合并成一个事件，
-        标在 |F| 最大的那天。每个事件统计「后 20 个交易日」的指数涨跌：买点看涨、卖点看跌，正数表示信号有效。
+        标在 |F| 最大的那天。
       </p>
       <p>
         为什么用「规模的 {Math.round(p.ratio * 100)}%」而不是固定金额：沪深 300 四只 ETF 合计规模近万亿，
         行业指数只有几十亿，同一个金额门槛在两类指数上完全不是一回事。封顶 {p.cap_yi} 亿是为了让万亿级指数也保留灵敏度。
-      </p>
-
-      <h2>怎么用、别怎么用</h2>
-      <p>
-        全样本 {ss.total} 个事件，20 个交易日后方向对的只有 {(all20.rate * 100).toFixed(1)}%——基本等于抛硬币。
-        但拆开看，买点和卖点完全不是一回事：
-      </p>
-      <ul>
-        <li>
-          <strong>卖点（大额净赎回之后）</strong>：360 日命中 {(sell360.rate * 100).toFixed(0)}%，中位
-          {pct(sell360.med)}，比该指数任意一天买入的中位收益高 <span class="fig">{num(sell360.excess, 1)}%</span>。
-          时间越长越准，240/480/600 日也都在 63% 以上。
-        </li>
-        <li>
-          <strong>买点（大额净申购之后）</strong>：360 日命中 {(buy360.rate * 100).toFixed(0)}%，中位
-          {pct(buy360.med)}，比基准低 <span class="fig">{num(Math.abs(buy360.excess), 1)}%</span>。这已经是它七个窗口里
-          最好的一档——60 日只有 {(buy60.rate * 100).toFixed(1)}%，120 日 {(buy120.rate * 100).toFixed(1)}%，
-          600 日超额 {pct(buy600.excess)}。
-        </li>
-      </ul>
-      <p>
-        国家队是逆势接盘的：它买的时候市场还在跌，接完还要跌一段。按年份拆，2023、2024 那两批买入等两年半是赚的
-        （+26.8%、+41.1%），2015、2021 那两批等到两年半还是亏的（−15.0%、−31.3%）。跟着买要准备等两年以上，
-        而且历史上有一半年份等两年也不赚。
-      </p>
-      <p>
-        另外两条：<strong>强度只在买点里有点用</strong>，最强的那三分之一超额转正，中、弱两档都是负的；卖点反过来，
-        越弱越准，但强档只剩几个成熟样本，不能当真。<strong>宽基明显好于行业主题</strong>，沪深 300、上证 180、
-        中证 1000 都在 60% 以上，中证酒、中证医疗只有 20% 出头。完整数字在 <a href="/stats.html">统计页</a>。
       </p>
 
       <h2>已知口径限制</h2>

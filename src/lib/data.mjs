@@ -8,9 +8,6 @@ import path from 'node:path';
 const ROOT = process.cwd();
 const DATA = path.resolve(ROOT, 'data');
 
-/** 后验收益窗口（交易日）。与 ingest.py 的 POST_WINDOWS 必须一致。 */
-export const WINDOWS = [20, 60, 120, 240, 360, 480, 600];
-
 function readJson(p) {
   return JSON.parse(fs.readFileSync(path.join(DATA, p), 'utf8'));
 }
@@ -144,13 +141,6 @@ export function round(x, n = 2) {
   return Math.round(x * f) / f;
 }
 
-export function median(arr) {
-  if (!arr.length) return null;
-  const s = arr.slice().sort((a, b) => a - b);
-  const m = Math.floor(s.length / 2);
-  return s.length % 2 ? s[m] : (s[m - 1] + s[m]) / 2;
-}
-
 /** 单指数的当期口径：当日／近 5 日／近 20 日净申赎 */
 export function indexStats(slug) {
   const { indexSeries, eventsBySlug, meta } = load();
@@ -211,100 +201,6 @@ export function streak() {
   return { days: n, sign };
 }
 
-/**
- * 一组事件的窗口统计：命中率、中位收益、相对该指数「任意一天买入」基准的超额。
- * 卖点的 post 已经取过负号（看跌为正），基准也要按方向取号，否则超额会算反。
- */
-function windowStats(list, meta) {
-  return WINDOWS.map((w) => {
-    const vals = [];
-    const excess = [];
-    for (const e of list) {
-      const v = e.post?.[String(w)];
-      if (v === null || v === undefined) continue;
-      vals.push(v);
-      const b = meta.indices?.[e.slug]?.bench?.[String(w)];
-      if (b !== null && b !== undefined) excess.push(v - e.side * b);
-    }
-    const hit = vals.filter((v) => v > 0).length;
-    return {
-      w,
-      n: vals.length,
-      hit,
-      rate: vals.length ? hit / vals.length : null,
-      med: vals.length ? round(median(vals), 2) : null,
-      excess: excess.length ? round(median(excess), 2) : null,
-    };
-  });
-}
-
-/** 信号有效性：全样本、买点、卖点，各自按窗口拆 */
-export function signalStats() {
-  const { events, meta } = load();
-  const buys = events.filter((e) => e.side > 0);
-  const sells = events.filter((e) => e.side < 0);
-  return {
-    total: events.length,
-    buys: buys.length,
-    sells: sells.length,
-    first: events[0]?.date ?? null,
-    all: windowStats(events, meta),
-    buy: windowStats(buys, meta),
-    sell: windowStats(sells, meta),
-  };
-}
-
-/** 按指数看命中率（样本太少的不上，免得一个事件就 100%） */
-export function byIndexStats(minN = 5) {
-  const { events, meta, bySlug } = load();
-  const groups = new Map();
-  for (const e of events) {
-    if (!groups.has(e.slug)) groups.set(e.slug, []);
-    groups.get(e.slug).push(e);
-  }
-  const rows = [];
-  for (const [slug, list] of groups) {
-    if (list.length < minN) continue;
-    const w = windowStats(list, meta).find((x) => x.w === 360);
-    rows.push({
-      slug,
-      name: bySlug.get(slug)?.name ?? slug,
-      cat: bySlug.get(slug)?.cat ?? '',
-      n: list.length,
-      buys: list.filter((e) => e.side > 0).length,
-      rate: w.rate,
-      med: w.med,
-      excess: w.excess,
-      matured: w.n,
-    });
-  }
-  return rows.sort((a, b) => (b.rate ?? 0) - (a.rate ?? 0));
-}
-
-/** 按历史强度分三档：同一指数内部 |当日金额| 排名前 1/3、中 1/3、后 1/3。
- *  买卖点分开算——两个方向的信号基数差一倍，混在一起分层会被构成带偏。
- *  n_events < 3 的指数分不出三档，直接排除。 */
-export function strengthStats() {
-  const { events, meta } = load();
-  const split = (list) => {
-    const bands = { strong: [], mid: [], weak: [] };
-    for (const e of list) {
-      if (!e.rank || !e.n_events || e.n_events < 3) continue;
-      const p = e.rank / e.n_events;
-      bands[p <= 1 / 3 ? 'strong' : p <= 2 / 3 ? 'mid' : 'weak'].push(e);
-    }
-    return ['strong', 'mid', 'weak'].map((k) => ({
-      key: k,
-      n: bands[k].length,
-      windows: windowStats(bands[k], meta),
-    }));
-  };
-  return {
-    buy: split(events.filter((e) => e.side > 0)),
-    sell: split(events.filter((e) => e.side < 0)),
-  };
-}
-
 /** 详情页图表的原始序列：K 线、申赎、事件、公告锚点。
  *  均线与 20 日累计在浏览器里算——派生序列不进 payload，能省三成体积。 */
 export function chartPayload(slug) {
@@ -329,7 +225,6 @@ export function chartPayload(slug) {
       n: e.n,
       rank: e.rank,
       nEvents: e.n_events,
-      post20: e.post20 ?? null,
     })),
   };
 }

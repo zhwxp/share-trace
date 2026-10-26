@@ -23,9 +23,7 @@ from __future__ import annotations
 import json
 import math
 import sqlite3
-import statistics
 import sys
-from bisect import bisect_left
 from collections import defaultdict
 from datetime import datetime, timezone
 from pathlib import Path
@@ -42,7 +40,6 @@ CAP_YI = 100.0        # 占比门槛的绝对上限（亿元）
 MIN_OBS = 60          # 至少积累这么多交易日才允许出信号
 MERGE_DAYS = 5        # 同向连续触发合并窗口（交易日）
 MIN_HIST_OBS = 60     # ETF 至少有这么多天份额历史才进历史序列
-POST_WINDOWS = (20, 60, 120, 240, 360, 480, 600)   # 后验收益窗口（交易日）
 
 # 份额折算日（2 份合 1 份会造出假申赎），这些日期的 Δ份额 置零
 SPLIT_DATES = {
@@ -212,53 +209,15 @@ def detect_events(dates, agg):
     return events
 
 
-def post_returns(kdates, kclose, ev_date, side):
-    """事件之后 N 个交易日的涨跌，按信号方向取号：买点看涨、卖点看跌，正数=信号有效。"""
-    i = bisect_left(kdates, ev_date)
-    out = {}
-    for h in POST_WINDOWS:
-        if i >= len(kdates) or i + h >= len(kdates):
-            out[str(h)] = None
-        else:
-            r = (kclose[i + h] / kclose[i] - 1) * 100
-            out[str(h)] = round(r if side > 0 else -r, 2)
-    return out
+def annotate_events(events):
+    """给事件标上历史强度排名：同一指数所有已触发事件里按 |当日金额| 从大到小排，1 为最强。
 
-
-def post_return(kdates, kclose, ev_date, side, horizon=20):
-    """单窗口版，保留给旧调用方。"""
-    return post_returns(kdates, kclose, ev_date, side)[str(horizon)]
-
-
-def bench_medians(kdates, kclose):
-    """该指数任意一天买入、持有 N 个交易日的中位收益——事件收益的对照基准。
-
-    没有它，A 股长期上涨的 beta 会被算成信号的功劳。
-    """
-    n = len(kclose)
-    out = {}
-    for h in POST_WINDOWS:
-        if n <= h:
-            out[str(h)] = None
-            continue
-        vals = [(kclose[i + h] / kclose[i] - 1) * 100 for i in range(n - h)]
-        out[str(h)] = round(statistics.median(vals), 2)
-    return out
-
-
-def annotate_events(events, kdates, kclose):
-    """给事件补两样东西：多窗口后验收益、该指数内部的历史强度排名。
-
-    排名口径：同一指数所有已触发事件里按 |当日金额| 从大到小排，1 为最强。
     用单日金额而不是连续合计——「这一天有多猛」才是读的人想问的。
     """
     n = len(events)
     for rank, e in enumerate(sorted(events, key=lambda x: -abs(x["amount"])), 1):
         e["rank"] = rank
         e["n_events"] = n
-    for e in events:
-        e["post"] = post_returns(kdates, kclose, e["date"], e["side"])
-        e["post20"] = e["post"]["20"]
     return events
 
 
@@ -336,7 +295,7 @@ def run(stats_only=False):
             dts = sorted(agg)
 
         events = detect_events(dts, agg) if len(dts) >= MIN_OBS else []
-        annotate_events(events, kdates, kclose)
+        annotate_events(events)
 
         if stats_only:
             summary.append((it["name"], len(dts), len(events), events))
@@ -384,7 +343,6 @@ def run(stats_only=False):
             "events": len(events),
             "etfs_used": use_hist,
             "etfs_short": [c for c in codes if c not in use_hist],
-            "bench": bench_medians(kdates, kclose),
         }
 
     if stats_only:

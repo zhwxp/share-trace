@@ -121,22 +121,22 @@ const generated = meta.generated_at.slice(0, 16).replace('T', ' ');
       <h2>成分 ETF <span class="cnt">{detail.length}</span></h2>
       <span class="side">份额为最新交易日的基金总份额</span>
     </div>
-    <table class="tbl">
-      <thead>
-        <tr><th>代码</th><th>名称</th><th>档</th><th>市场</th><th class="num">份额（亿份）</th></tr>
-      </thead>
-      <tbody>
-        {detail.map((e) => (
-          <tr>
-            <td class="sub" style="font-size:12px">{e.code}</td>
-            <td>{e.name}</td>
-            <td class="small">{e.tier}</td>
-            <td class="small">{e.market}</td>
-            <td class="num fig">{num(e.share, 2)}</td>
-          </tr>
-        ))}
-      </tbody>
-    </table>
+    <div class="chead" aria-hidden="true">
+      <span>代码</span><span>名称</span><span>档</span><span>市场</span><span class="num">份额（亿份）</span>
+    </div>
+    <div class="clist">
+      {detail.map((e) => (
+        <div class="crow">
+          <span class="cn">{e.name}</span>
+          <span class="cs">{num(e.share, 2)}</span>
+          <span class="cmeta">
+            <span class="cc">{e.code}</span>
+            <span class="ct">{e.tier}</span>
+            <span class="cm">{e.market}</span>
+          </span>
+        </div>
+      ))}
+    </div>
   </section>
 
   <p class="tail">

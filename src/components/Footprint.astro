@@ -14,14 +14,12 @@ const label = `2012 年 ${fp.start} 至 ${fp.end} 共 ${fp.n} 个交易日的合
     <path d={fp.neg} fill="var(--chart-2)" opacity="0.95"></path>
     <line x1="0" x2={fp.w} y1={fp.mid} y2={fp.mid} stroke="var(--axis-ink)" stroke-width="1"
       vector-effect="non-scaling-stroke" opacity="0.4"></line>
-    <line x1={fp.w - 0.5} x2={fp.w - 0.5} y1="0" y2={fp.h} stroke="var(--accent)" stroke-width="1"
-      vector-effect="non-scaling-stroke" opacity="0.9"></line>
   </svg>
   <div class="years" aria-hidden="true">
-    {fp.years.map((y) => (
-      <span style={`left:${(y.i / fp.w) * 100}%`}>{y.y}</span>
+    {fp.years.map((y, i) => (
+      <span class={i === 0 ? 'edge-l' : i === fp.years.length - 1 ? 'edge-r' : ''}
+        style={`left:${(y.i / fp.w) * 100}%`}>{y.y}</span>
     ))}
-    <span class="now" style="left:100%">今日</span>
   </div>
   {caption && <figcaption class="stripcap" data-idle={caption}>{caption}</figcaption>}
 </figure>

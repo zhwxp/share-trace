@@ -41,8 +41,8 @@ const streakText = st.days > 1
     <div>
       <h1>今日动态</h1>
       <p class="meta">
-        <span class="fig">{latest}</span> 收盘 · 沪市 <span class="fig">{t.n}</span> 只国家队 ETF 合计
-        · 数据生成 <span class="fig">{generated}</span>
+        <span class="fig">{latest}</span> 收盘<span class="hide-sm"> · 沪市 <span class="fig">{t.n}</span> 只国家队 ETF 合计
+        · 数据生成 <span class="fig">{generated}</span></span>
       </p>
     </div>
     <div class="right">
@@ -147,37 +147,36 @@ const streakText = st.days > 1
   <section class="band reveal">
     <div class="band-head">
       <h2>ETF 异动前五</h2>
-      <span class="side">按当日净申赎绝对值 · 深市部分 ETF 只有最近几日的份额</span>
+      <span class="side">按当日净申赎绝对值，单位亿元 / 亿份</span>
     </div>
-    <table class="tbl">
-      <thead>
-        <tr>
-          <th>ETF</th>
-          <th>市场</th>
-          <th>档</th>
-          <th class="num">当日净申赎 (亿)</th>
-          <th class="num">Δ 份额 (亿份)</th>
-          <th class="num">份额 (亿份)</th>
-        </tr>
-      </thead>
-      <tbody>
-        {mv.map((m) => (
-          <tr>
-            <td>
-              {codeToSlug.has(m.etf.code)
-                ? <a href={`/index/${codeToSlug.get(m.etf.code)}.html`}>{m.etf.name}</a>
-                : m.etf.name}
-              {' '}<span class="sub">{m.etf.code}</span>
-            </td>
-            <td class="small">{m.etf.market}</td>
-            <td class="small">{m.etf.tier}</td>
-            <td class="num fig">{signed(m.flow)}</td>
-            <td class="num fig">{signed(m.d_share)}</td>
-            <td class="num fig">{num(m.share, 2)}</td>
-          </tr>
-        ))}
-      </tbody>
-    </table>
+    <div class="ehead" aria-hidden="true">
+      <span>ETF</span>
+      <span>代码</span>
+      <span>市场</span>
+      <span>档</span>
+      <span class="num">当日净申赎</span>
+      <span class="num">Δ 份额</span>
+      <span class="num">份额</span>
+    </div>
+    <div class="elist">
+      {mv.map((m) => (
+        <div class="erow">
+          <span class="en">
+            {codeToSlug.has(m.etf.code)
+              ? <a href={`/index/${codeToSlug.get(m.etf.code)}.html`}>{m.etf.name}</a>
+              : m.etf.name}
+          </span>
+          <span class="ev">{signed(m.flow)}</span>
+          <span class="emeta">
+            <span class="ec">{m.etf.code}</span>
+            <span class="em">{m.etf.market}</span>
+            <span class="et">{m.etf.tier}</span>
+            <span class="ed">Δ {signed(m.d_share)}</span>
+            <span class="es">份额 {num(m.share, 2)}</span>
+          </span>
+        </div>
+      ))}
+    </div>
   </section>
 
   <p class="tail">

@@ -1,6 +1,6 @@
 {
  "schema_version": 1,
- "generated_at": "2026-10-26T17:05:35+08:00",
+ "generated_at": "2026-10-26T17:17:36+08:00",
  "latest_trade_date": "2026-10-23",
  "first_trade_date": "2012-01-04",
  "params": {
@@ -66,7 +66,7 @@
   }
  },
  "stale": {
-  "note": "K 线比最新份额日期短的指数，通常是上游当天行情还没补",
+  "note": "K 线比最新份额日期短的指数，上游行情还没有这几天的数据",
   "by_index": {}
  },
  "indices": {
@@ -149,7 +149,7 @@
    "last_date": "2026-10-23",
    "rows": 2420,
    "flow_days": 2420,
-   "events": 40,
+   "events": 41,
    "etfs_used": [
     "512100",
     "560010"
@@ -548,7 +548,7 @@
    "last_date": "2026-10-23",
    "rows": 1165,
    "flow_days": 1165,
-   "events": 3,
+   "events": 2,
    "etfs_used": [
     "562500"
    ],
@@ -613,8 +613,8 @@
    "first_date": "2022-07-12",
    "last_date": "2026-10-23",
    "rows": 1054,
-   "flow_days": 1007,
-   "events": 3,
+   "flow_days": 1038,
+   "events": 2,
    "etfs_used": [
     "513120"
    ],
@@ -651,6 +651,6 @@
   "indices": 43,
   "etfs": 57,
   "etf_rows": 92777,
-  "events": 241
+  "events": 240
  }
 }

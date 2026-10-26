@@ -1,86 +1,110 @@
 ---
 import Base from '../layouts/Base.astro';
-import { load, indexStats, miniFlow } from '../lib/data.mjs';
-import { num, signed, side } from '../lib/format.mjs';
+import { load, indexStats } from '../lib/data.mjs';
+import { signed, side, pct } from '../lib/format.mjs';
+import { V } from '../lib/asset.mjs';
 
-const { meta, latest, indices } = load();
+const { meta, latest, indices, events } = load();
 const rows = indices.map((it) => ({ it, s: indexStats(it.slug) }));
-const maxAbs = Math.max(...rows.map((r) => Math.abs(r.s.today ?? 0)), 1);
 
-const groups = meta.categories.map((cat) => {
-  const list = rows
+const groups = meta.categories.map((cat) => ({
+  cat,
+  list: rows
     .filter((r) => r.it.cat === cat)
-    .sort((a, b) => Math.abs(b.s.today ?? 0) - Math.abs(a.s.today ?? 0));
-  const flow = Math.round(list.reduce((s, r) => s + (r.s.today ?? 0), 0) * 100) / 100;
-  const ev = list.reduce((s, r) => s + r.s.events.length, 0);
-  return { cat, list, flow, ev };
-});
-const totalEv = meta.counts.events;
+    .sort((a, b) => Math.abs(b.s.today ?? 0) - Math.abs(a.s.today ?? 0)),
+}));
+
+// 默认打开最近出过信号的那个指数
+const lastEv = events.slice().sort((a, b) => (a.date < b.date ? 1 : -1))[0];
+const def = lastEv?.slug && indices.some((i) => i.slug === lastEv.slug) ? lastEv.slug : 'hs300';
+const dIt = indices.find((i) => i.slug === def);
+const dS = indexStats(def);
+const dEv = dS.events.slice(0, 8);
 const generated = meta.generated_at.slice(0, 16).replace('T', ' ');
 ---
-<Base title="ShareTrace · 分指数" current="indices" stamp={{ date: latest, generated }}>
+<Base title="ShareTrace · 分指数" current="indices" echarts stamp={{ date: latest, generated }}>
   <div class="head reveal">
     <div>
       <h1>分指数</h1>
-      <p class="meta">
-        {indices.length} 个标的指数，按大类分组，组内按当日净申赎绝对值排序。当日口径
-        <span class="fig">{latest}</span>，单位亿元。
-      </p>
-    </div>
-    <div class="right">
-      <b>{groups.length}</b> 个大类<br />
-      <b>{totalEv}</b> 个历史信号
+      <p class="meta">{indices.length} 个指数 · <span class="fig">{latest}</span> 收盘</p>
     </div>
   </div>
 
-  <div class="ihead" aria-hidden="true">
-    <span>指数</span>
-    <span>近 20 日逐日</span>
-    <span class="num">当日</span>
-    <span class="num">20 日合计</span>
-    <span class="num">最近信号</span>
-  </div>
+  <div class="picker">
+    <aside class="plist reveal" aria-label="指数列表">
+      {groups.map((g) => (
+        <div class="pgroup">
+          <h2>{g.cat}</h2>
+          {g.list.map(({ it, s }) => (
+            <a class="pitem" href={`#${it.slug}`} data-slug={it.slug} data-name={it.name}
+              aria-current={it.slug === def ? 'true' : undefined}>
+              <span class="pn">{it.name}</span>
+              <span class="pv">{signed(s.today)}</span>
+            </a>
+          ))}
+        </div>
+      ))}
+    </aside>
 
-  {groups.map((g) => (
-    <section class="band reveal" id={g.cat}>
-      <div class="band-head">
-        <h2>{g.cat} <span class="cnt">{g.list.length}</span></h2>
-        <span class="side">
-          当日合计 <span class="fig">{signed(g.flow)}</span> 亿 · {g.ev} 个事件
-        </span>
+    <section class="pmain reveal">
+      <label class="pselect-wrap">
+        <span class="sr">选择指数</span>
+        <select class="pselect" id="pSelect">
+          {groups.map((g) => (
+            <optgroup label={g.cat}>
+              {g.list.map(({ it }) => (
+                <option value={it.slug} selected={it.slug === def}>{it.name}</option>
+              ))}
+            </optgroup>
+          ))}
+        </select>
+      </label>
+
+      <div class="phead">
+        <h2 id="pName">{dIt.name}</h2>
+        <div class="pstats" id="pStats">
+          <span>当日 <b class={dS.today >= 0 ? 'up' : ''}>{signed(dS.today)}</b></span>
+          <span>近 5 日 <b>{signed(dS.d5)}</b></span>
+          <span>近 20 日 <b>{signed(dS.d20)}</b></span>
+        </div>
       </div>
-      <div class="ilist">
-        {g.list.map(({ it, s }) => {
-          const mf = miniFlow(it.slug);
-          return (
-          <a class="irow" href={`/index/${it.slug}.html`}>
-            <span class="inm">
-              {it.name}
-              {s.shortHistory && <span class="flag">历史不足</span>}
-            </span>
-            <span class="ispark" aria-hidden="true">
-              <svg viewBox={`0 0 ${mf.w} ${mf.h}`} preserveAspectRatio="none">
-                <line x1="0" x2={mf.w} y1={mf.mid} y2={mf.mid} stroke="var(--axis-ink)" stroke-width="0.5" opacity="0.35"></line>
-                <path d={mf.pos} fill="var(--chart-1)" opacity="0.85"></path>
-                <path d={mf.neg} fill="var(--chart-2)"></path>
-              </svg>
-            </span>
-            <span class="iv">{signed(s.today)}</span>
-            <span class="iv m">{signed(s.d20)}</span>
-            <span class="ie">
-              {s.lastEvent
-                ? <>{s.lastEvent.date.slice(2)} <span class={`pill ${s.lastEvent.side > 0 ? 'buy' : 'sell'}`}>{side(s.lastEvent.side)}</span> <span class="fig">{signed(s.lastEvent.amount, 0)}</span></>
-                : <span class="faint">—</span>}
-            </span>
-          </a>
-          );
-        })}
+
+      <div class="legend" style="margin-bottom:8px">
+        <span class="l"><i class="sw sw-candle"></i>K 线</span>
+        <span class="l"><i class="sw sw-ma20"></i>MA20</span>
+        <span class="l"><i class="sw sw-ma60"></i>MA60</span>
+        <span class="l"><i class="sw sw-flow"></i>日净申赎</span>
+        <span class="l"><i class="sw sw-cum"></i>20 日累计</span>
+        <span class="l">▲ 买点 ▼ 卖点</span>
+      </div>
+
+      <div id="pChart" class="chart chart-echarts" role="img"
+        aria-label={`${dIt.name}的 K 线、均线与净申赎，标出 ${dS.events.length} 个买卖点`}
+        data-src={`/data/index/${def}.json`}></div>
+      <noscript>
+        <p class="note">图表需要脚本。单个指数的独立页：<a href={`/index/${def}.html`}>{dIt.name}</a></p>
+      </noscript>
+
+      <div class="psig">
+        <div class="band-head">
+          <h3>历史信号 <span class="cnt">{dS.events.length}</span></h3>
+          <span class="side">后 20 日为信号方向的指数涨跌，正数=有效</span>
+        </div>
+        <div id="pSignals">
+          {dEv.map((e) => (
+            <div class="psrow">
+              <span class="psd">{e.date}</span>
+              <span class={`pill ${e.side > 0 ? 'buy' : 'sell'}`}>{side(e.side)}</span>
+              <span class="psv">{signed(e.amount)}</span>
+              <span class="psp">{e.post20 === null ? '—' : pct(e.post20, 1)}</span>
+            </div>
+          ))}
+          {dEv.length === 0 && <p class="empty">这个指数还没有触发过信号。</p>}
+        </div>
       </div>
     </section>
-  ))}
+  </div>
 
-  <p class="tail">
-    事件口径：5 个交易日内同向连续触发合并为一个，标在金额最大那天。「历史不足」的指数只有最近几个交易日的份额数据，
-    不参与历史序列，也不出信号。<a href="/about.html">口径说明 →</a>
-  </p>
+  <script is:inline defer src={`/assets/kline.js?v=${V}`}></script>
+  <script is:inline defer src={`/assets/picker.js?v=${V}`}></script>
 </Base>

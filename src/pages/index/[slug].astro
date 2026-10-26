@@ -2,6 +2,7 @@
 import Base from '../../layouts/Base.astro';
 import { load, indexStats } from '../../lib/data.mjs';
 import { num, signed, side, pct } from '../../lib/format.mjs';
+import { V } from '../../lib/asset.mjs';
 
 export function getStaticPaths() {
   const { indices } = load();
@@ -145,5 +146,6 @@ const generated = meta.generated_at.slice(0, 16).replace('T', ' ');
     标在当日金额最大的那天。<a href="/about.html">口径说明 →</a>
   </p>
 
-  <script is:inline src="/assets/detail.js" defer></script>
+  <script is:inline src={`/assets/kline.js?v=${V}`} defer></script>
+  <script is:inline src={`/assets/detail.js?v=${V}`} defer></script>
 </Base>

@@ -378,6 +378,58 @@ table.tbl .sub { color: var(--faint); font-family: var(--mono); font-size: 12px;
 .sv2.pos { color: var(--text); }
 .srow .pill { justify-self: start; }
 
+/* ---------------- 信号页 ---------------- */
+
+.statrow {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  margin-top: 22px;
+  border-top: 1px solid var(--border);
+  border-bottom: 1px solid var(--border);
+}
+.statrow > div { padding: 14px 20px 14px 0; }
+.statrow > div + div { padding-left: 20px; border-left: 1px solid var(--rule); }
+.statrow .k { color: var(--muted); font-size: 12px; }
+.statrow .v { font-family: var(--mono); font-size: 26px; letter-spacing: -0.02em; margin-top: 2px; }
+.statrow .v .u { font-size: 14px; color: var(--faint); }
+.statrow .v.hl { color: var(--accent-ink); }
+.statrow .s { color: var(--faint); font-size: 12px; margin-top: 2px; }
+
+.shead {
+  display: grid;
+  grid-template-columns: 96px minmax(0, 1fr) 56px 96px 132px 80px;
+  gap: 16px;
+  align-items: end;
+  margin-top: 30px;
+  padding-bottom: 8px;
+  border-bottom: 1px solid var(--border);
+  color: var(--muted);
+  font-size: 12px;
+}
+.shead .num { text-align: right; }
+
+.slist { display: flex; flex-direction: column; }
+
+.srow {
+  display: grid;
+  grid-template-columns: 96px minmax(0, 1fr) 56px 96px 132px 80px;
+  gap: 16px;
+  align-items: center;
+  min-height: 40px;
+  border-top: 1px solid var(--rule);
+  font-size: 13px;
+}
+.slist .srow:first-child { border-top: none; }
+.srow:hover { background: #191920; }
+.srow:hover .sn2 { color: var(--accent-ink); }
+
+.sd { font-variant-numeric: tabular-nums; font-size: 13px; color: var(--muted); }
+.sn2 { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.sv2 { font-family: var(--mono); font-variant-numeric: tabular-nums; text-align: right; font-size: 13px; }
+.sv2.m { color: var(--muted); font-family: var(--font); }
+.sv2.pos { color: var(--text); }
+.srow .pill { justify-self: start; }
+
 /* ---------------- 分指数列表 ---------------- */
 
 .ihead {
@@ -474,41 +526,7 @@ table.tbl .sub { color: var(--faint); font-family: var(--mono); font-size: 12px;
 .mv { font-family: var(--mono); font-variant-numeric: tabular-nums; text-align: right; font-size: 13px; }
 .mv.m { color: var(--muted); font-size: 13px; font-family: var(--font); font-variant-numeric: tabular-nums; }
 
-/* ---------------- 异动 / 成分 ETF 列表 ---------------- */
-
-.ehead, .erow {
-  display: grid;
-  grid-template-columns: minmax(0, 1fr) 64px 44px 56px 116px 112px 112px;
-  gap: 16px;
-  align-items: center;
-}
-.ehead {
-  padding-bottom: 8px;
-  color: var(--muted);
-  font-size: 12px;
-}
-.ehead .num { text-align: right; }
-.elist { display: flex; flex-direction: column; }
-.erow {
-  min-height: 40px;
-  border-top: 1px solid var(--rule);
-  font-size: 13px;
-}
-.elist .erow:first-child { border-top: none; }
-.erow:hover { background: #191920; }
-.erow:hover .en { color: var(--accent-ink); }
-.en { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-.ev, .ed, .es { font-family: var(--mono); font-variant-numeric: tabular-nums; text-align: right; font-size: 13px; }
-.emeta { display: contents; }
-.erow .en, .ehead > span:nth-child(1) { grid-column: 1; }
-.erow .ec, .ehead > span:nth-child(2) { grid-column: 2; }
-.erow .em, .ehead > span:nth-child(3) { grid-column: 3; }
-.erow .et, .ehead > span:nth-child(4) { grid-column: 4; }
-.erow .ev, .ehead > span:nth-child(5) { grid-column: 5; }
-.erow .ed, .ehead > span:nth-child(6) { grid-column: 6; }
-.erow .es, .ehead > span:nth-child(7) { grid-column: 7; }
-.ec, .em, .et { color: var(--muted); font-size: 12px; }
-.ec { font-variant-numeric: tabular-nums; }
+/* ---------------- 成分 ETF 列表 ---------------- */
 
 .chead, .crow {
   display: grid;
@@ -532,6 +550,83 @@ table.tbl .sub { color: var(--faint); font-family: var(--mono); font-size: 12px;
 .ct, .cm { color: var(--muted); font-size: 12px; }
 .cn { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .cs { font-family: var(--mono); font-variant-numeric: tabular-nums; text-align: right; font-size: 13px; }
+
+/* ---------------- 分指数：列表 + K 线 ---------------- */
+
+.picker {
+  display: grid;
+  grid-template-columns: 252px minmax(0, 1fr);
+  gap: 40px;
+  align-items: start;
+  margin-top: 26px;
+}
+
+.plist {
+  position: sticky;
+  top: 24px;
+  max-height: calc(100vh - 48px);
+  overflow-y: auto;
+  padding-right: 8px;
+  scrollbar-width: thin;
+}
+.pgroup + .pgroup { margin-top: 16px; }
+.pgroup h2 {
+  margin: 0 0 4px;
+  padding: 0 8px;
+  font-size: 11px;
+  font-weight: 400;
+  color: var(--faint);
+  letter-spacing: 0.02em;
+}
+.pitem {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 10px;
+  height: 32px;
+  padding: 0 8px;
+  border-radius: 4px;
+  font-size: 13px;
+  color: var(--muted);
+}
+.pitem:hover { background: #1c1c1f; color: var(--text); }
+.pitem[aria-current='true'] { background: #232327; color: var(--text); }
+.pitem[aria-current='true'] .pn { font-weight: 500; }
+.pitem .pn { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.pitem .pv { font-family: var(--mono); font-variant-numeric: tabular-nums; font-size: 12px; color: var(--faint); }
+.pitem[aria-current='true'] .pv { color: var(--muted); }
+
+.pselect-wrap { display: none; }
+
+.phead {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 10px 24px;
+  flex-wrap: wrap;
+  margin-bottom: 10px;
+}
+.phead h2 { font-size: 22px; font-weight: 500; letter-spacing: -0.01em; }
+.pstats { display: flex; gap: 18px; flex-wrap: wrap; font-size: 12px; color: var(--muted); }
+.pstats b { font-family: var(--mono); font-weight: 400; color: var(--text); margin-left: 4px; }
+.pstats b.up { color: var(--text); }
+
+.psig { margin-top: 22px; }
+.psig .band-head { margin-bottom: 6px; }
+.psig h3 { font-size: 14px; font-weight: 500; }
+.psrow {
+  display: grid;
+  grid-template-columns: 96px 56px minmax(0, 1fr) 80px;
+  gap: 16px;
+  align-items: center;
+  min-height: 36px;
+  border-top: 1px solid var(--rule);
+  font-size: 13px;
+}
+.psrow:first-child { border-top: none; }
+.psd { font-variant-numeric: tabular-nums; font-size: 12px; color: var(--muted); }
+.psv { font-family: var(--mono); font-variant-numeric: tabular-nums; text-align: right; font-size: 13px; }
+.psp { font-family: var(--mono); font-variant-numeric: tabular-nums; text-align: right; font-size: 12px; color: var(--muted); }
 
 /* ---------------- 图例 ---------------- */
 
@@ -575,6 +670,7 @@ table.tbl .sub { color: var(--faint); font-family: var(--mono); font-size: 12px;
 }
 .footstrip.is-live .cursor { opacity: 1; }
 .footstrip .years { position: relative; height: 18px; margin-top: 10px; }
+.footstrip .years span, .lead .unit, .figrow .label { font-variant-numeric: tabular-nums; }
 .footstrip .years .edge-l { transform: none; }
 .footstrip .years .edge-r { transform: translateX(-100%); }
 .footstrip .years span {
@@ -963,25 +1059,7 @@ html.no-js .reveal { opacity: 1; transform: none; }
   .mrow .mv.m { grid-column: 1; grid-row: 2; text-align: left; }
   .mrow .mv.m:nth-of-type(5) { grid-column: 2; grid-row: 2; text-align: right; }
 
-  .ehead, .chead { display: none; }
-  .erow {
-    grid-template-columns: minmax(0, 1fr) auto;
-    grid-template-areas: 'n v' 'm m';
-    gap: 4px 12px;
-    padding: 10px 0;
-    min-height: 0;
-  }
-  .erow .en { grid-area: n; font-size: 14px; }
-  .erow .ev { grid-area: v; font-size: 14px; }
-  .erow .emeta {
-    grid-area: m;
-    display: flex;
-    flex-wrap: wrap;
-    gap: 2px 12px;
-    color: var(--muted);
-    font-size: 12px;
-  }
-  .erow .emeta .ed, .erow .emeta .es { font-family: var(--mono); text-align: left; font-size: 12px; color: var(--muted); }
+  .chead { display: none; }
 
   .crow {
     grid-template-columns: minmax(0, 1fr) auto;
@@ -993,6 +1071,24 @@ html.no-js .reveal { opacity: 1; transform: none; }
   .crow .cn { grid-area: n; font-size: 14px; }
   .crow .cs { grid-area: v; font-size: 14px; }
   .crow .cmeta { grid-area: m; display: flex; gap: 12px; color: var(--muted); font-size: 12px; }
+
+  .picker { grid-template-columns: 1fr; gap: 0; margin-top: 18px; }
+  .plist { display: none; }
+  .pselect-wrap { display: block; margin-bottom: 14px; }
+  .pselect {
+    width: 100%;
+    height: 44px;
+    padding: 0 12px;
+    background: #1b1b1f;
+    color: var(--text);
+    border: 1px solid var(--control);
+    border-radius: 6px;
+    font: inherit;
+    font-size: 14px;
+  }
+  .phead h2 { font-size: 20px; }
+  .pstats { gap: 12px; font-size: 11px; }
+  .psrow { grid-template-columns: 82px 50px minmax(0, 1fr) 62px; gap: 10px; }
 }
 
 /* 手机底部标签栏 */

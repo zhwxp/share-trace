@@ -2,9 +2,9 @@
 
 名字取自「份额的足迹」：把 57 只「国家队曾出现在前十大持有人」的 ETF 的日度份额变化折算成金额，画到 43 个标的指数的 K 线上，标出买卖点。
 
-- 首页：当日合计净申赎 + 近 5/20 日 + 今日触发的信号 + ETF 异动前五 + 一个入口
-- 分指数：43 个标的指数按大类分组，当日 / 5 日 / 20 日 / 事件数 / 最近信号
-- 详情页：K 线 + 买卖点 + 日净申赎柱 + 20 日累计线 + 信号明细 + 成分 ETF
+- 首页：当日合计净申赎 + 一句话结论 + 近 5/20 日 + 2012 年至今的逐日足迹条 + 今日信号 + 近 20 日柱状图 + 最近信号
+- 分指数：左边 43 个指数（按大类分组），右边选中指数的 K 线（标买卖点）+ 日净申赎 + 20 日累计 + 历史信号；切换不跳页
+- 详情页：同一张图 + 信号明细 + 成分 ETF，给不跑脚本的设备和深链接用
 - 信号：全部历史事件，按年份分组
 - 历史：沪市合计按自然月汇总，逐日明细给 CSV 下载
 - 口径说明
@@ -20,10 +20,12 @@ src/lib/data.mjs      构建期读 data/、校验、派生（含足迹条、迷�
 src/lib/format.mjs    数字与日期显示规则
 src/layouts/          页面骨架（左栏 / 平板顶栏 / 手机底部标签）
 src/components/       Footprint.astro：2012 年至今的逐日足迹条
+src/lib/asset.mjs     构建期资源版本号（/assets/*.js 没有内容哈希，加 ?v= 免得改完还被缓存）
 src/pages/            首页 / 分指数 / 详情 / 信号 / 历史 / 口径
 src/pages/data/       静态 JSON 与 CSV 端点（图表序列、历史明细）
 src/styles/global.css 设计 token 与全站样式
-public/assets/        charts.js（SVG 图表）、detail.js（ECharts）、strip.js（足迹条读数）、reveal.js、echarts.min.js
+public/assets/        kline.js（K 线，详情页与分指数页共用）、picker.js（分指数页切换）、
+                      charts.js（首页柱状图）、strip.js（足迹条读数）、reveal.js、echarts.min.js
 dist/                 构建产物（.gitignore，由平台构建）
 ```
 

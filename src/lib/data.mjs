@@ -173,20 +173,6 @@ export function marketToday() {
   };
 }
 
-/** 最新交易日的 ETF 异动，按 |flow| 排序 */
-export function movers(limit = 5) {
-  const { etfs, etfSeries, latest } = load();
-  const out = [];
-  for (const e of etfs) {
-    const rows = etfSeries.get(e.code) ?? [];
-    const last = rows[rows.length - 1];
-    if (!last || last.date !== latest) continue;
-    out.push({ etf: e, ...last });
-  }
-  out.sort((a, b) => Math.abs(b.flow ?? 0) - Math.abs(a.flow ?? 0));
-  return out.slice(0, limit);
-}
-
 /** 当月触发的事件 */
 export function eventsOn(date) {
   return load().events.filter((e) => e.date === date);
@@ -254,24 +240,6 @@ export function streak() {
   return { days: n, sign };
 }
 
-/** 单指数最近 N 日净申赎的迷你足迹（分指数页的每一行用） */
-export function miniFlow(slug, days = 20, w = 100, h = 22) {
-  const { indexSeries } = load();
-  const rows = (indexSeries.get(slug) ?? []).filter((r) => r.flow !== null).slice(-days);
-  const max = Math.max(...rows.map((r) => Math.abs(r.flow)), 1);
-  const mid = h * 0.5;
-  const bw = w / days;
-  let pos = '';
-  let neg = '';
-  rows.forEach((r, i) => {
-    const x = i * bw;
-    const height = Math.max(0.8, (Math.sqrt(Math.abs(r.flow)) / Math.sqrt(max)) * (mid - 1.5));
-    if (r.flow >= 0) pos += `M${x.toFixed(2)} ${(mid - height).toFixed(2)}h${(bw * 0.72).toFixed(2)}v${height.toFixed(2)}h-${(bw * 0.72).toFixed(2)}z`;
-    else neg += `M${x.toFixed(2)} ${mid}h${(bw * 0.72).toFixed(2)}v${height.toFixed(2)}h-${(bw * 0.72).toFixed(2)}z`;
-  });
-  return { w, h, mid, pos, neg, n: rows.length, last: rows[rows.length - 1]?.flow ?? null };
-}
-
 /** 信号的有效率：后 20 日方向对的事件占比 */
 export function signalStats() {
   const { events } = load();
@@ -311,6 +279,7 @@ export function chartPayload(slug) {
       days: e.days,
       reson: e.reson,
       n: e.n,
+      post20: e.post20 ?? null,
     })),
   };
 }

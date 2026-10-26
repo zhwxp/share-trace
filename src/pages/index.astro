@@ -62,7 +62,7 @@ const streakText = st.days > 1
   <section class="band reveal">
     <div class="band-head">
       <h2>今日信号 <span class="cnt">{signals.length}</span></h2>
-      <span class="side">历史第 N 强 = 该指数所有信号里按当日金额排名</span>
+      <span class="side">历史第 N 强 = 同方向信号里按当日金额排名，买入、卖出各排各的</span>
     </div>
     {signals.length === 0 ? (
       <p class="empty">今天没有指数达到触发门槛。</p>

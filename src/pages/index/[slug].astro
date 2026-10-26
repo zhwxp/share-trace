@@ -108,7 +108,7 @@ const generated = meta.generated_at.slice(0, 16).replace('T', ' ');
   <section class="band reveal">
     <div class="band-head">
       <h2>信号明细 <span class="cnt">{s.events.length}</span></h2>
-      <span class="side">历史排名按当日金额，1 为最强</span>
+      <span class="side">买入、卖出分别排名，1 为各自方向最强</span>
     </div>
     {s.events.length === 0 ? (
       <p class="empty">这个指数还没有触发过信号。</p>

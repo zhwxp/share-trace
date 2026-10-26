@@ -195,14 +195,17 @@ def detect_events(dates, agg):
 
 
 def annotate_events(events):
-    """给事件标上历史强度排名：同一指数所有已触发事件里按 |当日金额| 从大到小排，1 为最强。
+    """按方向分别排名：买点内部、卖点内部各自按 |当日金额| 从大到小排，1 为最强。
 
-    用单日金额而不是连续合计——「这一天有多猛」才是读的人想问的。
+    买入越多越强、卖出越多也越强，但两边不混在一起——沪深 300 的「第 3 强买入」
+    和「第 3 强卖出」是两个独立的位置。用单日金额而不是连续合计。
     """
-    n = len(events)
-    for rank, e in enumerate(sorted(events, key=lambda x: -abs(x["amount"])), 1):
-        e["rank"] = rank
-        e["n_events"] = n
+    for side in (1, -1):
+        group = [e for e in events if e["side"] == side]
+        n = len(group)
+        for rank, e in enumerate(sorted(group, key=lambda x: -abs(x["amount"])), 1):
+            e["rank"] = rank
+            e["n_events"] = n
     return events
 
 

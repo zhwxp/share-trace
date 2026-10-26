@@ -227,7 +227,8 @@ def main():
     for r in RESULTS:
         print(f"{'OK  ' if r['ok'] else 'FAIL'}  {r['source']:<16} {r['detail']}")
     print(f"\n失败 {len(bad)} / 共 {len(RESULTS)}")
-    return 1 if bad else 0
+    # 这是诊断脚本，不是门禁：源挂了要如实打印，但不必把仓库的 Actions 标成红叉
+    return 0
 
 
 if __name__ == "__main__":

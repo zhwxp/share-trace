@@ -5,11 +5,8 @@ name: daily-data
 
 on:
   schedule:
-    # 00:25（北京时间）= 16:25 UTC（前一天）。GitHub 的 cron 固定按 UTC 解释，
-    # 账号或仓库的时区设置都不影响它。
-    # 先改成每天跑，方便观察 scheduled 到底会不会触发；周末 daily.py 会自己判定
-    # 没有新工作日、rc=3 静默退出，不产生提交。
-    - cron: '25 16 * * *'
+    # 测试用：字面写 0:40，不做时区折算，观察 GitHub 到底按哪个时区解释。
+    - cron: '40 0 * * *'
   workflow_dispatch:
     inputs:
       date:

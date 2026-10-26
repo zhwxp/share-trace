@@ -1,6 +1,6 @@
 {
  "schema_version": 1,
- "generated_at": "2026-10-26T13:22:47+08:00",
+ "generated_at": "2026-10-26T17:05:35+08:00",
  "latest_trade_date": "2026-10-23",
  "first_trade_date": "2012-01-04",
  "params": {
@@ -66,13 +66,8 @@
   }
  },
  "stale": {
-  "note": "K 线比最新份额日期短的指数，上游行情还没有这几天的数据",
-  "by_index": {
-   "zz500": {
-    "last_date": "2026-10-19",
-    "lag_days": 4
-   }
-  }
+  "note": "K 线比最新份额日期短的指数，通常是上游当天行情还没补",
+  "by_index": {}
  },
  "indices": {
   "sh50": {
@@ -135,8 +130,8 @@
    "kline_code": "sh.000905",
    "kline_source": "index",
    "first_date": "2013-03-15",
-   "last_date": "2026-10-19",
-   "rows": 3301,
+   "last_date": "2026-10-23",
+   "rows": 3305,
    "flow_days": 3305,
    "events": 17,
    "etfs_used": [
@@ -618,7 +613,7 @@
    "first_date": "2022-07-12",
    "last_date": "2026-10-23",
    "rows": 1054,
-   "flow_days": 1038,
+   "flow_days": 1007,
    "events": 3,
    "etfs_used": [
     "513120"

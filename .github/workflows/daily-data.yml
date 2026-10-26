@@ -1,0 +1,74 @@
+name: daily-data
+
+# 每天 21:40（CST）抓当天的份额与行情，追加到 data/ 后提交。
+# 提交会触发 EdgeOne 重新构建，不需要在这里部署。
+
+on:
+  schedule:
+    # 21:40 CST = 13:40 UTC。份额数据 21:18 后才发布，留 20 分钟余量。
+    - cron: '40 13 * * 1-5'
+  workflow_dispatch:
+    inputs:
+      date:
+        description: '补跑指定日期 YYYY-MM-DD（留空 = 今天）'
+        required: false
+      backfill:
+        description: '把每个序列缺的交易日都补上'
+        type: boolean
+        default: false
+
+concurrency:
+  group: daily-data
+  cancel-in-progress: false
+
+permissions:
+  contents: write
+
+jobs:
+  update:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+          cache: 'npm'
+
+      - name: 抓数据
+        id: fetch
+        run: |
+          set +e
+          args=""
+          if [ -n "${{ inputs.date }}" ]; then args="$args --date ${{ inputs.date }}"; fi
+          if [ "${{ inputs.backfill }}" = "true" ]; then args="$args --backfill"; fi
+          python3 daily.py $args
+          rc=$?
+          if [ $rc -eq 3 ]; then
+            echo "没有新数据，正常退出"
+            echo "no_new_data=true" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+          exit $rc
+
+      - name: 构建校验
+        if: steps.fetch.outputs.no_new_data != 'true'
+        run: npm ci --no-audit --no-fund && npm run build
+
+      - name: 提交
+        if: steps.fetch.outputs.no_new_data != 'true'
+        run: |
+          git add data/
+          if git diff --cached --quiet; then
+            echo "data/ 没有变化"
+            exit 0
+          fi
+          git -c user.name='sharetrace-bot' \
+              -c user.email='sharetrace-bot@users.noreply.github.com' \
+              commit -m "数据更新 $(TZ=Asia/Shanghai date +%F)"
+          git push

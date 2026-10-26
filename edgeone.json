@@ -1,0 +1,20 @@
+{
+  "name": "sharetrace",
+  "installCommand": "echo 'no dependencies -- pure static'",
+  "buildCommand": "echo 'using prebuilt site/'",
+  "outputDirectory": "./site",
+  "headers": [
+    {
+      "source": "/assets/*",
+      "headers": [
+        { "key": "Cache-Control", "value": "public, max-age=604800" }
+      ]
+    },
+    {
+      "source": "/*.html",
+      "headers": [
+        { "key": "Cache-Control", "value": "public, max-age=300, must-revalidate" }
+      ]
+    }
+  ]
+}

@@ -178,7 +178,7 @@ a:hover { color: #fff; }
   margin: 0 auto;
 }
 
-main.wrap { flex: 1; padding-top: 48px; padding-bottom: 72px; }
+main.wrap { flex: 1; padding-top: 44px; padding-bottom: 72px; }
 
 /* ---------------- 排版 ---------------- */
 
@@ -880,7 +880,7 @@ html.no-js .reveal { opacity: 1; transform: none; }
   .topbar .nav .n { display: none; }
   .app { margin-left: 0; }
   .rail, .rail .stamp { display: none; }
-  main.wrap { padding-top: 34px; padding-bottom: 56px; }
+  main.wrap { padding-top: 32px; padding-bottom: 56px; }
   .chart-echarts { height: 460px; }
 }
 
@@ -898,8 +898,8 @@ html.no-js .reveal { opacity: 1; transform: none; }
   .topbar { height: 52px; }
   .topbar .nav { display: none; }
   .topbar .mark .name { font-size: 14px; }
-  main.wrap { padding-top: 30px; padding-bottom: 88px; }
-  .hide-sm { display: none; }
+  main.wrap { padding-top: 22px; padding-bottom: 56px; }
+  .foot { padding-bottom: calc(100px + env(safe-area-inset-bottom)); }
   .head { align-items: flex-start; gap: 10px; }
   .head .right { text-align: left; }
   .panel { padding: 16px 14px; }

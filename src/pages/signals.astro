@@ -1,0 +1,51 @@
+---
+import Base from '../layouts/Base.astro';
+import { load } from '../lib/data.mjs';
+import { signed, tone, side, pct } from '../lib/format.mjs';
+
+const { events, bySlug, meta } = load();
+const rows = events.slice().sort((a, b) => (a.date < b.date ? 1 : -1));
+const years = [...new Set(rows.map((e) => e.date.slice(0, 4)))].sort().reverse();
+const byYear = years.map((y) => ({ year: y, rows: rows.filter((e) => e.date.startsWith(y)) }));
+const buys = rows.filter((e) => e.side > 0).length;
+---
+<Base title="ShareTrace · 全部信号" current="signals">
+  <h1>全部信号</h1>
+  <p class="lede">
+    共 {rows.length} 个事件（买点 {buys} 个、卖点 {rows.length - buys} 个），按日期倒序。
+    后 20 日为该信号方向对应的指数涨跌，正数表示信号有效。
+  </p>
+
+  {byYear.map(({ year, rows: ys }) => (
+    <section>
+      <h2>{year} <span class="lede">{ys.length} 个</span></h2>
+      <div class="panel">
+        <table class="tbl">
+          <thead>
+            <tr>
+              <th>日期</th><th>指数</th><th>方向</th><th class="num">当日(亿)</th>
+              <th class="num">连续/合计(亿)</th><th class="num">共振</th><th class="num">后 20 日</th>
+            </tr>
+          </thead>
+          <tbody>
+            {ys.map((e) => (
+              <tr>
+                <td>{e.date}</td>
+                <td><a href={`/index/${e.slug}.html`}>{bySlug.get(e.slug)?.name ?? e.slug}</a></td>
+                <td><span class={`tag ${e.side > 0 ? 'buy' : 'sell'}`}>{side(e.side)}</span></td>
+                <td class="num fig">{signed(e.amount)}</td>
+                <td class="num fig">{e.days} 天 / {signed(e.total)}</td>
+                <td class="num fig">{e.reson}/{e.n}</td>
+                <td class="num fig">{e.post20 === null ? '—' : pct(e.post20, 1)}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+    </section>
+  ))}
+  <p class="note">
+    口径：|F| ≥ max({meta.params.floor_yi} 亿, {meta.params.ratio * 100}% × 合计规模)，封顶 {meta.params.cap_yi} 亿；
+    {meta.params.merge_days} 个交易日内同向连续触发合并。后 20 日为空表示信号太新，还没有满 20 个交易日。
+  </p>
+</Base>

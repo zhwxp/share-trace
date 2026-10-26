@@ -1,6 +1,7 @@
 node_modules/
 dist/
 .astro/
+.taste-skill/
 __pycache__/
 *.pyc
 .DS_Store

@@ -1,7 +1,7 @@
 ---
 import Base from '../layouts/Base.astro';
 import { load, indexStats } from '../lib/data.mjs';
-import { num, signed, tone } from '../lib/format.mjs';
+import { num, signed } from '../lib/format.mjs';
 
 const { meta, indices, bySlug } = load();
 const rows = indices.map((it) => ({ it, s: indexStats(it.slug) }));
@@ -40,11 +40,11 @@ const totalEvents = meta.counts.events;
                   <a href={`/index/${it.slug}.html`}>{it.name}</a>
                   {s.shortHistory && <span class="lede"> · 份额历史不足</span>}
                 </td>
-                <td class={`num ${tone(s.today)}`}>{signed(s.today)}</td>
-                <td class={`num ${tone(s.d5)}`}>{signed(s.d5)}</td>
-                <td class={`num ${tone(s.d20)}`}>{signed(s.d20)}</td>
-                <td class="num">{s.nEtf ?? '—'}</td>
-                <td class="num">{s.events.length}</td>
+                <td class="num fig">{signed(s.today)}</td>
+                <td class="num fig">{signed(s.d5)}</td>
+                <td class="num fig">{signed(s.d20)}</td>
+                <td class="num fig">{s.nEtf ?? '—'}</td>
+                <td class="num fig">{s.events.length}</td>
                 <td>
                   {s.lastEvent
                     ? `${s.lastEvent.date} ${s.lastEvent.side > 0 ? '买' : '卖'} ${signed(s.lastEvent.amount, 0)}`

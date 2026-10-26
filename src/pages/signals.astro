@@ -32,11 +32,11 @@ const buys = rows.filter((e) => e.side > 0).length;
               <tr>
                 <td>{e.date}</td>
                 <td><a href={`/index/${e.slug}.html`}>{bySlug.get(e.slug)?.name ?? e.slug}</a></td>
-                <td><span class={`tag ${e.side > 0 ? 'up' : 'down'}`}>{side(e.side)}</span></td>
-                <td class={`num ${tone(e.amount)}`}>{signed(e.amount)}</td>
-                <td class="num">{e.days} 天 / {signed(e.total)}</td>
-                <td class="num">{e.reson}/{e.n}</td>
-                <td class={`num ${tone(e.post20)}`}>{e.post20 === null ? '—' : pct(e.post20, 1)}</td>
+                <td><span class={`tag ${e.side > 0 ? 'buy' : 'sell'}`}>{side(e.side)}</span></td>
+                <td class="num fig">{signed(e.amount)}</td>
+                <td class="num fig">{e.days} 天 / {signed(e.total)}</td>
+                <td class="num fig">{e.reson}/{e.n}</td>
+                <td class="num fig">{e.post20 === null ? '—' : pct(e.post20, 1)}</td>
               </tr>
             ))}
           </tbody>

@@ -1,4 +1,9 @@
 ---
+import '@fontsource/geist/latin-400.css';
+import '@fontsource/geist/latin-500.css';
+import '@fontsource/geist/latin-700.css';
+import '@fontsource/geist-mono/latin-400.css';
+import '@fontsource/geist-mono/latin-500.css';
 import '../styles/global.css';
 
 const {
@@ -25,12 +30,17 @@ const nav = [
     <meta name="description" content={desc} />
   </head>
   <body>
-    <header class="top">
+    <header class="shell">
       <div class="wrap">
-        <div class="brand">
-          <strong>ShareTrace</strong>
-          <span>国家队 ETF 份额足迹</span>
-        </div>
+        <a class="mark" href="/index.html">
+          <svg width="20" height="20" viewBox="0 0 20 20" aria-hidden="true">
+            <rect x="1" y="11" width="4" height="8" rx="1" fill="#0a0a0a" opacity=".22"></rect>
+            <rect x="7" y="7" width="4" height="12" rx="1" fill="#0a0a0a" opacity=".5"></rect>
+            <rect x="13" y="2" width="4" height="17" rx="1" fill="#1d5fbf"></rect>
+          </svg>
+          <span class="name">ShareTrace</span>
+          <span class="scope">43 个指数 · 57 只 ETF · 份额口径</span>
+        </a>
         <nav class="main">
           {nav.map(([key, label, href]) => (
             <a href={href} aria-current={key === current ? 'page' : undefined}>{label}</a>
@@ -43,8 +53,8 @@ const nav = [
     </main>
     <footer class="foot">
       <div class="wrap">
-        <p>数据源：上交所 ETF 归档 / 深交所 / 同花顺 · 行情 baostock · 份额为基金总份额，不是成交额</p>
-        <p>本站只做数据呈现，不构成投资建议。</p>
+        <p>数据源：上交所 ETF 归档 / 深交所 / 同花顺 · 行情 baostock · 份额为基金总份额，不是成交额。</p>
+        <p>本站只做数据呈现，不构成投资建议。份额变化能说明资金进出，不能证明是国家队在买。</p>
       </div>
     </footer>
     {echarts && <script is:inline src="/assets/echarts.min.js"></script>}

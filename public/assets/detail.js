@@ -3,8 +3,9 @@
 (function () {
   'use strict';
 
-  var UP = '#c8452f', DOWN = '#1f7a5c', GRID = '#e6e4de', AXIS = '#d5d2ca', MUTED = '#8a8f9a';
-  var TX = '#16181d';
+  // 红涨绿跌只出现在 K 线里；其余一律 ink / 灰，资金流那条线用 --chart-1
+  var UP = '#c4242a', DOWN = '#2e7d32', GRID = '#ececec', AXIS = '#e6e6e6', MUTED = '#8a8f97';
+  var TX = '#0a0a0a', FLOW = '#1d5fbf';
 
   var el = document.getElementById('detailChart');
   if (!el || !window.echarts) return;
@@ -76,12 +77,12 @@
         symbol: 'triangle',
         symbolRotate: buy ? 0 : 180,
         symbolSize: 8 + Math.round(6 * w),
-        itemStyle: { color: buy ? UP : DOWN, borderColor: '#fff', borderWidth: 1, opacity: 0.6 + 0.4 * w },
+        itemStyle: { color: buy ? FLOW : '#8a8f97', borderColor: '#fff', borderWidth: 1, opacity: 0.6 + 0.4 * w },
         label: {
           show: w >= 0.35,
           position: buy ? 'bottom' : 'top',
           distance: 6,
-          color: buy ? UP : DOWN,
+          color: buy ? FLOW : MUTED,
           fontSize: 10,
           formatter: function (p) { return (p.value > 0 ? '+' : '') + Math.round(p.value); }
         }
@@ -151,8 +152,8 @@
         { type: 'inside', xAxisIndex: [0, 1], start: zoomStart, end: 100 },
         {
           type: 'slider', xAxisIndex: [0, 1], start: zoomStart, end: 100, bottom: 8, height: 16,
-          borderColor: GRID, fillerColor: 'rgba(29,78,216,.08)',
-          handleStyle: { color: '#1d4ed8' }, textStyle: { color: MUTED, fontSize: 10 }
+          borderColor: GRID, fillerColor: 'rgba(29,95,191,.08)',
+          handleStyle: { color: FLOW }, textStyle: { color: MUTED, fontSize: 10 }
         }
       ],
       series: [
@@ -167,18 +168,18 @@
             data: annLines
           }
         },
-        { name: 'MA20', type: 'line', data: c.ma20, symbol: 'none', lineStyle: { width: 1, color: '#b8860b', opacity: 0.9 }, connectNulls: true },
-        { name: 'MA60', type: 'line', data: c.ma60, symbol: 'none', lineStyle: { width: 1, color: '#6b7cd6', opacity: 0.85 }, connectNulls: true },
+        { name: 'MA20', type: 'line', data: c.ma20, symbol: 'none', lineStyle: { width: 1, color: '#6b6b6b', opacity: 0.9 }, connectNulls: true },
+        { name: 'MA60', type: 'line', data: c.ma60, symbol: 'none', lineStyle: { width: 1, color: '#b9bcc2', opacity: 0.95 }, connectNulls: true },
         {
           name: '日净申赎', type: 'bar', xAxisIndex: 1, yAxisIndex: 1, barMaxWidth: 7,
           data: c.flows.map(function (v) {
             if (v === null || v === undefined) return { value: null };
-            return { value: v, itemStyle: { color: v >= 0 ? UP : DOWN, opacity: 0.9 } };
+            return { value: v, itemStyle: { color: v >= 0 ? FLOW : '#cfd3d8' } };
           })
         },
         {
           name: '20日累计', type: 'line', xAxisIndex: 1, yAxisIndex: 2, data: c.cum,
-          symbol: 'none', lineStyle: { width: 1.4, color: '#1d4ed8' }, connectNulls: true
+          symbol: 'none', lineStyle: { width: 1.4, color: FLOW }, connectNulls: true
         }
       ]
     });

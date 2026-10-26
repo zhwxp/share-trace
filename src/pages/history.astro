@@ -1,7 +1,7 @@
 ---
 import Base from '../layouts/Base.astro';
 import { marketToday } from '../lib/data.mjs';
-import { num, signed, tone } from '../lib/format.mjs';
+import { num, signed } from '../lib/format.mjs';
 
 const t = marketToday();
 const byMonth = new Map();
@@ -50,10 +50,10 @@ const worst = months.reduce((a, b) => (b.flow < a.flow ? b : a), months[0] ?? nu
         {months.map((m) => (
           <tr>
             <td>{m.month}</td>
-            <td class={`num ${tone(m.flow)}`}>{signed(m.flow)}</td>
-            <td class="num">{m.n}</td>
-            <td class="num">{m.inDays}</td>
-            <td class="num">{m.outDays}</td>
+            <td class="num fig">{signed(m.flow)}</td>
+            <td class="num fig">{m.n}</td>
+            <td class="num fig">{m.inDays}</td>
+            <td class="num fig">{m.outDays}</td>
             <td>{m.maxDate} · {num(m.maxAbs)}</td>
           </tr>
         ))}

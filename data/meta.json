@@ -1,0 +1,661 @@
+{
+ "schema_version": 1,
+ "generated_at": "2026-10-26T13:17:59+08:00",
+ "latest_trade_date": "2026-10-23",
+ "first_trade_date": "2012-01-04",
+ "params": {
+  "floor_yi": 2.0,
+  "ratio": 0.08,
+  "cap_yi": 100.0,
+  "min_obs": 60,
+  "merge_days": 5,
+  "min_hist_obs": 60
+ },
+ "split_dates": {
+  "510310": [
+   "2024-09-20"
+  ],
+  "512100": [
+   "2022-09-02"
+  ],
+  "560010": [
+   "2022-09-13"
+  ]
+ },
+ "announcements": [
+  {
+   "date": "2015-07-08",
+   "label": "汇金：已买入 ETF"
+  },
+  {
+   "date": "2023-10-23",
+   "label": "汇金：买入 ETF 并将继续增持"
+  },
+  {
+   "date": "2024-02-06",
+   "label": "汇金：扩大 ETF 增持范围"
+  },
+  {
+   "date": "2025-04-07",
+   "label": "汇金：再次增持 ETF"
+  },
+  {
+   "date": "2026-07-20",
+   "label": "国新/诚通：增持央企与科技 ETF"
+  }
+ ],
+ "categories": [
+  "A股宽基",
+  "A股行业主题",
+  "跨境",
+  "商品"
+ ],
+ "coverage": {
+  "note": "这些 ETF 份额历史太短，已排除在指数历史序列之外",
+  "by_index": {
+   "hs300": [
+    "159919"
+   ],
+   "zz500": [
+    "159922"
+   ],
+   "zz1000": [
+    "159845",
+    "159629"
+   ]
+  }
+ },
+ "stale": {
+  "note": "K 线比最新份额日期短的指数，上游行情还没有这几天的数据",
+  "by_index": {
+   "zz500": {
+    "last_date": "2026-10-19",
+    "lag_days": 4
+   }
+  }
+ },
+ "indices": {
+  "sh50": {
+   "kline_code": "sh.000016",
+   "kline_source": "index",
+   "first_date": "2012-01-04",
+   "last_date": "2026-10-23",
+   "rows": 3593,
+   "flow_days": 3593,
+   "events": 18,
+   "etfs_used": [
+    "510050"
+   ],
+   "etfs_short": []
+  },
+  "sh180": {
+   "kline_code": "sh.000010",
+   "kline_source": "index",
+   "first_date": "2012-01-04",
+   "last_date": "2026-10-23",
+   "rows": 3593,
+   "flow_days": 3593,
+   "events": 16,
+   "etfs_used": [
+    "510180"
+   ],
+   "etfs_short": []
+  },
+  "shindex": {
+   "kline_code": "sh.000001",
+   "kline_source": "index",
+   "first_date": "2012-01-04",
+   "last_date": "2026-10-23",
+   "rows": 3593,
+   "flow_days": 3593,
+   "events": 16,
+   "etfs_used": [
+    "510210"
+   ],
+   "etfs_short": []
+  },
+  "hs300": {
+   "kline_code": "sh.000300",
+   "kline_source": "index",
+   "first_date": "2012-05-28",
+   "last_date": "2026-10-23",
+   "rows": 3500,
+   "flow_days": 3500,
+   "events": 21,
+   "etfs_used": [
+    "510300",
+    "510310",
+    "510330"
+   ],
+   "etfs_short": [
+    "159919"
+   ]
+  },
+  "zz500": {
+   "kline_code": "sh.000905",
+   "kline_source": "index",
+   "first_date": "2013-03-15",
+   "last_date": "2026-10-19",
+   "rows": 3301,
+   "flow_days": 3305,
+   "events": 17,
+   "etfs_used": [
+    "510500",
+    "512500"
+   ],
+   "etfs_short": [
+    "159922"
+   ]
+  },
+  "zz1000": {
+   "kline_code": "sh.000852",
+   "kline_source": "index",
+   "first_date": "2016-11-04",
+   "last_date": "2026-10-23",
+   "rows": 2420,
+   "flow_days": 2420,
+   "events": 40,
+   "etfs_used": [
+    "512100",
+    "560010"
+   ],
+   "etfs_short": [
+    "159845",
+    "159629"
+   ]
+  },
+  "zz800": {
+   "kline_code": "sh.000906",
+   "kline_source": "index",
+   "first_date": "2019-12-16",
+   "last_date": "2026-10-23",
+   "rows": 1660,
+   "flow_days": 1660,
+   "events": 5,
+   "etfs_used": [
+    "515800"
+   ],
+   "etfs_short": []
+  },
+  "a500": {
+   "kline_code": "000510",
+   "kline_source": "index",
+   "first_date": "2024-10-15",
+   "last_date": "2026-10-23",
+   "rows": 492,
+   "flow_days": 492,
+   "events": 0,
+   "etfs_used": [
+    "512050",
+    "563800",
+    "563220"
+   ],
+   "etfs_short": []
+  },
+  "cyb": {
+   "kline_code": "sz.399006",
+   "kline_source": "index",
+   "first_date": "2012-01-04",
+   "last_date": "2026-10-23",
+   "rows": 3593,
+   "flow_days": 3,
+   "events": 0,
+   "etfs_used": [
+    "159915"
+   ],
+   "etfs_short": []
+  },
+  "cyb50": {
+   "kline_code": "sz.399673",
+   "kline_source": "index",
+   "first_date": "2014-06-18",
+   "last_date": "2026-10-23",
+   "rows": 3002,
+   "flow_days": 3,
+   "events": 0,
+   "etfs_used": [
+    "159949"
+   ],
+   "etfs_short": []
+  },
+  "sz100": {
+   "kline_code": "sz.399330",
+   "kline_source": "index",
+   "first_date": "2012-01-04",
+   "last_date": "2026-10-23",
+   "rows": 3593,
+   "flow_days": 3,
+   "events": 0,
+   "etfs_used": [
+    "159901"
+   ],
+   "etfs_short": []
+  },
+  "kc50": {
+   "kline_code": "sh.588080",
+   "kline_source": "index",
+   "first_date": "2020-11-16",
+   "last_date": "2026-10-23",
+   "rows": 1439,
+   "flow_days": 1439,
+   "events": 3,
+   "etfs_used": [
+    "588000",
+    "588050",
+    "588080"
+   ],
+   "etfs_short": []
+  },
+  "kc100": {
+   "kline_code": "sh.588800",
+   "kline_source": "index",
+   "first_date": "2023-11-16",
+   "last_date": "2026-10-23",
+   "rows": 710,
+   "flow_days": 710,
+   "events": 4,
+   "etfs_used": [
+    "588800"
+   ],
+   "etfs_short": []
+  },
+  "chip-gz": {
+   "kline_code": "sz.159995",
+   "kline_source": "index",
+   "first_date": "2020-02-10",
+   "last_date": "2026-10-23",
+   "rows": 1627,
+   "flow_days": 3,
+   "events": 0,
+   "etfs_used": [
+    "159995"
+   ],
+   "etfs_short": []
+  },
+  "chip-zh": {
+   "kline_code": "sh.512760",
+   "kline_source": "index",
+   "first_date": "2019-06-12",
+   "last_date": "2026-10-23",
+   "rows": 1787,
+   "flow_days": 1787,
+   "events": 6,
+   "etfs_used": [
+    "512760"
+   ],
+   "etfs_short": []
+  },
+  "chip-zz": {
+   "kline_code": "H30184",
+   "kline_source": "index",
+   "first_date": "2019-06-12",
+   "last_date": "2026-10-23",
+   "rows": 1787,
+   "flow_days": 1787,
+   "events": 5,
+   "etfs_used": [
+    "512480"
+   ],
+   "etfs_short": []
+  },
+  "pharma": {
+   "kline_code": "000913",
+   "kline_source": "index",
+   "first_date": "2013-10-28",
+   "last_date": "2026-10-23",
+   "rows": 3159,
+   "flow_days": 3159,
+   "events": 3,
+   "etfs_used": [
+    "512010"
+   ],
+   "etfs_short": []
+  },
+  "medical": {
+   "kline_code": "399989",
+   "kline_source": "index",
+   "first_date": "2019-06-17",
+   "last_date": "2026-10-23",
+   "rows": 1784,
+   "flow_days": 1784,
+   "events": 5,
+   "etfs_used": [
+    "512170"
+   ],
+   "etfs_short": []
+  },
+  "biotech": {
+   "kline_code": "930726",
+   "kline_source": "index",
+   "first_date": "2019-05-20",
+   "last_date": "2026-10-23",
+   "rows": 1803,
+   "flow_days": 1803,
+   "events": 3,
+   "etfs_used": [
+    "512290"
+   ],
+   "etfs_short": []
+  },
+  "innovdrug": {
+   "kline_code": "931152",
+   "kline_source": "index",
+   "first_date": "2019-09-24",
+   "last_date": "2026-10-23",
+   "rows": 1714,
+   "flow_days": 3,
+   "events": 0,
+   "etfs_used": [
+    "159992"
+   ],
+   "etfs_short": []
+  },
+  "military": {
+   "kline_code": "sz.399967",
+   "kline_source": "index",
+   "first_date": "2016-08-08",
+   "last_date": "2026-10-23",
+   "rows": 2477,
+   "flow_days": 2477,
+   "events": 2,
+   "etfs_used": [
+    "512660"
+   ],
+   "etfs_short": []
+  },
+  "military-leader": {
+   "kline_code": "931066",
+   "kline_source": "index",
+   "first_date": "2019-08-26",
+   "last_date": "2026-10-23",
+   "rows": 1734,
+   "flow_days": 1734,
+   "events": 3,
+   "etfs_used": [
+    "512710"
+   ],
+   "etfs_short": []
+  },
+  "comm5g": {
+   "kline_code": "931079",
+   "kline_source": "index",
+   "first_date": "2019-10-16",
+   "last_date": "2026-10-23",
+   "rows": 1703,
+   "flow_days": 1703,
+   "events": 4,
+   "etfs_used": [
+    "515050"
+   ],
+   "etfs_short": []
+  },
+  "comm-dev": {
+   "kline_code": "931160",
+   "kline_source": "index",
+   "first_date": "2019-09-06",
+   "last_date": "2026-10-23",
+   "rows": 1725,
+   "flow_days": 1725,
+   "events": 14,
+   "etfs_used": [
+    "515880"
+   ],
+   "etfs_short": []
+  },
+  "soe-restruct": {
+   "kline_code": "sh.512960",
+   "kline_source": "index",
+   "first_date": "2019-01-18",
+   "last_date": "2026-10-23",
+   "rows": 1880,
+   "flow_days": 1880,
+   "events": 3,
+   "etfs_used": [
+    "512960"
+   ],
+   "etfs_short": []
+  },
+  "soe-innov": {
+   "kline_code": "000861",
+   "kline_source": "index",
+   "first_date": "2019-12-18",
+   "last_date": "2026-10-23",
+   "rows": 1658,
+   "flow_days": 1658,
+   "events": 1,
+   "etfs_used": [
+    "515900"
+   ],
+   "etfs_short": []
+  },
+  "broker": {
+   "kline_code": "399975",
+   "kline_source": "index",
+   "first_date": "2016-08-08",
+   "last_date": "2026-10-23",
+   "rows": 2477,
+   "flow_days": 2477,
+   "events": 4,
+   "etfs_used": [
+    "512000",
+    "512880"
+   ],
+   "etfs_short": []
+  },
+  "nonferrous": {
+   "kline_code": "000819",
+   "kline_source": "index",
+   "first_date": "2017-09-01",
+   "last_date": "2026-10-23",
+   "rows": 2216,
+   "flow_days": 2216,
+   "events": 5,
+   "etfs_used": [
+    "512400"
+   ],
+   "etfs_short": []
+  },
+  "rare-metal": {
+   "kline_code": "930632",
+   "kline_source": "index",
+   "first_date": "2021-09-27",
+   "last_date": "2026-10-23",
+   "rows": 1227,
+   "flow_days": 1227,
+   "events": 3,
+   "etfs_used": [
+    "562800"
+   ],
+   "etfs_short": []
+  },
+  "gold-stock": {
+   "kline_code": "931238",
+   "kline_source": "index",
+   "first_date": "2023-11-01",
+   "last_date": "2026-10-23",
+   "rows": 754,
+   "flow_days": 721,
+   "events": 2,
+   "etfs_used": [
+    "517520"
+   ],
+   "etfs_short": []
+  },
+  "food": {
+   "kline_code": "000815",
+   "kline_source": "index",
+   "first_date": "2021-01-13",
+   "last_date": "2026-10-23",
+   "rows": 1398,
+   "flow_days": 1398,
+   "events": 2,
+   "etfs_used": [
+    "515170"
+   ],
+   "etfs_short": []
+  },
+  "liquor": {
+   "kline_code": "399987",
+   "kline_source": "index",
+   "first_date": "2019-05-06",
+   "last_date": "2026-10-23",
+   "rows": 1813,
+   "flow_days": 1813,
+   "events": 9,
+   "etfs_used": [
+    "512690"
+   ],
+   "etfs_short": []
+  },
+  "chem": {
+   "kline_code": "000813",
+   "kline_source": "index",
+   "first_date": "2012-01-04",
+   "last_date": "2026-10-23",
+   "rows": 3593,
+   "flow_days": 3,
+   "events": 0,
+   "etfs_used": [
+    "159870"
+   ],
+   "etfs_short": []
+  },
+  "solar": {
+   "kline_code": "931151",
+   "kline_source": "index",
+   "first_date": "2020-12-18",
+   "last_date": "2026-10-23",
+   "rows": 1415,
+   "flow_days": 1415,
+   "events": 1,
+   "etfs_used": [
+    "515790"
+   ],
+   "etfs_short": []
+  },
+  "newenergy": {
+   "kline_code": "sz.399808",
+   "kline_source": "index",
+   "first_date": "2021-02-04",
+   "last_date": "2026-10-23",
+   "rows": 1382,
+   "flow_days": 1382,
+   "events": 4,
+   "etfs_used": [
+    "516160"
+   ],
+   "etfs_short": []
+  },
+  "robot": {
+   "kline_code": "sh.562500",
+   "kline_source": "index",
+   "first_date": "2021-12-29",
+   "last_date": "2026-10-23",
+   "rows": 1165,
+   "flow_days": 1165,
+   "events": 3,
+   "etfs_used": [
+    "562500"
+   ],
+   "etfs_short": []
+  },
+  "bank": {
+   "kline_code": "399986",
+   "kline_source": "index",
+   "first_date": "2017-08-03",
+   "last_date": "2026-10-23",
+   "rows": 2237,
+   "flow_days": 2237,
+   "events": 4,
+   "etfs_used": [
+    "512800"
+   ],
+   "etfs_short": []
+  },
+  "china-internet": {
+   "kline_code": "sh.513050",
+   "kline_source": "etf",
+   "first_date": "2017-01-18",
+   "last_date": "2026-10-23",
+   "rows": 2368,
+   "flow_days": 2368,
+   "events": 1,
+   "etfs_used": [
+    "513050"
+   ],
+   "etfs_short": []
+  },
+  "hscei": {
+   "kline_code": "sh.510900",
+   "kline_source": "index",
+   "first_date": "2012-10-22",
+   "last_date": "2026-10-23",
+   "rows": 3401,
+   "flow_days": 3401,
+   "events": 4,
+   "etfs_used": [
+    "510900"
+   ],
+   "etfs_short": []
+  },
+  "hstech": {
+   "kline_code": "sh.513180",
+   "kline_source": "index",
+   "first_date": "2021-05-25",
+   "last_date": "2026-10-23",
+   "rows": 1313,
+   "flow_days": 1313,
+   "events": 1,
+   "etfs_used": [
+    "513180",
+    "513010"
+   ],
+   "etfs_short": []
+  },
+  "hk-innovdrug": {
+   "kline_code": "931787",
+   "kline_source": "index",
+   "first_date": "2022-07-12",
+   "last_date": "2026-10-23",
+   "rows": 1054,
+   "flow_days": 1038,
+   "events": 3,
+   "etfs_used": [
+    "513120"
+   ],
+   "etfs_short": []
+  },
+  "shanghai-gold": {
+   "kline_code": "sh.518850",
+   "kline_source": "index",
+   "first_date": "2020-06-05",
+   "last_date": "2026-10-23",
+   "rows": 1547,
+   "flow_days": 1547,
+   "events": 1,
+   "etfs_used": [
+    "518850"
+   ],
+   "etfs_short": []
+  },
+  "gold9999": {
+   "kline_code": "sh.518880",
+   "kline_source": "index",
+   "first_date": "2013-07-29",
+   "last_date": "2026-10-23",
+   "rows": 3217,
+   "flow_days": 3217,
+   "events": 5,
+   "etfs_used": [
+    "518880"
+   ],
+   "etfs_short": []
+  }
+ },
+ "counts": {
+  "indices": 43,
+  "etfs": 57,
+  "etf_rows": 92777,
+  "events": 241
+ }
+}

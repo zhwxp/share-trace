@@ -39,7 +39,7 @@ python3 ingest.py          # 从 sqlite 全量导出 data/（初始化或重建�
 npm run build              # 只读 data/，不碰数据库
 ```
 
-日常更新不用这台机器：`.github/workflows/daily-data.yml` 周一至五 21:40（CST）跑 `daily.py`，抓当天份额与行情、追加到 `data/`、校验构建、提交，EdgeOne 随后自动重建。
+日常更新不用这台机器：`.github/workflows/daily-data.yml` 周一至五 22:48 和 23:48（北京时间）跑 `daily.py`，抓当天份额与行情、追加到 `data/`、校验构建、提交，EdgeOne 随后自动重建。
 
 ```bash
 python3 daily.py                     # 抓今天

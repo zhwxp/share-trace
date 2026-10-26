@@ -13,7 +13,7 @@
 所以一台干净的 runner 上也能跑，不需要任何数据库。
 
 用法：
-    python3 daily.py                      # 抓今天（CST），没新数据就安静退出（退出码 3）
+    python3 daily.py                      # 抓今天（北京时间），没新数据就安静退出（退出码 3）
     python3 daily.py --date 2026-10-23    # 补指定日期
     python3 daily.py --backfill           # 把每个序列缺的交易日都补上
     python3 daily.py --dry-run            # 只打印要追加什么
@@ -35,7 +35,7 @@ import ingest  # noqa: E402  复用同一套信号规则与常量
 
 ROOT = Path(__file__).resolve().parent
 DATA = ROOT / "data"
-CST = timezone(timedelta(hours=8))
+CST = timezone(timedelta(hours=8))   # 北京时间（UTC+8）
 UA = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36"
 
 INDEX_COLS = ["date", "o", "h", "l", "c", "flow", "n_in", "n_out", "n_etf", "scale"]

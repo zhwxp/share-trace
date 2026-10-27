@@ -33,6 +33,11 @@ jobs:
     timeout-minutes: 30
     steps:
       - uses: actions/checkout@v4
+        with:
+          # 重跑旧 run 不会更新 head_sha，写死 ref 才能拿到最新 main；
+          # fetch-depth 0 是为了 push 前的 rebase 有共同祖先，浅克隆会失败。
+          ref: main
+          fetch-depth: 0
 
       - uses: actions/setup-python@v5
         with:
@@ -74,4 +79,6 @@ jobs:
           git -c user.name='sharetrace-bot' \
               -c user.email='sharetrace-bot@users.noreply.github.com' \
               commit -m "数据更新 $(TZ=Asia/Shanghai date +%F)"
+          # 抓数据的这几分钟里 main 可能又被推过，先 rebase 再推
+          git pull --rebase origin main
           git push

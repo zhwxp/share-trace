@@ -614,6 +614,50 @@
     if (compareLabel && rows.some((r) => minutes(r.compare) != null)) items.push({ label: compareLabel, w: 8, draw: (sw) => tick(sw, 4, 6) });
     return { get svg() { return el.querySelector(':scope > svg'); }, legend: legendEl(items, legend) };
   }
+  // Sparse events across a run of days, one row per subject: a dot per event, its radius by amount, in the
+  // colour of its direction; today's column sits on the accent rule. Rows arrive biggest first.
+  //   days: ['10-26', …]; rows: [{ label: '沪深300', marks: [{ at: 17, value: 198.6, side: 1, title: '…' }] }]
+  function signalDots(el, { days, rows, today = null, above = 'Above', below = 'Below', format = fmt.signed(fmt.dec(1)), height = null, legend = null }) {
+    const buy = css(el, '--sig-buy', '#e8897b'), sell = css(el, '--sig-sell', '#6fc99b');
+    const draw = () => {
+      const pitch = 34, head = 26;
+      const { s, w, h } = frame(el, heightOf(height) ?? head + rows.length * pitch + 8);
+      const lw = Math.round(Math.min(200, Math.max(w < 480 ? 92 : 120, w * 0.2)));
+      const cw = (w - lw) / Math.max(1, days.length), x = (i) => lw + i * cw + cw / 2;
+      const ink = css(el, '--ink', '#111'), muted = css(el, '--axis-ink', '#6b6b6b'), rule = css(el, '--rule', '#f0f0f0'), accent = css(el, '--accent', '#cf3f4e');
+      const g = svg('g', {}, s);
+      for (let i = 0; i <= days.length; i++) svg('line', { x1: lw + i * cw, x2: lw + i * cw, y1: head - 6, y2: h, stroke: rule, 'stroke-width': 1, 'shape-rendering': 'crispEdges' }, g);
+      if (today != null) svg('line', { x1: x(today), x2: x(today), y1: head - 6, y2: h, stroke: accent, 'stroke-width': 1, opacity: 0.8, 'shape-rendering': 'crispEdges' }, g);
+      // date labels keep one step counted back from the last day, so today is always labelled
+      const step = Math.max(1, Math.ceil((measure(s, days[0] || '', 12) + 18) / cw));
+      days.forEach((d, i) => {
+        if ((days.length - 1 - i) % step && i !== today) return;
+        const tw = measure(s, String(d), 12), left = Math.max(lw, Math.min(w - tw, x(i) - tw / 2));
+        text(g, d, { x: left, y: head - 10, 'font-size': 12, 'font-weight': i === today ? 600 : 400, fill: i === today ? ink : muted });
+      });
+      const max = Math.max(1, ...rows.flatMap((r) => r.marks.map((m) => Math.abs(m.value))));
+      // a dot never grows past half a column, so neighbouring days stay apart on a phone
+      const rmax = Math.max(4, Math.min(11, cw * 0.46));
+      rows.forEach((r, k) => {
+        const cy = head + k * pitch + pitch / 2;
+        text(g, fit(s, r.label, lw - 14, 14), { x: 0, y: cy + 5, 'font-size': 14, fill: ink });
+        for (const m of r.marks) {
+          if (m.at == null) continue;
+          const rr = rmax * (0.35 + 0.65 * Math.sqrt(Math.abs(m.value) / max));
+          const c = svg('circle', { cx: x(m.at), cy, r: rr, fill: m.side > 0 ? buy : sell, 'fill-opacity': 0.92, stroke: css(el, '--ground', '#171719'), 'stroke-width': 1 }, g);
+          titled(c, m.title || `${r.label}: ${format(m.value)}`);
+        }
+      });
+      s.setAttribute('aria-label', `${rows.length} rows, ${rows.reduce((n, r) => n + r.marks.length, 0)} signals across ${days.length} days, ${days[0]} to ${days.at(-1)}`);
+    };
+    draw(); watch(el, draw); settle(draw);
+    const dirs = new Set(rows.flatMap((r) => r.marks.map((m) => (m.side > 0 ? 1 : -1))));
+    const dot = (c) => (sw) => svg('circle', { cx: 5, cy: 6, r: 4.5, fill: c }, sw);
+    const items = [];
+    if (dirs.has(1)) items.push({ label: above, w: 12, draw: dot(buy) });
+    if (dirs.has(-1)) items.push({ label: below, w: 12, draw: dot(sell) });
+    return { get svg() { return el.querySelector(':scope > svg'); }, legend: legendEl(items, legend) };
+  }
   function watch(el, draw) { if (!('ResizeObserver' in window)) return; let w = el.clientWidth; new ResizeObserver(() => { if (Math.abs(el.clientWidth - w) > 4) { w = el.clientWidth; draw(); } }).observe(el); }
-  window.Charts = { line, bars, diverging, ring, barList, plan, bullet, timeline, matrix, timeStrip, ticks, fmt };
+  window.Charts = { line, bars, diverging, ring, barList, plan, bullet, timeline, matrix, timeStrip, signalDots, ticks, fmt };
 })();

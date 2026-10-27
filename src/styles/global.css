@@ -36,6 +36,9 @@
   --pill-negative-bg: #2c1a1c;
   --pill-negative-ink: #e8897b;
 
+  --sig-buy: #e8897b;      /* 信号点：买入（净申购） */
+  --sig-sell: #6fc99b;     /* 信号点：卖出（净赎回） */
+
   --radius-card: 6px;
   --radius-control: 4px;
 
@@ -263,6 +266,7 @@ p { margin: 0 0 12px; }
 }
 .band-head .side { color: var(--muted); font-size: 12px; }
 .band-head .side .fig { color: var(--text); }
+.legendline { display: inline-flex; align-items: center; gap: 16px; }
 
 /* ---------------- 数字条 ---------------- */
 

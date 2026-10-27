@@ -8,23 +8,51 @@ const { meta, latest, bySlug, events } = load();
 const t = marketToday();
 const st = streak();
 const signals = eventsOn(latest);
-const recentEv = events.filter((e) => e.date < latest).slice(-10).reverse();
+
+// 今日与近 20 个交易日共用同一个窗口
 const recent = t.history.slice(-20);
+const windowStart = recent[0].date;
+const windowEvents = events.filter((e) => e.date >= windowStart);
+const recentEv = windowEvents.slice().reverse();
+
+// 点阵：一行一个指数，一列一个交易日
+const dayAt = new Map(recent.map((d, i) => [d.date, i]));
+const sums = new Map();
+for (const e of windowEvents) sums.set(e.slug, (sums.get(e.slug) ?? 0) + Math.abs(e.amount));
+const sigRows = [...new Set(windowEvents.map((e) => e.slug))]
+  .sort((a, b) => sums.get(b) - sums.get(a))
+  .map((slug) => {
+    const name = bySlug.get(slug)?.name ?? slug;
+    return {
+      label: name,
+      marks: windowEvents
+        .filter((e) => e.slug === slug)
+        .map((e) => ({
+          at: dayAt.get(e.date),
+          side: e.side,
+          value: e.amount,
+          title: `${name} · ${e.date} · ${side(e.side)} ${signed(e.amount)} 亿 · 历史第 ${e.rank} 强 / ${e.n_events} 次`,
+        })),
+    };
+  });
+
+const sigPayload = {
+  days: recent.map((d) => d.date.slice(5)),
+  rows: sigRows,
+  today: recent.length - 1,
+};
 
 const generated = meta.generated_at.slice(0, 16).replace('T', ' ');
-const labels = recent.map((d) => d.date.slice(5));
-const values = recent.map((d) => d.flow);
-const chartPayload = { labels, values, today: labels.length - 1 };
 
 const streakText = st.days > 1
   ? `连续 ${st.days} 个交易日${st.sign > 0 ? '净申购' : '净赎回'}`
   : '今日转为' + (st.sign > 0 ? '净申购' : '净赎回');
 ---
 
-<Base title="ShareTrace · 今日动态" current="home" stamp={{ date: latest, generated }}>
+<Base title="ShareTrace · 今日" current="home" stamp={{ date: latest, generated }}>
   <div class="head reveal">
     <div>
-      <h1>今日动态</h1>
+      <h1>今日</h1>
       <p class="meta"><span class="fig">{latest}</span> 收盘</p>
     </div>
   </div>
@@ -51,18 +79,11 @@ const streakText = st.days > 1
         <div class="v">{signed(t.d20)}</div>
       </div>
     </div>
-
-    {t.szFirst && (
-      <p class="note" style="margin:16px 0 0;color:var(--faint);font-size:12px">
-        深市 10 只自 <span class="fig">{t.szFirst}</span> 起才计入合计，之前只有沪市 47 只；两段柱高不完全可比，深市历史份额补上后就一致了。
-      </p>
-    )}
   </section>
 
   <section class="band reveal">
     <div class="band-head">
       <h2>今日信号 <span class="cnt">{signals.length}</span></h2>
-      <span class="side">历史第 N 强 = 同方向信号里按当日金额排名，买入、卖出各排各的</span>
     </div>
     {signals.length === 0 ? (
       <p class="empty">今天没有指数达到触发门槛。</p>
@@ -80,55 +101,50 @@ const streakText = st.days > 1
     )}
   </section>
 
-  <section class="panel reveal" style="margin-top:34px">
-    <div class="panel-head">
-      <h2>近 20 个交易日</h2>
-      <span class="note">净申赎 · 亿元</span>
-    </div>
-    <div id="flowChart" class="chart"></div>
-  </section>
-
-  <section class="band reveal" style="margin-top:34px">
+  <section class="band reveal">
     <div class="band-head">
-      <h2>最近 10 个信号</h2>
-      <span class="side"><a href="/stats.html">统计 →</a></span>
+      <h2>近 20 个交易日信号 <span class="cnt">{recentEv.length}</span></h2>
+      <span class="side legendline">
+        <span id="sig-legend"></span>
+        <a href="/stats.html">统计 →</a>
+      </span>
     </div>
-    <div class="sigs">
-      {recentEv.map((e) => (
-        <a class="sig quiet" href={`/index/${e.slug}.html`}>
-          <span class="sn">{bySlug.get(e.slug)?.name ?? e.slug}</span>
-          <span class={`pill ${e.side > 0 ? 'buy' : 'sell'}`}>{side(e.side)}</span>
-          <span class="sv fig">{signed(e.amount)}</span>
-          <span class="sm">{e.date} · 第 {e.rank} 强 / {e.n_events} 次</span>
-        </a>
-      ))}
-    </div>
+
+    {recentEv.length === 0 ? (
+      <p class="empty">近 20 个交易日没有指数达到触发门槛。</p>
+    ) : (
+      <>
+        <div id="signalChart" class="chart"></div>
+        <div class="sigs" style="margin-top:14px">
+          {recentEv.map((e) => (
+            <a class="sig quiet" href={`/index/${e.slug}.html`}>
+              <span class="sn">{bySlug.get(e.slug)?.name ?? e.slug}</span>
+              <span class={`pill ${e.side > 0 ? 'buy' : 'sell'}`}>{side(e.side)}</span>
+              <span class="sv fig">{signed(e.amount)}</span>
+              <span class="sm">{e.date} · 第 {e.rank} 强 / {e.n_events} 次</span>
+            </a>
+          ))}
+        </div>
+      </>
+    )}
   </section>
 
-  <p class="tail">
-    每个指数都能看 K 线与买卖点。<a href="/indices.html">分指数 →</a>
-  </p>
-
-  <script is:inline type="application/json" id="flow-data" set:html={JSON.stringify(chartPayload)} />
+  <script is:inline type="application/json" id="sig-data" set:html={JSON.stringify(sigPayload)} />
   <script is:inline src={`/assets/charts.js?v=${V}`}></script>
   <script is:inline>
     (function () {
-      var el = document.getElementById('flowChart');
-      var raw = document.getElementById('flow-data');
+      var el = document.getElementById('signalChart');
+      var raw = document.getElementById('sig-data');
       if (!el || !raw || !window.Charts) return;
       var d = JSON.parse(raw.textContent);
       function draw() {
-        Charts.diverging(el, {
-          labels: d.labels,
-          values: d.values,
-          above: '净申购',
-          below: '净赎回',
-          format: function (v) { return v >= 100 ? Math.round(v) : v.toFixed(0); },
-          height: Math.max(180, Math.round(el.clientHeight)),
-          mark: [d.today],
-          markLabel: '今日',
-          markSide: 'both',
-          xAt: [0, 5, 10, 15, 19]
+        Charts.signalDots(el, {
+          days: d.days,
+          rows: d.rows,
+          today: d.today,
+          above: '买入',
+          below: '卖出',
+          legend: '#sig-legend'
         });
       }
       draw();

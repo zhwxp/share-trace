@@ -624,10 +624,9 @@
       const { s, w, h } = frame(el, heightOf(height) ?? head + rows.length * pitch + 8);
       const lw = Math.round(Math.min(200, Math.max(w < 480 ? 92 : 120, w * 0.2)));
       const cw = (w - lw) / Math.max(1, days.length), x = (i) => lw + i * cw + cw / 2;
-      const ink = css(el, '--ink', '#111'), muted = css(el, '--axis-ink', '#6b6b6b'), rule = css(el, '--rule', '#f0f0f0'), accent = css(el, '--accent', '#cf3f4e');
+      const ink = css(el, '--ink', '#111'), muted = css(el, '--axis-ink', '#6b6b6b'), rule = css(el, '--rule', '#f0f0f0');
       const g = svg('g', {}, s);
       for (let i = 0; i <= days.length; i++) svg('line', { x1: lw + i * cw, x2: lw + i * cw, y1: head - 6, y2: h, stroke: rule, 'stroke-width': 1, 'shape-rendering': 'crispEdges' }, g);
-      if (today != null) svg('line', { x1: x(today), x2: x(today), y1: head - 6, y2: h, stroke: accent, 'stroke-width': 1, opacity: 0.8, 'shape-rendering': 'crispEdges' }, g);
       // date labels keep one step counted back from the last day, so today is always labelled
       const step = Math.max(1, Math.ceil((measure(s, days[0] || '', 12) + 18) / cw));
       days.forEach((d, i) => {

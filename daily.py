@@ -96,22 +96,35 @@ def sse_snapshot(day: str) -> dict[str, float]:
     return out
 
 
-def szse_share(code: str) -> float | None:
-    """深交所 1945 报表，dqgm 单位万份 → 亿份。第一次常被 reset，重试即可。"""
+def szse_share(code: str, day: str) -> float | None:
+    """深交所 1945 报表，dqgm 单位万份 → 亿份。
+
+    dqgm 是 T-1 数据，页面会标注日期；标注不是 day 就重试，仍不是则返回 None。
+    这个标注在 T 日晚间到 T+1 凌晨之间才从 T-1 翻到 T，不能凭 subname 判断。
+    """
     url = ("http://www.szse.cn/api/report/ShowReport/data?SHOWTYPE=JSON"
            f"&CATALOGID=1945&TABKEY=tab1&PAGENO=1&txtQueryKeyAndJC={code}")
-    try:
-        raw = get(url, {"Referer": "http://www.szse.cn/"}, timeout=40, tries=3)
-        rows = json.loads(raw.decode("utf-8"))[0].get("data") or []
-    except Exception as e:  # noqa: BLE001
-        log(f"  warn 深交所 {code}: {type(e).__name__}")
+    for _attempt in range(3):
+        try:
+            raw = get(url, {"Referer": "http://www.szse.cn/"}, timeout=40, tries=3)
+            text = raw.decode("utf-8", "replace")
+            rows = json.loads(text)[0].get("data") or []
+        except Exception as e:  # noqa: BLE001
+            log(f"  warn 深交所 {code}: {type(e).__name__}")
+            return None
+        m = re.search(r"当前规模.*?（(\d{4}-\d{2}-\d{2})）", text, re.S)
+        label = m.group(1) if m else ""
+        if label != day:
+            log(f"  warn 深交所 {code}: 页面日期 {label or '?'} != {day}")
+            time.sleep(1.0)
+            continue
+        for r in rows:
+            if code in str(r.get("sys_key", "")):
+                try:
+                    return float(str(r.get("dqgm", "")).replace(",", "")) / 1e4
+                except ValueError:
+                    return None
         return None
-    for r in rows:
-        if code in str(r.get("sys_key", "")):
-            try:
-                return float(str(r.get("dqgm", "")).replace(",", "")) / 1e4
-            except ValueError:
-                return None
     return None
 
 
@@ -375,7 +388,7 @@ def main(argv):
     sz_codes = [e["code"] for e in etfs if e["market"] == "SZ"]
     log(f"取深交所 {len(sz_codes)} 只 …")
     for code in sz_codes:
-        v = szse_share(code)
+        v = szse_share(code, target)
         if v is not None:
             shares[code] = v
         time.sleep(0.2)

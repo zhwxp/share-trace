@@ -1,18 +1,18 @@
 name: daily-data
 
-# 每天 22:48（北京时间）补齐缺失交易日的份额与行情，追加到 data/ 后提交。
+# 每天 09:18（北京时间）补齐缺失交易日的份额与行情，追加到 data/ 后提交。
 # 提交会触发 EdgeOne 重新构建，不需要在这里部署。
 
 on:
   schedule:
-    # 22:48（北京时间）= 14:48 UTC。GitHub 的 cron 默认按 UTC，账号和仓库的
-    # 时区设置都不影响它。21 点多上交所当日快照往往还没发布，所以定在 22:48；
-    # 漏跑的日子由 daily.py 下次自动补齐所有缺的工作日。
-    - cron: '48 14 * * 1-5'
+    # 09:18（北京时间）= 01:18 UTC。GitHub 的 cron 默认按 UTC，账号和仓库的
+    # 时区设置都不影响它。深交所 dqgm 是 T-1、T+1 早间才定稿，22:48 抓到的是
+    # 前一日的值；放到盘前跑，前一交易日的沪深数据都已最终化。
+    - cron: '18 1 * * 1-5'
   workflow_dispatch:
     inputs:
       date:
-        description: '补跑指定日期 YYYY-MM-DD（留空 = 今天）'
+        description: '补跑指定日期 YYYY-MM-DD（留空 = 自动补齐缺口）'
         required: false
       backfill:
         description: '把每个序列缺的交易日都补上'

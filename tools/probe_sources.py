@@ -126,6 +126,39 @@ def probe_csindex():
         record("csindex:perf", False, f"{type(e).__name__}: {e}")
 
 
+def probe_csindex_batch():
+    """复现 daily.py 的 9 连发：中证自编指数是否会被限频或静默返回空。
+
+    daily.py 里这 9 个 H/930/931 只能走中证官网，中间 sleep 1.25 秒；
+    真跑时它们会连续排在指数循环的尾部，最容易被盯上。
+    """
+    codes = ["930632", "930726", "931066", "931079", "931151",
+             "931152", "931160", "931238", "931787"]
+    end = datetime.now(CST).strftime("%Y%m%d")
+    start = (datetime.now(CST) - timedelta(days=40)).strftime("%Y%m%d")
+    full, empty, errs, lines = [], [], [], []
+    for code in codes:
+        url = ("https://www.csindex.com.cn/csindex-home/perf/index-perf"
+               f"?indexCode={code}&startDate={start}&endDate={end}")
+        try:
+            raw, status = get(url, {"Referer": "https://www.csindex.com.cn/"}, timeout=30)
+            d = json.loads(raw.decode("utf-8"))
+            rows = d.get("data") or []
+            last = rows[-1].get("tradeDate") if rows else None
+            line = (f"{code} HTTP {status} rows={len(rows)} last={last} "
+                    f"success={d.get('success')} msg={str(d.get('msg'))[:60]}")
+            lines.append(line)
+            (full if rows else empty).append(code)
+        except Exception as e:  # noqa: BLE001
+            lines.append(f"{code} {type(e).__name__}: {e}")
+            errs.append(code)
+        time.sleep(1.25)
+    for line in lines:
+        print(f"  {line}", flush=True)
+    record("csindex:9batch", not empty and not errs,
+           f"有数据 {len(full)} / 空 {len(empty)}{empty if empty else ''} / 异常 {len(errs)}{errs if errs else ''}")
+
+
 def probe_tencent_kline():
     """腾讯日线：baostock 的备胎（指数/ETF 前复权日线）。"""
     url = ("https://web.ifzq.gtimg.cn/appstock/app/fqkline/get"
@@ -217,6 +250,7 @@ def main():
     probe_szse()
     probe_tencent()
     probe_csindex()
+    probe_csindex_batch()
     probe_tencent_kline()
     probe_sina_kline()
     probe_ths()

@@ -71,9 +71,21 @@ def get(url, headers=None, timeout=40, insecure=False, tries=3, backoff=2.5):
                 return r.read()
         except Exception as e:  # noqa: BLE001
             last = e
+            if getattr(e, "code", None) in (401, 403):
+                break      # 出口 IP 被 WAF 拦，同一台机器重试没用，交给外层换 runner
             if i < tries - 1:
                 time.sleep(backoff * (i + 1))
     raise last  # type: ignore[misc]
+
+
+def egress() -> str:
+    """当前出口 IP，用来判断 403 是不是 IP 段问题。"""
+    try:
+        raw = get("https://ipinfo.io/json", timeout=8, tries=1)
+        d = json.loads(raw.decode("utf-8"))
+        return f"{d.get('ip')} {d.get('city')}/{d.get('country')} {d.get('org')}"
+    except Exception:  # noqa: BLE001
+        return "未知"
 
 
 # ------------------------------------------------------------------ 份额
@@ -87,7 +99,12 @@ def sse_snapshot(day: str) -> dict[str, float]:
     url = ("https://query.sse.com.cn/commonQuery.do?isPagination=true&pageHelp.pageSize=10000"
            "&pageHelp.pageNo=1&pageHelp.beginPage=1&pageHelp.cacheSize=1&pageHelp.endPage=1"
            "&sqlId=COMMON_SSE_ZQPZ_ETFZL_XXPL_ETFGM_SEARCH_L&STAT_DATE=" + day)
-    raw = get(url, {"Referer": "https://www.sse.com.cn/"}, timeout=45, insecure=True)
+    try:
+        raw = get(url, {"Referer": "https://www.sse.com.cn/"}, timeout=45, insecure=True)
+    except Exception as e:  # noqa: BLE001
+        if getattr(e, "code", None) == 403:
+            log(f"  上交所 403，出口：{egress()}")
+        raise
     payload = json.loads(raw.decode("utf-8", "replace"))
     rows = payload.get("result") or []
     total = (payload.get("pageHelp") or {}).get("total")

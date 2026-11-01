@@ -443,7 +443,7 @@ def main(argv):
             freq[d] = freq.get(d, 0) + 1
     quorum = 3    # 有 3 条以上序列同时有这天，就当它是交易日（港股独有的日子只有 2 条）
     cal_set = set(ref) | {d for d, c in freq.items() if c >= quorum}
-    if len(ref) <= 200:
+    if len(ref) <= 30:
         log(f"  warn 交易日历基准只拿到 {len(ref)} 天，用各序列的日期补齐")
     cal = sorted(d for d in cal_set if d <= target
                  and date.fromisoformat(d).weekday() < 5)

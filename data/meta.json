@@ -106,7 +106,7 @@
    "last_date": "2026-10-30",
    "rows": 3598,
    "flow_days": 3598,
-   "events": 23,
+   "events": 22,
    "etfs_used": [
     "510180"
    ],
@@ -147,7 +147,7 @@
    "last_date": "2026-10-30",
    "rows": 3310,
    "flow_days": 3310,
-   "events": 23,
+   "events": 22,
    "etfs_used": [
     "510500",
     "512500"
@@ -247,7 +247,7 @@
    "last_date": "2026-10-30",
    "rows": 3598,
    "flow_days": 3598,
-   "events": 26,
+   "events": 25,
    "etfs_used": [
     "510210"
    ],
@@ -312,7 +312,7 @@
    "last_date": "2026-10-30",
    "rows": 3164,
    "flow_days": 3164,
-   "events": 5,
+   "events": 4,
    "etfs_used": [
     "512010"
    ],
@@ -378,7 +378,7 @@
    "last_date": "2026-10-30",
    "rows": 2242,
    "flow_days": 2242,
-   "events": 7,
+   "events": 6,
    "etfs_used": [
     "512800"
    ],
@@ -391,7 +391,7 @@
    "last_date": "2026-10-30",
    "rows": 1818,
    "flow_days": 1818,
-   "events": 10,
+   "events": 9,
    "etfs_used": [
     "512690"
    ],
@@ -404,7 +404,7 @@
    "last_date": "2026-10-30",
    "rows": 1789,
    "flow_days": 1789,
-   "events": 8,
+   "events": 7,
    "etfs_used": [
     "512170"
    ],
@@ -417,7 +417,7 @@
    "last_date": "2026-10-30",
    "rows": 1792,
    "flow_days": 1792,
-   "events": 8,
+   "events": 7,
    "etfs_used": [
     "512760"
    ],
@@ -482,7 +482,7 @@
    "last_date": "2026-10-30",
    "rows": 1739,
    "flow_days": 1739,
-   "events": 3,
+   "events": 2,
    "etfs_used": [
     "512710"
    ],
@@ -495,7 +495,7 @@
    "last_date": "2026-10-30",
    "rows": 1708,
    "flow_days": 1708,
-   "events": 8,
+   "events": 7,
    "etfs_used": [
     "515050"
    ],
@@ -534,7 +534,7 @@
    "last_date": "2026-10-30",
    "rows": 1730,
    "flow_days": 1730,
-   "events": 20,
+   "events": 19,
    "etfs_used": [
     "515880"
    ],
@@ -560,7 +560,7 @@
    "last_date": "2026-10-30",
    "rows": 1792,
    "flow_days": 1792,
-   "events": 12,
+   "events": 11,
    "etfs_used": [
     "512480"
    ],
@@ -650,6 +650,6 @@
   "indices": 43,
   "etfs": 57,
   "etf_rows": 92891,
-  "events": 404
+  "events": 392
  }
 }

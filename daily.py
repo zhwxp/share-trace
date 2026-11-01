@@ -48,6 +48,7 @@ EXIT_FAIL = 1
 QUOTE_BATCH = 40      # 一次快照查多少只
 TENCENT_GAP = 0.45    # 腾讯历史日线的请求间隔（太快会 501）
 CSINDEX_GAP = 1.25    # 中证官网串行间隔，并发即封 IP
+GAP_LOOKBACK_DAYS = 180   # 默认只补最近这么多天的缺口，--deep 才从头扫
 
 
 def log(msg):
@@ -99,12 +100,13 @@ def sse_snapshot(day: str) -> dict[str, float]:
 def szse_share(code: str, day: str) -> float | None:
     """深交所 1945 报表，dqgm 单位万份 → 亿份。
 
-    dqgm 是 T-1 数据，页面会标注日期；标注不是 day 就重试，仍不是则返回 None。
+    dqgm 是 T-1 数据，页面会标注日期；标注不是 day 就返回 None。
     这个标注在 T 日晚间到 T+1 凌晨之间才从 T-1 翻到 T，不能凭 subname 判断。
+    注意：这个接口只给「最新」一天的规模，补不了历史——所以历史深市份额只能靠导出。
     """
     url = ("http://www.szse.cn/api/report/ShowReport/data?SHOWTYPE=JSON"
            f"&CATALOGID=1945&TABKEY=tab1&PAGENO=1&txtQueryKeyAndJC={code}")
-    for _attempt in range(3):
+    for _attempt in range(2):
         try:
             raw = get(url, {"Referer": "http://www.szse.cn/"}, timeout=40, tries=3)
             text = raw.decode("utf-8", "replace")
@@ -115,7 +117,10 @@ def szse_share(code: str, day: str) -> float | None:
         m = re.search(r"当前规模.*?（(\d{4}-\d{2}-\d{2})）", text, re.S)
         label = m.group(1) if m else ""
         if label != day:
-            log(f"  warn 深交所 {code}: 页面日期 {label or '?'} != {day}")
+            # 页面有日期但对不上 = 这天的历史值拿不到，重试也没用；
+            # 只有日期读不出来（页面刚翻页）才值得再试一次
+            if label:
+                return None
             time.sleep(1.0)
             continue
         for r in rows:
@@ -212,6 +217,53 @@ def sina_history(symbol: str, count: int = 320) -> dict[str, list[float]]:
     return out
 
 
+def trading_ref(start: str, end: str, deep: bool = False) -> dict[str, list[float]]:
+    """沪深300 日线拼成交易日历。
+
+    日常只补近 180 天：先问新浪（一个请求、最近 320 根，够用且不怕腾讯限频），
+    拿不到再按 600 天分段问腾讯；补全历史时反过来，腾讯拿不到的段回落到中证。
+    """
+    if not deep:
+        try:
+            rows = {d: v for d, v in sina_history("sh000300").items() if d >= start}
+            if len(rows) > 100 and max(rows) >= (date.fromisoformat(end)
+                                                 - timedelta(days=10)).isoformat():
+                return rows
+        except Exception as e:  # noqa: BLE001
+            log(f"  warn 交易日历(新浪): {type(e).__name__}")
+    out: dict[str, list[float]] = {}
+    cur = date.fromisoformat(start)
+    stop = date.fromisoformat(end)
+    streak = 0
+    while cur <= stop:
+        chunk_end = min(cur + timedelta(days=598), stop)
+        got: dict[str, list[float]] = {}
+        try:
+            got = tencent_history("sh000300", cur.isoformat(), chunk_end.isoformat())
+        except Exception as e:  # noqa: BLE001
+            log(f"  warn 交易日历(腾讯) {cur}~{chunk_end}: {type(e).__name__}")
+        if not got:
+            try:
+                got = {d: v for d, v in sina_history("sh000300").items()
+                       if cur.isoformat() <= d <= chunk_end.isoformat()}
+            except Exception as e:  # noqa: BLE001
+                log(f"  warn 交易日历(新浪) {cur}~{chunk_end}: {type(e).__name__}")
+        if not got and deep:
+            try:
+                got = csindex_history("000300", cur.isoformat(), chunk_end.isoformat())
+                time.sleep(CSINDEX_GAP)
+            except Exception as e:  # noqa: BLE001
+                log(f"  warn 交易日历(中证) {cur}~{chunk_end}: {type(e).__name__}")
+        out.update(got)
+        streak = 0 if got else streak + 1
+        if streak >= 2:      # 连续两段拿不到就别耗时间了，后面用序列日期补
+            log("  warn 交易日历取不到，剩下的用序列日期补")
+            break
+        time.sleep(TENCENT_GAP)
+        cur = chunk_end + timedelta(days=1)
+    return out
+
+
 def csindex_history(code: str, start: str, end: str) -> dict[str, list[float]]:
     """中证官网日线。日期参数必须 %Y%m%d，带横杠会返回空 data。"""
     url = ("https://www.csindex.com.cn/csindex-home/perf/index-perf"
@@ -233,7 +285,7 @@ _tx_fail = 0   # 腾讯连续失败次数，达到 3 就整轮改用新浪，别
 
 
 def history_for(code: str, start: str, end: str) -> dict[str, list[float]]:
-    """历史日线：带前缀/裸 6 位走腾讯→新浪，中证自编指数走官网。"""
+    """历史日线：带前缀/裸 6 位走腾讯→新浪→中证，自编指数直接走中证。"""
     global _tx_fail
     sym = tencent_symbol(code)
     if sym:
@@ -254,19 +306,23 @@ def history_for(code: str, start: str, end: str) -> dict[str, list[float]]:
                     log(f"  warn 腾讯历史 {sym}: {type(e).__name__}（连续 {_tx_fail} 次）")
                     time.sleep(1.5)
         try:
-            return sina_history(sym)
+            rows = sina_history(sym)
+            # 新浪不看日期区间、只给最近 320 根：回来的东西离 end 太远就是错标的，
+            # 当成拿不到（曾经把 sh000813 返回成 2016 年的数据）
+            if rows and max(rows) >= (date.fromisoformat(end) - timedelta(days=45)).isoformat():
+                return rows
         except Exception as e:  # noqa: BLE001
             log(f"  warn 新浪历史 {sym}: {type(e).__name__}")
-            return {}
     code_cs = code.split(".")[-1]
     try:
         rows = csindex_history(code_cs, start, end)
-        return rows
+        if rows:
+            return rows
     except Exception as e:  # noqa: BLE001
         log(f"  warn 中证 {code_cs}: {type(e).__name__}")
-        return {}
     finally:
         time.sleep(CSINDEX_GAP)
+    return {}
 
 
 # ------------------------------------------------------------------ CSV
@@ -292,57 +348,61 @@ def num(x, n=2):
     return None if x is None else round(x, n)
 
 
-# ------------------------------------------------------------------ 主流程
+def fmt(x, n=4) -> str:
+    """CSV 里的数字：跟 ingest.py 的 num()+str() 保持一样（0.0 不写成 0）。"""
+    if x is None:
+        return ""
+    return str(round(float(x), n))
 
-def last_share_date(etfs) -> str:
-    last = ""
-    for e in etfs:
-        path = DATA / "etf" / f"{e['code']}.csv"
-        if not path.exists():
+
+def write_series(path: Path, cols: list[str], rows: list[dict]) -> None:
+    """整份重写：按日期排序、同日只留一行。补中间缺口后只能这样写。"""
+    path.parent.mkdir(parents=True, exist_ok=True)
+    with path.open("w", encoding="utf-8", newline="\n") as f:
+        f.write(",".join(cols) + "\n")
+        for r in rows:
+            f.write(",".join(str(r.get(c, "")) for c in cols) + "\n")
+
+
+def recompute_flows(rows: list[dict], targets: set[str], cal_pos: dict[str, int], splits=()) -> None:
+    """只重算受影响的几行：补进去的那些日期，以及紧随其后的那一行。
+
+    补中间缺口时，原来跟在洞后面的那一行 Δ 会被算成 0（不相邻），必须重算；
+    再往后的行predecessor 没变，重算只会让末位小数白白抖动，所以不碰。
+    """
+    pos = {r["date"]: i for i, r in enumerate(rows)}
+    for d in sorted(targets):
+        i = pos.get(d)
+        if i is None:
             continue
-        with path.open(encoding="utf-8") as f:
-            tail = f.readlines()[-1:]
-        if tail:
-            last = max(last, tail[0].split(",")[0])
-    return last
+        r = rows[i]
+        prev = rows[i - 1] if i else None
+        dsh = flow = 0.0
+        if prev is not None and r.get("share") and prev.get("share") and r.get("close"):
+            if cal_pos.get(r["date"], -99) - cal_pos.get(prev["date"], -99) == 1:
+                dsh = float(r["share"]) - float(prev["share"])
+                flow = dsh * float(r["close"])
+        if r["date"] in splits:
+            dsh = flow = 0.0
+        r["d_share"] = fmt(dsh)
+        r["flow"] = fmt(flow)
 
+
+# ------------------------------------------------------------------ 主流程
 
 def main(argv):
     dry = "--dry-run" in argv
-    backfill = "--backfill" in argv
+    deep = "--deep" in argv or "--backfill" in argv
+    audit = "--audit" in argv
+    backfill = deep
     want = None
     for i, a in enumerate(argv):
         if a == "--date" and i + 1 < len(argv):
             want = argv[i + 1]
 
-    # 不带 --date 时补齐「上次数据之后的所有工作日」。
-    # 定在某个钟点跑，可能撞上交易所还没发布当天数据；只抓当天的话那一天就永远丢了。
-    # 这里逐个工作日试，没发布的跳过，第二天还会再来一次。
-    if want is None and "--once" not in argv:
-        etfs = json.loads((DATA / "etfs.json").read_text(encoding="utf-8"))["etfs"]
-        last = last_share_date(etfs)
-        if not last:
-            log("data/etf 下没有数据，先用 ingest.py 初始化")
-            return EXIT_FAIL
-        today_s = datetime.now(CST).strftime("%Y-%m-%d")
-        d0 = date.fromisoformat(last) + timedelta(days=1)
-        days = []
-        while d0 <= date.fromisoformat(today_s):
-            if d0.weekday() < 5:
-                days.append(d0.isoformat())
-            d0 += timedelta(days=1)
-        if not days:
-            log(f"最新数据已是 {last}，没有待补的工作日")
-            return EXIT_NO_DATA
-        log(f"待补齐的工作日：{', '.join(days)}")
-        worst = EXIT_OK
-        for d in days:
-            rc = main(["--date", d, "--once"] + [a for a in argv if a in ("--dry-run", "--backfill")])
-            if rc == EXIT_FAIL:
-                worst = EXIT_FAIL
-            elif rc == EXIT_OK and worst != EXIT_FAIL:
-                worst = EXIT_OK
-        return worst
+    # 不带 --date 时不再「按最后一个份额日期往下走」：那只补得到尾部，
+    # 而且只要某一只 ETF 比别人靠前，落在后面的序列就被永远跳过。
+    # 现在改为逐序列算缺口（见下面的 missing_days），尾部与中间一起补。
 
     meta = json.loads((DATA / "meta.json").read_text(encoding="utf-8"))
     indices = json.loads((DATA / "indices.json").read_text(encoding="utf-8"))["indices"]
@@ -353,57 +413,100 @@ def main(argv):
     is_today = target >= today
     log(f"目标日期 {target}（{'今天' if is_today else '补历史'}{'，backfill' if backfill else ''}{'，dry-run' if dry else ''}）")
 
-    # ---- 已有数据
-    etf_series: dict[str, list[dict]] = {}
-    for e in etfs:
-        etf_series[e["code"]] = read_csv(DATA / "etf" / f"{e['code']}.csv")
+    # ---- 已有序列
+    etf_series: dict[str, list[dict]] = {
+        e["code"]: read_csv(DATA / "etf" / f"{e['code']}.csv") for e in etfs
+    }
     if not any(etf_series.values()):
         log("data/etf 下没有数据，先用 ingest.py 初始化")
         return EXIT_FAIL
+    idx_series: dict[str, list[dict]] = {
+        it["slug"]: read_csv(DATA / "index" / f"{it['slug']}.csv") for it in indices
+    }
 
-    cal = set()
-    for it in indices:
-        for r in read_csv(DATA / "index" / f"{it['slug']}.csv"):
-            cal.add(r["date"])
+    # ---- 交易日历
+    # 用沪深300 的日线当 A 股交易日基准：它是每个交易日都有的一手数据。
+    # 不能拿「各序列日期的并集」当日历——港股跟 A 股的节假日不一样，
+    # 并集会把 10-06 这种港股开市、A 股休市的日子算成所有 A 股序列的缺口。
+    first_dates = [rows[0]["date"] for rows in etf_series.values() if rows]
+    ref_start = min(first_dates) if deep and first_dates else (
+        date.fromisoformat(target) - timedelta(days=200)).isoformat()
+    ref = trading_ref(ref_start, target, deep=deep)
+    # 各序列自己的日期按「出现频率」并进来：一半以上的序列都有的日子一定是交易日，
+    # 只有个别港股序列才有的日子（港股开市、A 股休市）不会混进 A 股日历。
+    freq: dict[str, int] = {}
+    for rows in etf_series.values():
+        for d in {r["date"] for r in rows}:
+            freq[d] = freq.get(d, 0) + 1
+    for rows in idx_series.values():
+        for d in {r["date"] for r in rows}:
+            freq[d] = freq.get(d, 0) + 1
+    quorum = 3    # 有 3 条以上序列同时有这天，就当它是交易日（港股独有的日子只有 2 条）
+    cal_set = set(ref) | {d for d, c in freq.items() if c >= quorum}
+    if len(ref) <= 200:
+        log(f"  warn 交易日历基准只拿到 {len(ref)} 天，用各序列的日期补齐")
+    cal = sorted(d for d in cal_set if d <= target
+                 and date.fromisoformat(d).weekday() < 5)
     # 目标日通常还没写进任何 CSV，但它是交易日；日历必须带上它，
     # 否则「上一行是不是紧邻的前一交易日」永远不成立，Δ份额会全算成 0。
-    cal.add(target)
-    cal = sorted(cal)
+    if target not in cal and date.fromisoformat(target).weekday() < 5:
+        cal = sorted(cal + [target])
     cal_pos = {d: i for i, d in enumerate(cal)}
 
-    # ---- 份额
-    shares: dict[str, float] = {}
+    # 默认只补最近 GAP_LOOKBACK_DAYS 天；--deep / --backfill 从每条序列的第一行扫起
+    horizon = cal[0] if deep else (date.fromisoformat(target)
+                                   - timedelta(days=GAP_LOOKBACK_DAYS)).isoformat()
+
+    def missing_days(rows: list[dict]) -> list[str]:
+        """这条序列在 [第一行, target] 之间缺的交易日。"""
+        have = {r["date"] for r in rows}
+        lo = max(rows[0]["date"] if rows else horizon, horizon)
+        return [d for d in cal if lo <= d <= target and d not in have]
+
+    if audit:
+        gaps: dict[str, list[str]] = {
+            f"etf/{code}": missing_days(rows) for code, rows in etf_series.items()
+        }
+        gaps |= {f"index/{slug}": missing_days(rows) for slug, rows in idx_series.items()}
+        bad = {k: v for k, v in gaps.items() if v}
+        for k, v in list(bad.items())[:40]:
+            log(f"  {k}: 缺 {len(v)} 天，最近 {v[-3:]}")
+        log(f"审计：{len(bad)}/{len(gaps)} 条序列有缺口"
+            f"（窗口 {horizon} → {target}，加 --deep 从第一行扫起）")
+        return EXIT_OK
+
+    # ---- 份额：按日缓存，同一天只打一次上交所
+    sse_cache: dict[str, dict] = {}
+
+    def sse_of(day: str) -> dict[str, float]:
+        if day not in sse_cache:
+            sse_cache[day] = sse_snapshot(day)
+        return sse_cache[day]
+
     log("取上交所快照 …")
     try:
-        snap = sse_snapshot(target)
+        snap = sse_of(target)
     except Exception as e:  # noqa: BLE001
         log(f"  上交所失败：{type(e).__name__}: {e}")
         return EXIT_FAIL
     if not snap:
         log(f"  上交所 {target} 快照为空（当天数据通常 21:18 后发布）")
-        return EXIT_NO_DATA
-    for e in etfs:
-        if e["market"] == "SH" and e["code"] in snap:
-            shares[e["code"]] = snap[e["code"]]
-    log(f"  沪市命中 {len(shares)} 只")
-
-    sz_codes = [e["code"] for e in etfs if e["market"] == "SZ"]
-    log(f"取深交所 {len(sz_codes)} 只 …")
-    for code in sz_codes:
-        v = szse_share(code, target)
-        if v is not None:
-            shares[code] = v
-        time.sleep(0.2)
-    log(f"  份额合计 {len(shares)} 只")
-    missing = [e["code"] for e in etfs if e["code"] not in shares]
-    if missing:
-        log(f"  warn 缺份额 {len(missing)} 只：{missing}")
+        if want is not None:
+            return EXIT_NO_DATA
+    log(f"  沪市 {target} 命中 {sum(1 for e in etfs if e['market'] == 'SH' and e['code'] in snap)} 只")
+    if not snap and want is None and target in cal:
+        # 目标日还没发布（常见于盘前跑）：把它从日历里摘掉，
+        # 这样缺口只算到「有数据的最晚一天」，不会为每个序列白跑一次历史行情。
+        cal = [d for d in cal if d != target]
+        cal_pos = {d: i for i, d in enumerate(cal)}
+        log(f"  {target} 还没有份额数据，本次先跳过这几天之后的部分")
 
     # ---- 价格
-    #  今天：批量快照（2 次请求拿 100 只，不触发限频）
-    #  补历史 / backfill：历史日线接口，慢跑
-    quotes = {}
-    if is_today and not backfill:
+    #  目标日是今天：先用批量快照（两次请求拿全市场，几乎不限频）；
+    #  补缺 / 补历史：走历史日线接口，按需要的区间拉一次。
+    quotes: dict[str, dict] = {}
+    if is_today and snap:
+        # 只有目标日真的出了份额才值得拿快照：没份额就写不了行，快照纯属白跑
         syms = []
         for it in indices:
             s = tencent_symbol(meta["indices"][it["slug"]]["kline_code"])
@@ -415,74 +518,80 @@ def main(argv):
         quotes = batch_quote(sorted(set(syms)))
         log(f"  {len(quotes)} 只拿到当日行情")
 
-    def price_rows(code: str, start: str) -> dict[str, list[float]]:
-        """要写的日线：当天优先用批量快照，历史接口只补快照覆盖不到的日期。
+    def px_range(code: str, lo: str) -> dict[str, list[float]]:
+        """[lo-10d, target] 的日线；目标日优先用批量快照，其余走历史接口。
 
-        快照走 qt.gtimg.cn（一个请求几十只，几乎不限频）；
-        历史走 fqkline，那个接口有频率限制，只在补缺口时用。
+        返回整段而不是只返回缺失日：调用方只写缺失的那几天，
+        但「整段都没拿到」和「只有节假日没有」要能区分开。
         """
-        out = {}
+        out: dict[str, list[float]] = {}
         sym = tencent_symbol(code)
-        if is_today and sym and sym in quotes:
-            q = quotes[sym]
-            if q["date"] == target:
+        if is_today and sym:
+            q = quotes.get(sym)
+            if q and q["date"] == target:
                 out[target] = [q["o"], q["h"], q["l"], q["c"]]
-            else:
-                log(f"  warn {sym} 快照日期是 {q['date']}，不是 {target}")
-        if target not in out or backfill:
-            for d, v in history_for(code, start, target).items():
-                if d <= target and d not in out:
-                    out[d] = v
+        if lo == target and target in out:
+            return out
+        start_hist = (date.fromisoformat(lo) - timedelta(days=10)).isoformat()
+        for d, v in history_for(code, start_hist, target).items():
+            if d <= target and d not in out:
+                out[d] = v
         return out
 
-    start = (date.fromisoformat(target) - timedelta(days=30)).isoformat()
-
-    # ---- ETf：先补价格，再决定要不要写份额行
+    # ---- ETF：逐条序列补缺（尾部与中间一视同仁）
     log("ETF 日线 …")
-    etf_px: dict[str, dict] = {}
-    need_etf = [e for e in etfs
-                if not etf_series[e["code"]] or etf_series[e["code"]][-1]["date"] < target]
-    for e in need_etf:
-        # 传 data 风格的代码（sh.510300），tencent_symbol 才认得出市场
-        etf_px[e["code"]] = price_rows(f"{e['market'].lower()}.{e['code']}", start)
-    log(f"  {len(need_etf)} 只需要行情，拿到 {sum(1 for v in etf_px.values() if v)} 只")
-
     etf_added = 0
-    new_rows: dict[str, list[dict]] = {}
+    etf_unsolved: dict[str, list[str]] = {}
     for e in etfs:
-        code = e["code"]
+        code, market = e["code"], e["market"]
         rows = etf_series[code]
-        last = rows[-1]["date"] if rows else ""
-        px = etf_px.get(code) or {}
-        share_now = shares.get(code)
-        if share_now is None or target <= last:
+        miss = missing_days(rows)
+        if not miss:
             continue
-        close = (px.get(target) or [None, None, None, None])[3]
-        if close is None:
-            log(f"  warn {code} 没有 {target} 收盘价，跳过")
-            continue
-        prev = rows[-1] if rows else None
-        dsh = flow = 0.0
-        if prev and prev["share"] and prev["date"] in cal_pos and target in cal_pos:
-            if cal_pos[target] - cal_pos[prev["date"]] == 1:
-                dsh = float(share_now) - float(prev["share"])
-                flow = dsh * close
-        if code in ingest.SPLIT_DATES and target in ingest.SPLIT_DATES[code]:
-            dsh = flow = 0.0
-        row = [target, num(close, 4), num(share_now, 4), num(flow, 4), num(dsh, 4)]
-        new_rows.setdefault(code, []).append(
-            {"date": target, "close": close, "share": share_now, "d_share": dsh, "flow": flow})
-        if not dry:
-            etf_added += append_rows(DATA / "etf" / f"{code}.csv", [row])
-        else:
-            etf_added += 1
+        px = px_range(f"{market.lower()}.{code}", miss[0])
+        no_share: list[str] = []
+        inserted: list[str] = []
+        for d in miss:
+            close = (px.get(d) or [None, None, None, None])[3]
+            if close is None:
+                continue
+            if market == "SH":
+                share = sse_of(d).get(code)
+            else:
+                share = szse_share(code, d)
+                time.sleep(0.2)
+            if share is None:
+                no_share.append(d)
+                continue
+            rows.append({"date": d, "close": fmt(close), "share": fmt(share),
+                         "flow": "", "d_share": ""})
+            inserted.append(d)
+        added = len(inserted)
+        if added:
+            rows.sort(key=lambda r: r["date"])
+            pos = {r["date"]: i for i, r in enumerate(rows)}
+            targets = set(inserted)
+            for d in inserted:      # 紧跟其后的那一行 Δ 也被打乱了，一起重算
+                i = pos[d] + 1
+                if i < len(rows):
+                    targets.add(rows[i]["date"])
+            recompute_flows(rows, targets, cal_pos, ingest.SPLIT_DATES.get(code, ()))
+            etf_added += added
+            if not dry:
+                write_series(DATA / "etf" / f"{code}.csv", ETF_COLS, rows)
+            tail = ""
+            if no_share:
+                tail = f"（有 {len(no_share)} 天有行情没份额）"
+            log(f"  {code}: +{added} 行{tail}")
+        if not px:
+            log(f"  warn {code}: {miss[0]}~{target} 行情一条没拿到")
+        if no_share:
+            etf_unsolved[code] = no_share
     log(f"ETF 追加 {etf_added} 行")
 
-    for code, extra in new_rows.items():
-        etf_series[code].extend(extra)
     series = {
         code: [{"date": r["date"], "close": float(r["close"]), "share": float(r["share"]),
-                "d_share": float(r["d_share"]), "flow": float(r["flow"])}
+                "d_share": float(r["d_share"] or 0), "flow": float(r["flow"] or 0)}
                for r in rows if r.get("close") and r.get("share")]
         for code, rows in etf_series.items()
     }
@@ -490,36 +599,63 @@ def main(argv):
     # ---- 指数
     log("指数日线 …")
     idx_added = 0
+    idx_unsolved: dict[str, list[str]] = {}
     for it in indices:
         slug = it["slug"]
-        path = DATA / "index" / f"{slug}.csv"
-        rows = read_csv(path)
-        last = rows[-1]["date"] if rows else ""
-        if last >= target and not backfill:
+        rows = idx_series[slug]
+        miss = missing_days(rows)
+        if not miss:
             continue
+        px = px_range(meta["indices"][slug]["kline_code"], miss[0])
         use_hist, agg = ingest.aggregate(it["etfs"], series, ingest.MIN_HIST_OBS)
-        px = price_rows(meta["indices"][slug]["kline_code"], start)
-        batch = []
-        for d in sorted(px):
-            if d <= last or d > target:
+        if not agg:
+            use_hist, agg = ingest.aggregate(it["etfs"], series, 0)
+        added = 0
+        for d in miss:
+            v = px.get(d)
+            if not v:
                 continue
-            o, h, l, c = px[d]
+            o, h, l, c = v
             a = agg.get(d)
-            batch.append([d, num(o, 4), num(h, 4), num(l, 4), num(c, 4),
-                          num(a["flow"], 4) if a else None,
-                          a["nin"] if a else None, a["nout"] if a else None,
-                          a["n"] if a else None, num(a["scale"], 2) if a else None])
-        if batch and not dry:
-            idx_added += append_rows(path, batch)
-        elif batch:
-            idx_added += len(batch)
-        if batch:
-            log(f"  {slug}: +{len(batch)} 根（{batch[0][0]} → {batch[-1][0]}）")
+            rows.append({
+                "date": d, "o": fmt(o), "h": fmt(h), "l": fmt(l), "c": fmt(c),
+                "flow": fmt(a["flow"]) if a else "",
+                "n_in": str(a["nin"]) if a else "",
+                "n_out": str(a["nout"]) if a else "",
+                "n_etf": str(a["n"]) if a else "",
+                "scale": fmt(a["scale"], 2) if a else "",
+            })
+            added += 1
+        if added:
+            rows.sort(key=lambda r: r["date"])
+            idx_added += added
+            if not dry:
+                write_series(DATA / "index" / f"{slug}.csv", INDEX_COLS, rows)
+            log(f"  {slug}: +{added} 根（{miss[0]} → {miss[-1]}）")
+        if not px:
+            idx_unsolved[slug] = miss
+            log(f"  warn {slug}: {miss[0]}~{target} 行情一条没拿到")
     log(f"指数追加 {idx_added} 行")
+
+    # ---- 收尾核对：真正的缺口（有行情、缺份额/接口失败）单独列出来
+    if etf_unsolved or idx_unsolved:
+        log(f"  仍有缺口：ETF {len(etf_unsolved)} 条、指数 {len(idx_unsolved)} 条（下次再试）")
+        for code, days in list(etf_unsolved.items())[:8]:
+            log(f"    etf/{code}: 有行情没份额 {len(days)} 天 {days[:3]}")
+        for slug, days in list(idx_unsolved.items())[:8]:
+            log(f"    index/{slug}: 行情没拿到 {len(days)} 天 {days[:3]}")
+    else:
+        log("  缺口核对：窗口内没有残余缺口")
 
     if dry:
         log("dry-run：不写文件")
         return EXIT_OK
+
+    # 一行没加就直接退出：事件重算和 meta 里的 generated_at 都会变，
+    # 白白给仓库添一个「数据更新」提交，线上也会重建一次。
+    if etf_added == 0 and idx_added == 0:
+        log("NO_NEW_DATA")
+        return EXIT_NO_DATA
 
     # ---- 信号全量重算（规则一改，历史也跟着对齐）
     events_all = []
@@ -590,6 +726,8 @@ def main(argv):
     stale = {slug: {"last_date": m["last_date"],
                     "lag_days": sum(1 for d in share_dates if d > m["last_date"])}
              for slug, m in per_idx.items() if m["last_date"] != latest_trade}
+    unresolved = {f"etf/{c}": days for c, days in etf_unsolved.items()}
+    unresolved |= {f"index/{s}": days for s, days in idx_unsolved.items()}
     meta.update({
         "generated_at": datetime.now(CST).isoformat(timespec="seconds"),
         "latest_trade_date": latest_trade,
@@ -599,6 +737,8 @@ def main(argv):
                      "by_index": {s: m["etfs_short"] for s, m in per_idx.items() if m["etfs_short"]}},
         "stale": {"note": "K 线比最新份额日期短的指数，通常是上游当天行情还没补",
                   "by_index": stale},
+        "unresolved": {"note": "有行情但源头没份额/接口失败而没补齐的日期，下次运行会再试",
+                       "by_series": unresolved},
     })
     (DATA / "meta.json").write_text(json.dumps(meta, ensure_ascii=False, indent=1) + "\n", encoding="utf-8")
 

@@ -79,14 +79,24 @@ def get(url, headers=None, timeout=40, insecure=False, tries=3, backoff=2.5):
 # ------------------------------------------------------------------ 份额
 
 def sse_snapshot(day: str) -> dict[str, float]:
-    """上交所当日全市场 ETF 份额（亿份）。"""
+    """上交所当日全市场 ETF 份额（亿份）。
+
+    服务端会把 pageSize 压到 2000：拿到的条数必须等于它自报的 total，
+    且每条都是请求日的日期，否则是残缺/错日的快照，宁可报错也不能写进 data/。
+    """
     url = ("https://query.sse.com.cn/commonQuery.do?isPagination=true&pageHelp.pageSize=10000"
            "&pageHelp.pageNo=1&pageHelp.beginPage=1&pageHelp.cacheSize=1&pageHelp.endPage=1"
            "&sqlId=COMMON_SSE_ZQPZ_ETFZL_XXPL_ETFGM_SEARCH_L&STAT_DATE=" + day)
     raw = get(url, {"Referer": "https://www.sse.com.cn/"}, timeout=45, insecure=True)
-    rows = json.loads(raw.decode("utf-8", "replace")).get("result") or []
+    payload = json.loads(raw.decode("utf-8", "replace"))
+    rows = payload.get("result") or []
+    total = (payload.get("pageHelp") or {}).get("total")
+    if isinstance(total, int) and total != len(rows):
+        raise RuntimeError(f"上交所返回 {len(rows)} 条，自报总数 {total}，快照不完整")
     out = {}
     for r in rows:
+        if str(r.get("STAT_DATE", "")).strip() != day:
+            raise RuntimeError(f"上交所返回了 {r.get('STAT_DATE')} 的数据，不是 {day}")
         code = str(r.get("SEC_CODE", "")).strip()
         try:
             v = float(r.get("TOT_VOL", 0) or 0)
@@ -214,6 +224,32 @@ def sina_history(symbol: str, count: int = 320) -> dict[str, list[float]]:
             out[r["day"][:10]] = [float(r["open"]), float(r["high"]), float(r["low"]), float(r["close"])]
         except (KeyError, TypeError, ValueError):
             continue
+    return out
+
+
+def official_calendar(start: str, end: str) -> set[str]:
+    """深交所官方交易日历：按月取，逐日给 is_open，比用沪深300 推断靠谱。
+
+    任何一个月拿不到就整体返回空集合，别拿半份日历去判缺口（会把缺口判成没有）。
+    """
+    out: set[str] = set()
+    cur = date.fromisoformat(start).replace(day=1)
+    stop = date.fromisoformat(end)
+    while cur <= stop:
+        url = ("https://www.szse.cn/api/report/exchange/onepersistenthour/monthList"
+               f"?month={cur.year}-{cur.month}")
+        try:
+            raw = get(url, {"Referer": "https://www.szse.cn/"}, timeout=25)
+            rows = json.loads(raw.decode("utf-8", "replace")).get("data") or []
+            if not rows:
+                raise RuntimeError("空结果")
+            for r in rows:
+                if str(r.get("jybz")) == "1" and r.get("jyrq"):
+                    out.add(str(r["jyrq"])[:10])
+        except Exception as e:  # noqa: BLE001
+            log(f"  warn 官方日历 {cur.year}-{cur.month}: {type(e).__name__}: {e}")
+            return set()
+        cur = date(cur.year + (cur.month == 12), (cur.month % 12) + 1, 1)
     return out
 
 
@@ -431,7 +467,14 @@ def main(argv):
     first_dates = [rows[0]["date"] for rows in etf_series.values() if rows]
     ref_start = min(first_dates) if deep and first_dates else (
         date.fromisoformat(target) - timedelta(days=200)).isoformat()
-    ref = trading_ref(ref_start, target, deep=deep)
+    if deep:
+        # 补全历史要几百个月，官方月历太慢：退回沪深300 日线（腾讯分段→中证）
+        cal_set = set(trading_ref(ref_start, target, deep=True))
+    else:
+        cal_set = official_calendar(ref_start, target)
+        if len(cal_set) < 30:
+            log("  warn 官方交易日历拿不到，退回沪深300 日线推断")
+            cal_set = set(trading_ref(ref_start, target))
     # 各序列自己的日期按「出现频率」并进来：一半以上的序列都有的日子一定是交易日，
     # 只有个别港股序列才有的日子（港股开市、A 股休市）不会混进 A 股日历。
     freq: dict[str, int] = {}
@@ -442,9 +485,9 @@ def main(argv):
         for d in {r["date"] for r in rows}:
             freq[d] = freq.get(d, 0) + 1
     quorum = 3    # 有 3 条以上序列同时有这天，就当它是交易日（港股独有的日子只有 2 条）
-    cal_set = set(ref) | {d for d, c in freq.items() if c >= quorum}
-    if len(ref) <= 30:
-        log(f"  warn 交易日历基准只拿到 {len(ref)} 天，用各序列的日期补齐")
+    cal_set |= {d for d, c in freq.items() if c >= quorum}
+    if len(cal_set) <= 30:
+        log(f"  warn 交易日历只有 {len(cal_set)} 天，缺口判断可能不准")
     cal = sorted(d for d in cal_set if d <= target
                  and date.fromisoformat(d).weekday() < 5)
     # 目标日通常还没写进任何 CSV，但它是交易日；日历必须带上它，

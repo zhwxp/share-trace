@@ -134,10 +134,12 @@ def tencent_symbol(code: str) -> str | None:
     """data 里的代码 → 腾讯符号；中证自编指数（H/930/931）返回 None。"""
     if "." in code:
         return code.replace(".", "")
-    if re.fullmatch(r"\d{6}", code):
-        return ("sz" if code.startswith("399") else "sh") + code
+    # 9\d{5} 必须先判：930632 这种也是 6 位纯数字，落到下一条会被当成沪市代码，
+    # 拼出 sh930632 这种不存在的符号，然后腾讯/新浪静默返回空，中证那条路永远走不到。
     if re.fullmatch(r"[Hh]\d{6}|9\d{5}", code):
         return None      # 中证自编指数，腾讯没有
+    if re.fullmatch(r"\d{6}", code):
+        return ("sz" if code.startswith("399") else "sh") + code
     log(f"  warn 代码 {code} 认不出市场前缀，按中证自编指数处理")
     return None
 

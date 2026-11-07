@@ -18,6 +18,7 @@ from __future__ import annotations
 
 import argparse
 import json
+import socket
 import sqlite3
 import ssl
 import sys
@@ -31,7 +32,27 @@ UA = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36"
 DEFAULT_DB = Path.home() / ".hermes/data/astock/market.sqlite"
 
 
-def sse_snapshot(day: str, tries=3) -> dict[str, float]:
+def _v4_first_urlopen(req, timeout, ctx=None):
+    """优先走 IPv4：本机到 query.sse.com.cn 的 IPv6 路径会偶发卡死。
+
+    2026-11-06 实测 10 次里 1 次 48 秒超时（IPv4 10/10 通），urllib 只试第一条地址，
+    卡住就整单失败。日报脚本里同一处已改成 IPv4 优先 + 重试 + 完整性断言。
+    """
+    orig = socket.getaddrinfo
+
+    def v4_first(host, port, family=0, type=0, proto=0, flags=0):
+        infos = orig(host, port, family, type, proto, flags)
+        v4 = [x for x in infos if x[0] == socket.AF_INET]
+        return v4 or infos
+
+    socket.getaddrinfo = v4_first
+    try:
+        return urllib.request.urlopen(req, timeout=timeout, context=ctx).read()
+    finally:
+        socket.getaddrinfo = orig
+
+
+def sse_snapshot(day: str, tries=4, timeout=20) -> dict[str, float]:
     url = ("https://query.sse.com.cn/commonQuery.do?isPagination=true&pageHelp.pageSize=10000"
            "&pageHelp.pageNo=1&pageHelp.beginPage=1&pageHelp.cacheSize=1&pageHelp.endPage=1"
            "&sqlId=COMMON_SSE_ZQPZ_ETFZL_XXPL_ETFGM_SEARCH_L&STAT_DATE=" + day)
@@ -43,8 +64,20 @@ def sse_snapshot(day: str, tries=3) -> dict[str, float]:
         try:
             req = urllib.request.Request(url, headers={"User-Agent": UA,
                                                        "Referer": "https://www.sse.com.cn/"})
-            raw = urllib.request.urlopen(req, timeout=45, context=ctx).read()
-            rows = json.loads(raw.decode("utf-8", "replace")).get("result") or []
+            raw = _v4_first_urlopen(req, timeout=timeout, ctx=ctx)
+            j = json.loads(raw.decode("utf-8", "replace"))
+            rows = j.get("result") or []
+            total = (j.get("pageHelp") or {}).get("total")
+            if total is not None:
+                try:
+                    total = int(total)
+                except (TypeError, ValueError):
+                    total = None
+            if rows and total is not None and len(rows) != total:
+                raise RuntimeError(f"不完整 {len(rows)}/{total} 条")
+            bad = {str(r.get("STAT_DATE", ""))[:10] for r in rows} - {day}
+            if bad:
+                raise RuntimeError(f"日期不符：{sorted(bad)[:3]}")
             out = {}
             for r in rows:
                 code = str(r.get("SEC_CODE", "")).strip()
@@ -104,7 +137,7 @@ def main():
                         "INSERT INTO fund_shares(code,date,share_yi,source,updated_at) "
                         "VALUES(?,?,?,?,datetime('now'))", (code, day, v, "sse_resync"))
                 changed += 1
-            elif abs(cur[0] - v) > 1e-6:
+            elif abs(cur[0] - v) > 1e-4:  # 日报按 4 位小数入库，别为浮点尾数重写
                 if not args.dry_run:
                     conn.execute(
                         "UPDATE fund_shares SET share_yi=?, source='sse_resync', updated_at=datetime('now') "

@@ -101,7 +101,7 @@ const generated = meta.generated_at.slice(0, 16).replace('T', ' ');
       <span class="l"><i class="sw sw-cum"></i>20 日累计</span>
       <span class="l"><i class="sw sw-ann"></i>国家队公告</span>
     </div>
-    <div id="detailChart" class="chart chart-echarts" role="img" aria-label={`${it.name}的 K 线、均线、日净申赎与 20 日累计，标出 ${s.events.length} 个信号点`} data-src={`/data/index/${it.slug}.json`}></div>
+    <div id="detailChart" class="chart chart-echarts" role="img" aria-label={`${it.name}的 K 线、均线、日净申赎与 20 日累计，标出 ${s.events.length} 个信号点`} data-src={`/data/index/${it.slug}.json?v=${V}`}></div>
     <p class="note" id="chart-status">图表载入中…</p>
   </section>
 

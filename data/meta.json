@@ -1,7 +1,7 @@
 {
  "schema_version": 1,
- "generated_at": "2026-11-11T08:10:13+08:00",
- "latest_trade_date": "2026-11-10",
+ "generated_at": "2026-11-12T09:38:48+08:00",
+ "latest_trade_date": "2026-11-11",
  "first_trade_date": "2012-01-04",
  "params": {
   "floor_yi": 2.0,
@@ -117,9 +117,9 @@
    "kline_code": "sh.000016",
    "kline_source": "index",
    "first_date": "2012-01-04",
-   "last_date": "2026-11-10",
-   "rows": 3605,
-   "flow_days": 3605,
+   "last_date": "2026-11-11",
+   "rows": 3606,
+   "flow_days": 3606,
    "events": 35,
    "etfs_used": [
     "510050"
@@ -130,9 +130,9 @@
    "kline_code": "sh.000300",
    "kline_source": "index",
    "first_date": "2012-05-28",
-   "last_date": "2026-11-10",
-   "rows": 3512,
-   "flow_days": 3512,
+   "last_date": "2026-11-11",
+   "rows": 3513,
+   "flow_days": 3513,
    "events": 70,
    "etfs_used": [
     "510300",
@@ -146,9 +146,9 @@
    "kline_code": "sh.000010",
    "kline_source": "index",
    "first_date": "2012-01-04",
-   "last_date": "2026-11-10",
-   "rows": 3605,
-   "flow_days": 3605,
+   "last_date": "2026-11-11",
+   "rows": 3606,
+   "flow_days": 3606,
    "events": 22,
    "etfs_used": [
     "510180"
@@ -159,9 +159,9 @@
    "kline_code": "sh.000906",
    "kline_source": "index",
    "first_date": "2019-12-16",
-   "last_date": "2026-11-10",
-   "rows": 1672,
-   "flow_days": 1672,
+   "last_date": "2026-11-11",
+   "rows": 1673,
+   "flow_days": 1673,
    "events": 8,
    "etfs_used": [
     "515800"
@@ -172,9 +172,9 @@
    "kline_code": "000510",
    "kline_source": "index",
    "first_date": "2024-10-15",
-   "last_date": "2026-11-10",
-   "rows": 504,
-   "flow_days": 504,
+   "last_date": "2026-11-11",
+   "rows": 505,
+   "flow_days": 505,
    "events": 0,
    "etfs_used": [
     "512050",
@@ -187,9 +187,9 @@
    "kline_code": "sh.000905",
    "kline_source": "index",
    "first_date": "2013-03-15",
-   "last_date": "2026-11-10",
-   "rows": 3317,
-   "flow_days": 3317,
+   "last_date": "2026-11-11",
+   "rows": 3318,
+   "flow_days": 3318,
    "events": 28,
    "etfs_used": [
     "510500",
@@ -202,9 +202,9 @@
    "kline_code": "sh.000852",
    "kline_source": "index",
    "first_date": "2016-11-04",
-   "last_date": "2026-11-10",
-   "rows": 2432,
-   "flow_days": 2432,
+   "last_date": "2026-11-11",
+   "rows": 2433,
+   "flow_days": 2433,
    "events": 83,
    "etfs_used": [
     "512100",
@@ -218,9 +218,9 @@
    "kline_code": "sz.399006",
    "kline_source": "index",
    "first_date": "2016-11-08",
-   "last_date": "2026-11-10",
-   "rows": 2430,
-   "flow_days": 2430,
+   "last_date": "2026-11-11",
+   "rows": 2431,
+   "flow_days": 2431,
    "events": 15,
    "etfs_used": [
     "159915"
@@ -231,9 +231,9 @@
    "kline_code": "sz.399673",
    "kline_source": "index",
    "first_date": "2016-11-08",
-   "last_date": "2026-11-10",
-   "rows": 2430,
-   "flow_days": 2430,
+   "last_date": "2026-11-11",
+   "rows": 2431,
+   "flow_days": 2431,
    "events": 12,
    "etfs_used": [
     "159949"
@@ -244,9 +244,9 @@
    "kline_code": "sz.399330",
    "kline_source": "index",
    "first_date": "2016-11-08",
-   "last_date": "2026-11-10",
-   "rows": 2430,
-   "flow_days": 2430,
+   "last_date": "2026-11-11",
+   "rows": 2431,
+   "flow_days": 2431,
    "events": 0,
    "etfs_used": [
     "159901"
@@ -257,9 +257,9 @@
    "kline_code": "sh.588080",
    "kline_source": "index",
    "first_date": "2020-11-16",
-   "last_date": "2026-11-10",
-   "rows": 1451,
-   "flow_days": 1451,
+   "last_date": "2026-11-11",
+   "rows": 1452,
+   "flow_days": 1452,
    "events": 4,
    "etfs_used": [
     "588000",
@@ -272,9 +272,9 @@
    "kline_code": "sh.588800",
    "kline_source": "index",
    "first_date": "2023-11-16",
-   "last_date": "2026-11-10",
-   "rows": 722,
-   "flow_days": 722,
+   "last_date": "2026-11-11",
+   "rows": 723,
+   "flow_days": 723,
    "events": 5,
    "etfs_used": [
     "588800"
@@ -285,9 +285,9 @@
    "kline_code": "sh.000001",
    "kline_source": "index",
    "first_date": "2012-01-04",
-   "last_date": "2026-11-10",
-   "rows": 3605,
-   "flow_days": 3605,
+   "last_date": "2026-11-11",
+   "rows": 3606,
+   "flow_days": 3606,
    "events": 25,
    "etfs_used": [
     "510210"
@@ -298,9 +298,9 @@
    "kline_code": "000813",
    "kline_source": "index",
    "first_date": "2021-03-03",
-   "last_date": "2026-11-10",
-   "rows": 1380,
-   "flow_days": 1380,
+   "last_date": "2026-11-11",
+   "rows": 1381,
+   "flow_days": 1381,
    "events": 12,
    "etfs_used": [
     "159870"
@@ -311,9 +311,9 @@
    "kline_code": "000815",
    "kline_source": "index",
    "first_date": "2021-01-13",
-   "last_date": "2026-11-10",
-   "rows": 1410,
-   "flow_days": 1410,
+   "last_date": "2026-11-11",
+   "rows": 1411,
+   "flow_days": 1411,
    "events": 2,
    "etfs_used": [
     "515170"
@@ -324,9 +324,9 @@
    "kline_code": "000819",
    "kline_source": "index",
    "first_date": "2017-09-01",
-   "last_date": "2026-11-10",
-   "rows": 2228,
-   "flow_days": 2228,
+   "last_date": "2026-11-11",
+   "rows": 2229,
+   "flow_days": 2229,
    "events": 10,
    "etfs_used": [
     "512400"
@@ -337,9 +337,9 @@
    "kline_code": "000861",
    "kline_source": "index",
    "first_date": "2019-12-18",
-   "last_date": "2026-11-10",
-   "rows": 1670,
-   "flow_days": 1670,
+   "last_date": "2026-11-11",
+   "rows": 1671,
+   "flow_days": 1671,
    "events": 3,
    "etfs_used": [
     "515900"
@@ -350,9 +350,9 @@
    "kline_code": "000913",
    "kline_source": "index",
    "first_date": "2013-10-28",
-   "last_date": "2026-11-10",
-   "rows": 3171,
-   "flow_days": 3171,
+   "last_date": "2026-11-11",
+   "rows": 3172,
+   "flow_days": 3172,
    "events": 4,
    "etfs_used": [
     "512010"
@@ -363,9 +363,9 @@
    "kline_code": "sz.159995",
    "kline_source": "index",
    "first_date": "2020-02-10",
-   "last_date": "2026-11-10",
-   "rows": 1639,
-   "flow_days": 1639,
+   "last_date": "2026-11-11",
+   "rows": 1640,
+   "flow_days": 1640,
    "events": 1,
    "etfs_used": [
     "159995"
@@ -376,9 +376,9 @@
    "kline_code": "sz.399808",
    "kline_source": "index",
    "first_date": "2021-02-04",
-   "last_date": "2026-11-10",
-   "rows": 1394,
-   "flow_days": 1394,
+   "last_date": "2026-11-11",
+   "rows": 1395,
+   "flow_days": 1395,
    "events": 5,
    "etfs_used": [
     "516160"
@@ -389,9 +389,9 @@
    "kline_code": "sz.399967",
    "kline_source": "index",
    "first_date": "2016-08-08",
-   "last_date": "2026-11-10",
-   "rows": 2489,
-   "flow_days": 2489,
+   "last_date": "2026-11-11",
+   "rows": 2490,
+   "flow_days": 2490,
    "events": 5,
    "etfs_used": [
     "512660"
@@ -402,9 +402,9 @@
    "kline_code": "399975",
    "kline_source": "index",
    "first_date": "2016-08-08",
-   "last_date": "2026-11-10",
-   "rows": 2489,
-   "flow_days": 2489,
+   "last_date": "2026-11-11",
+   "rows": 2490,
+   "flow_days": 2490,
    "events": 4,
    "etfs_used": [
     "512000",
@@ -416,9 +416,9 @@
    "kline_code": "399986",
    "kline_source": "index",
    "first_date": "2017-08-03",
-   "last_date": "2026-11-10",
-   "rows": 2249,
-   "flow_days": 2249,
+   "last_date": "2026-11-11",
+   "rows": 2250,
+   "flow_days": 2250,
    "events": 6,
    "etfs_used": [
     "512800"
@@ -429,9 +429,9 @@
    "kline_code": "399987",
    "kline_source": "index",
    "first_date": "2019-05-06",
-   "last_date": "2026-11-10",
-   "rows": 1825,
-   "flow_days": 1825,
+   "last_date": "2026-11-11",
+   "rows": 1826,
+   "flow_days": 1826,
    "events": 9,
    "etfs_used": [
     "512690"
@@ -442,9 +442,9 @@
    "kline_code": "399989",
    "kline_source": "index",
    "first_date": "2019-06-17",
-   "last_date": "2026-11-10",
-   "rows": 1796,
-   "flow_days": 1796,
+   "last_date": "2026-11-11",
+   "rows": 1797,
+   "flow_days": 1797,
    "events": 7,
    "etfs_used": [
     "512170"
@@ -455,9 +455,9 @@
    "kline_code": "sh.512760",
    "kline_source": "index",
    "first_date": "2019-06-12",
-   "last_date": "2026-11-10",
-   "rows": 1799,
-   "flow_days": 1799,
+   "last_date": "2026-11-11",
+   "rows": 1800,
+   "flow_days": 1800,
    "events": 7,
    "etfs_used": [
     "512760"
@@ -468,9 +468,9 @@
    "kline_code": "sh.512960",
    "kline_source": "index",
    "first_date": "2019-01-18",
-   "last_date": "2026-11-10",
-   "rows": 1892,
-   "flow_days": 1892,
+   "last_date": "2026-11-11",
+   "rows": 1893,
+   "flow_days": 1893,
    "events": 4,
    "etfs_used": [
     "512960"
@@ -481,9 +481,9 @@
    "kline_code": "sh.562500",
    "kline_source": "index",
    "first_date": "2021-12-29",
-   "last_date": "2026-11-10",
-   "rows": 1177,
-   "flow_days": 1177,
+   "last_date": "2026-11-11",
+   "rows": 1178,
+   "flow_days": 1178,
    "events": 3,
    "etfs_used": [
     "562500"
@@ -494,9 +494,9 @@
    "kline_code": "930632",
    "kline_source": "index",
    "first_date": "2021-09-27",
-   "last_date": "2026-11-10",
-   "rows": 1239,
-   "flow_days": 1239,
+   "last_date": "2026-11-11",
+   "rows": 1240,
+   "flow_days": 1240,
    "events": 5,
    "etfs_used": [
     "562800"
@@ -507,9 +507,9 @@
    "kline_code": "930726",
    "kline_source": "index",
    "first_date": "2019-05-20",
-   "last_date": "2026-11-10",
-   "rows": 1815,
-   "flow_days": 1815,
+   "last_date": "2026-11-11",
+   "rows": 1816,
+   "flow_days": 1816,
    "events": 3,
    "etfs_used": [
     "512290"
@@ -520,9 +520,9 @@
    "kline_code": "931066",
    "kline_source": "index",
    "first_date": "2019-08-26",
-   "last_date": "2026-11-10",
-   "rows": 1746,
-   "flow_days": 1746,
+   "last_date": "2026-11-11",
+   "rows": 1747,
+   "flow_days": 1747,
    "events": 2,
    "etfs_used": [
     "512710"
@@ -533,9 +533,9 @@
    "kline_code": "931079",
    "kline_source": "index",
    "first_date": "2019-10-16",
-   "last_date": "2026-11-10",
-   "rows": 1715,
-   "flow_days": 1715,
+   "last_date": "2026-11-11",
+   "rows": 1716,
+   "flow_days": 1716,
    "events": 7,
    "etfs_used": [
     "515050"
@@ -546,9 +546,9 @@
    "kline_code": "931151",
    "kline_source": "index",
    "first_date": "2020-12-18",
-   "last_date": "2026-11-10",
-   "rows": 1427,
-   "flow_days": 1427,
+   "last_date": "2026-11-11",
+   "rows": 1428,
+   "flow_days": 1428,
    "events": 2,
    "etfs_used": [
     "515790"
@@ -559,9 +559,9 @@
    "kline_code": "931152",
    "kline_source": "index",
    "first_date": "2020-04-10",
-   "last_date": "2026-11-10",
-   "rows": 1596,
-   "flow_days": 1596,
+   "last_date": "2026-11-11",
+   "rows": 1597,
+   "flow_days": 1597,
    "events": 2,
    "etfs_used": [
     "159992"
@@ -572,9 +572,9 @@
    "kline_code": "931160",
    "kline_source": "index",
    "first_date": "2019-09-06",
-   "last_date": "2026-11-10",
-   "rows": 1737,
-   "flow_days": 1737,
+   "last_date": "2026-11-11",
+   "rows": 1738,
+   "flow_days": 1738,
    "events": 19,
    "etfs_used": [
     "515880"
@@ -585,9 +585,9 @@
    "kline_code": "931238",
    "kline_source": "index",
    "first_date": "2023-11-01",
-   "last_date": "2026-11-10",
-   "rows": 766,
-   "flow_days": 733,
+   "last_date": "2026-11-11",
+   "rows": 767,
+   "flow_days": 734,
    "events": 2,
    "etfs_used": [
     "517520"
@@ -598,9 +598,9 @@
    "kline_code": "H30184",
    "kline_source": "index",
    "first_date": "2019-06-12",
-   "last_date": "2026-11-10",
-   "rows": 1799,
-   "flow_days": 1799,
+   "last_date": "2026-11-11",
+   "rows": 1800,
+   "flow_days": 1800,
    "events": 11,
    "etfs_used": [
     "512480"
@@ -611,9 +611,9 @@
    "kline_code": "sh.510900",
    "kline_source": "index",
    "first_date": "2012-10-22",
-   "last_date": "2026-11-10",
-   "rows": 3413,
-   "flow_days": 3413,
+   "last_date": "2026-11-11",
+   "rows": 3414,
+   "flow_days": 3414,
    "events": 10,
    "etfs_used": [
     "510900"
@@ -624,9 +624,9 @@
    "kline_code": "sh.513180",
    "kline_source": "index",
    "first_date": "2021-05-25",
-   "last_date": "2026-11-10",
-   "rows": 1325,
-   "flow_days": 1325,
+   "last_date": "2026-11-11",
+   "rows": 1326,
+   "flow_days": 1326,
    "events": 1,
    "etfs_used": [
     "513180",
@@ -638,9 +638,9 @@
    "kline_code": "931787",
    "kline_source": "index",
    "first_date": "2022-07-12",
-   "last_date": "2026-11-10",
-   "rows": 1066,
-   "flow_days": 1019,
+   "last_date": "2026-11-11",
+   "rows": 1067,
+   "flow_days": 1020,
    "events": 4,
    "etfs_used": [
     "513120"
@@ -651,9 +651,9 @@
    "kline_code": "sh.513050",
    "kline_source": "etf",
    "first_date": "2017-01-18",
-   "last_date": "2026-11-10",
-   "rows": 2380,
-   "flow_days": 2380,
+   "last_date": "2026-11-11",
+   "rows": 2381,
+   "flow_days": 2381,
    "events": 1,
    "etfs_used": [
     "513050"
@@ -664,9 +664,9 @@
    "kline_code": "sh.518850",
    "kline_source": "index",
    "first_date": "2020-06-05",
-   "last_date": "2026-11-10",
-   "rows": 1559,
-   "flow_days": 1559,
+   "last_date": "2026-11-11",
+   "rows": 1560,
+   "flow_days": 1560,
    "events": 1,
    "etfs_used": [
     "518850"
@@ -677,9 +677,9 @@
    "kline_code": "sh.518880",
    "kline_source": "index",
    "first_date": "2013-07-29",
-   "last_date": "2026-11-10",
-   "rows": 3229,
-   "flow_days": 3229,
+   "last_date": "2026-11-11",
+   "rows": 3230,
+   "flow_days": 3230,
    "events": 10,
    "etfs_used": [
     "518880"
